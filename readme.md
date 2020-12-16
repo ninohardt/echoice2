@@ -3,6 +3,8 @@ echoice2
 
 # ![echoice2 0.1](man/figures/echoicelogo.png)
 
+Package website: [ninohardt.de/echoice2](http://ninohardt.de/echoice2)
+
 This package contains choice models with economic foundation.
 
 For more theoretical background, please refer to the chapter ‘economic
@@ -50,7 +52,22 @@ using the remotes package.
 remotes::install_github("ninohardt/echoice2")
 ```
 
+Please make sure you are using a recent version of R (4.0.x) and you
+update packages such as tidyverse, Rcpp and RcppArmadillo.
+
+If you are installing this on windows, make you install
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) first.
+
+If you are using OSX, make you have CLI, XQuartz and potentially other
+things installed.
+
+If you are using linux, this should work.
+
+Binaries for windows can be downloaded
+[here](http://ninohardt.de/echoice2/echoice2_0.1.zip "echoice2")
+
 ### Using echoice
 
 Please read the vignette. It illustrates a complete workflow from
-estimation to market simulation.
+estimation to market simulation. The vignette can also be found on the
+[package website](http://ninohardt.de/echoice2/articles/echoice2.html).
