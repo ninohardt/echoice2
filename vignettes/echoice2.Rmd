@@ -1,0 +1,387 @@
+---
+title: "echoice2"
+output: 
+  rmarkdown::html_document:
+    theme: spacelab
+    highlight: pygments
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: no
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{echice2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+  library(tidyverse)  
+  library(echoice2)
+  knitr::opts_chunk$set(fig.align  = "center",
+                        fig.height = 3.5,
+                        warning    = FALSE,
+                        error      = FALSE,
+                        message    = FALSE)
+```
+
+# Introduction
+
+This package contains functions for applying choice models based on economic theory. Models can be applied to data from choice experiments ('Conjoint Analysis'), from purchase transaction histories or a combination of both. The package contains functions for estimation and demand prediction.
+
+By and large, it uses 'tidy' data and integrated nicely into many 'tidyverse' functions. The idea is to facilitate easy and readable choice modeling workflows.
+
+All estimation and prediction functions are implemented in c++ and use openMP for multithreading support (i.e., this package is fast).
+
+## Overview of functions
+
+Functions that relate to discrete demand start in `dd_`, while functions for volumetric demand start in `vd_`. Estimation functions continue in `est`, demand simulators in `dem`. Universal functions (discrete and volumetric choice) start in `ec_`.
+
+Here is a quick overview of key functions:
+
+### Estimation
+
+-   `dd_est_hmnl`: Discrete Choice (HMNL)
+-   `dd_est_hmnl_screen`: Discrete Choice, attribute-based screening (not including price)
+-   `vd_est_vd`: Volumetric demand, EV1 errors
+-   `vd_est_vdmn`: Volumetric demand, Normal errors
+-   `vd_est_vdm_screen`: Volumetric demand, attribute-based screening, Normal errors
+-   `vd_est_vdm_screenpr`: Volumetric demand, attribute-based screening including price, Normal errors
+-   `vd_est_vdm_ss`: Volumetric demand, accounting for set-size variation (1st order), EV1 errors
+-   `vd_est_vdm_ssq`: Volumetric demand, accounting for set-size variation (2nd order), EV1 errors
+
+### Demand
+
+-   `dd_dem`: Discrete Choice (HMNL)
+-   `dd_dem_sr`: Discrete Choice, attribute-based screening (not including price)
+-   `vd_dem_vdm`: Volumetric demand, EV1 errors
+-   `vd_dem_vdmn`: Volumetric demand, Normal errors
+-   `vd_dem_vdmnsr`: Volumetric demand, attribute-based screening, Normal errors
+-   `vd_dem_vdmsrpr`: Volumetric demand, attribute-based screening including price, Normal errors
+-   `vd_dem_vdmss`: Volumetric demand, accounting for set-size variation (1st order), EV1 errors
+-   `vd_dem_vdmssq`: Volumetric demand, accounting for set-size variation (2nd order), EV1 errors
+
+### Other key functions
+
+-   `ec_estimates_MU`: Upper-level summaries (Part-Worths)
+-   `ec_trace_MU`: Part-Worth traceplots
+-   `ec_boxplot_MU`: Part-Worth boxplots
+-   `ec_dem_eval`: Evaluate hold-out predictions
+
+## To-do-list
+
+The package is work in progress. Some of the next things to do on the list are:
+
+-   Priors: Specifying hyperparameters, providing LKJ Prior alternative. Currently weakly-informative conjugate priors are assumed.
+-   Upper level regression: Provide a somewhat fail-safe way to put in upper-level covariates
+-   Continuous attributes alongside categorical attributes
+-   Optimization (find optimal product configurations)
+-   Economic value measures
+-   Maybe: Mixture of Normal Heterogeneity
+
+## Related readings
+
+-   "Economic foundations of conjoint analysis' ([\<https://doi.org/10.1016/bs.hem.2019.04.002\>](https://doi.org/10.1016/bs.hem.2019.04.002 "Persistent link using digital object identifier"))
+
+-   "Conjunctive Screening in Models of Multiple Discreteness" (<https://dx.doi.org/10.2139/ssrn.2770025>)
+
+-   "Volumetric Demand and Set Size Variation" (<https://dx.doi.org/10.2139/ssrn.3418383>)
+
+# Volumetric demand modeling
+
+The MCMC algorithm for the volumetric demand model is implemented in `vd_est_vdm`. The model can be applied to data from volumetric conjoint studies, or from unit-level demand data, such as household panel data. This vignette provides exposition of the model, input data structure, and an example, including model estimation and evaluation.
+
+## Model
+
+We assume that subjects maximize their utility from consuming inside goods $x$ and the outside good $z$
+
+$$u\left( {{\bf{x}},z} \right) = \sum\limits_k {\frac{{{\psi _k}}}{\gamma }} \ln \left( {\gamma {x_k} + 1} \right) + \ln (z)$$ subject to a budget constraint $$\sum\limits_k^{} {{p_k}} {x_k} + z = E$$
+
+where $\psi_k$ is the baseline utlity of the $k$-th good, and $\gamma$ is a parameter that governs the rate of satiation of inside goods. It is assumed that the rate of satiation $\gamma$ is the same for all inside goods.
+
+In this implementation, we assume that $$\psi_j = \exp[a_j'\beta + \varepsilon_j]$$ where $$\varepsilon \sim \text{Type I EV}(0,\sigma)$$
+
+While the assumption of the EV1 error term is common, there are also implementations assuming Normal-distributed errors.
+
+The marginal utility for the inside and outside goods is:
+
+$$
+\begin{array}{*{20}{l}}
+{{u_j}}&{ = \frac{{\partial u\left( {{\bf{x}},z} \right)}}{{\partial {x_j}}} = \frac{{{\psi _j}}}{{\gamma {x_j} + 1}}{\rm{  }}}\\
+{{u_z}}&{ = \frac{{\partial u\left( {{\bf{x}},z} \right)}}{{\partial z}} = \frac{1}{z}}
+\end{array}
+$$
+
+Solving for $\varepsilon_j$ leads to the following expression for the KT conditions:
+
+$$\begin{array}{*{20}{l}}
+{}&{{\varepsilon _j} = {g_j}\quad {\rm{if}}\quad {x_j} > 0}\\
+{}&{{\varepsilon _j} < {g_j}\quad {\rm{if}}\quad {x_j} = 0}
+\end{array}$$
+
+where $${g_j} =  - {{\bf{a}}_{j'}}\beta  + \ln (\gamma {x_j} + 1) + \ln \left( {\frac{{{p_j}}}{{E - {{\bf{p}}^\prime }{\bf{x}}}}} \right)$$
+
+We are able to obtain a closed-form expression for the probability that $R$ of $N$ goods are chosen.
+
+$$ x_1,x_2,\dots,x_R > 0, \qquad x_{R+1}, x_{R+2}, \dots, x_N = 0. $$
+
+The error scale $(\sigma$) is identified in this model because price enters the specification without a separate price coefficient The likelihood $\ell(\theta)$ of the model parameters is proportional to the probability of observing $n_1$ chosen goods and $n_2$ goods with zero demand The contribution to the likelihood of the chosen goods is in the form of a probability density while the goods not chosen contribute as a probability mass.
+
+$$\begin{array}{l}
+\ell (\theta ) \propto p({x_{{n_1}}} > 0,{x_{{n_2}}} = 0|\theta )\\
+ = |{J_R}|\int_{ - \infty }^{{g_N}}  \cdots  \int_{ - \infty }^{{g_{R + 1}}} f ({g_1}, \ldots ,{g_R},{\varepsilon _{R + 1}}, \ldots ,{\varepsilon _N})d{\varepsilon _{R + 1}}, \ldots ,d{\varepsilon _N}\\
+ = |{J_R}|\left\{ {\prod\limits_{j = 1}^R {\frac{{\exp ( - {g_j}/\sigma )}}{\sigma }} \exp \left( { - {e^{ - {g_j}/\sigma }}} \right)} \right\}\left\{ {\prod\limits_{i = R + 1}^N {\exp } \left( { - {e^{ - {g_i}/\sigma }}} \right)} \right\}\\
+ = |{J_R}|\left\{ {\prod\limits_{j = 1}^R {\frac{{\exp ( - {g_j}/\sigma )}}{\sigma }} } \right\}\exp \left\{ { - \sum\limits_{i = 1}^N {\exp } ( - {g_i}/\sigma )} \right\}
+\end{array}$$
+
+where $|J_{R}|$ is the Jacobian of the transformation from random-utility error ($\varepsilon$) to the likelihood of the observed data. In this model, the Jacobian is: $$\left| {{J_R}} \right| = \prod\limits_{k = 1}^R {\left( {\frac{\gamma }{{\gamma {x_k} + 1}}} \right)} \left\{ {\sum\limits_{k = 1}^R {\frac{{\gamma {x_k} + 1}}{\gamma }} \cdot\frac{{{p_k}}}{{E - {{\bf{p}}^\prime }{\bf{x}}}} + 1} \right\}$$
+
+The 'lower level' of the hierarchical model applies the direct utility model to a specific respondent's choice data, and the 'upper level' of the model incorporates heterogeneity in respondent coefficients.
+
+Respondent heterogeneity can be incorporated into conjoint analysis using a variety of random-effect models. We use a Normal model for heterogeneity by default.
+
+Denoting all individual-level parameters $\theta_h$ for respondent $h$ we have: $$
+\theta_h \sim \text{Normal}(\bar\theta, \Sigma)
+$$ where $$\theta_h =\left\{ {\beta_h', \gamma_h, E_h,\sigma_h} \right\}$$It is possible to add covariates ($z$) to the mean of the heterogeneity distribution as in a regression model: $$
+\theta_h \sim  \text{Normal}(\Gamma z_h, \Sigma)
+$$The parameters $\bar\theta$, $\Gamma$ and $\Sigma$ are referred to as hyper-parameters because they describe the distribution of other parameters.\
+Covariates in the above expression might include demographic variables or other variables collected as part of the conjoint survey, e.g., variables describing reasons to purchase.\
+`rVDev` implements a multivariate Regression prior. If no covariates are provided, $z$ simply contains a vector of `1`s, and $\Gamma$ is equivalent to $\bar \theta$ in the MVN heterogeneity model.
+
+## Priors
+
+Prior is stored in a list. It's elements are (Gammabar, AGamma, nu, V).
+
+Natural conjugate priors are specified:
+
+$$ \theta \sim MVN({\Gamma}z_h, \Sigma) $$ $$\Gamma \sim (\bar \Gamma, A_{\Gamma}^{-1})$$
+
+$$ \Sigma \sim IW(\nu, V) $$
+
+This specification of priors assumes that $\Gamma$ is independent of $\Sigma$ and that, conditional on the hyperparameters, the $\theta_i$'s are a priori independent.
+
+By default, Priors are set to be weakly informative, with an emphasis on 'weakly'.
+
+## Example: Ice cream conjoint
+
+Here we demonstrate the implementation using the `icecream` ice cream data available within the package. The dataset contains volumetric choice data for `300` respondents who evaluated packaged ice cream.
+
+### Data
+
+The package is built around the idea of using long format data. This makes it easy to select and manipulate data, whether it is coming from a choice experiment or transaction data. The structure of choice data in `echoice2` is simple:
+
+Choice data data.frames or tibbles need to contain the following columns:
+
+-   id (integer; respondent identifier)
+-   task (integer; task number)
+-   alt (integer; alternative number within task)
+-   x (double; quantity purchased)
+-   p (double; price)
+-   attributes defining the choice alternatives (factor)
+
+Continuous attributes are currently not supported, but forthcoming.
+
+The `icecream` dataset is stored in a tibble:
+
+```{r}
+  data(icecream)
+  icecream %>% head
+```
+
+`ec_summarize_attrlvls` provides a quick glance at the attributes and levels (for categorical attributes).
+
+```{r}
+icecream %>% ec_summarize_attrlvls
+```
+
+Storing choice data in a 'long' format allows leveraging all the functionality of `dplyr` and other `tidyverse` packages. We can, for instance, quickly generate a summary of average choice quantities per task and plot a histogram. Most respondents choose 5 or less packs of 4 servings per task.
+
+```{r}
+icecream %>% 
+  arrange(id,task,alt) %>%
+  group_by(id,task) %>%  
+  summarise(units=sum(x)) %>%
+  group_by(id) %>% summarise(mean_units=mean(units)) %>%
+  ggplot(aes(x=mean_units)) + geom_histogram()
+```
+
+### Holdout
+
+For hold-out validation, it is common to keep 1 or 2 tasks per respondent. Here, we select 1 task per respondent. Identifiers of the hold-out tasks are stored in `ho_tasks`. `ice_cal` and `ice_ho` contain the calibration and holdout portion of the `icecream` choice dataset.
+
+```{r}
+#select holdout tasks
+  set.seed(8438453)
+      ho_tasks=
+      icecream %>%
+        distinct(id,task) %>%
+        mutate(id=as.integer(id))%>%
+        group_by(id) %>%
+        summarise(task=sample(task,1), .groups = 'drop')
+  set.seed(NULL)
+
+#split data
+  ice_cal= icecream %>% mutate(id=as.integer(id)) %>%
+    anti_join(ho_tasks, by=c('id','task'))
+  
+  ice_ho= icecream %>% mutate(id=as.integer(id)) %>%
+    semi_join(ho_tasks, by=c('id','task'))
+```
+
+### Estimation
+
+The standard volumetric demand model is implemented in `vd_est_vdm`. Other volumetric demand models are implemented in functions starting in `vd_est_`. Discrete choice models are implemented in functions starting in `dd_est_`.
+
+In this example, only 20,000 draws are generated to speed up vignette compilation. It takes about a half minute on a modern 16-core PC.
+
+Estimation uses the simple Metropolis-Hastings algorithm, which is very fast but may require thinning. The function automatically determines the number of physical CPU cores and uses openMP for parallel computation. By default, 100,000 draws are generated and every 10th draw is saved. For real-world applications, more draws (`R`) and more thinning (`keep`) is recommended.
+
+```{r}
+ icecream_est = ice_cal %>% vd_est_vdm(R=20000)
+```
+
+## Estimates
+
+Summaries of the upper-level coefficients can be obtained using the `ec_estimates_MU` function.
+
+```{r}
+icecream_est %>% ec_estimates_MU 
+```
+
+### Diagnostics
+
+Diagnostics start with a look at traceplots. Upper-level means can be checked using the `ec_trace_MU` function.
+
+```{r}
+icecream_est %>% ec_trace_MU()
+```
+
+## Fit
+
+We should check in-sample and out-of-sample fit.
+
+### LMD
+
+First, we compare in-sample fit. `ec_lmd_NR` computes a rough approximation of the marginal Likelihood. It does so for 4 equally-sized chunks of draws, which let's us double-check convergence.
+
+```{r}
+icecream_est %>% ec_lmd_NR
+```
+
+### Holdout
+
+Now, we compare out of sample fit. These are the steps:
+
+-   Ensure the hold-out data is compatible with the in-sample data. This means that the factor levels of the categorical attributes should be identical. Using the `prep_newprediction` we ensure that factor levels match.
+
+-   Demand simulators are implemented in functions starting in `vd_dem_`. For the standard volumetric demand model, we use the `vd_dem_vdm` function.
+
+-   Removing burn-in from draws and additional thinning might be required. `vd_thin_draw` helps do that. By default, it removes the first half of the draws.
+
+-   `vd_dem_eval` helps assess fit. It compared demand predictions relative to true values. For volumetric models, MAE, MSE, RAE and bias are computed. The RAE (relative absolute error) is not widely used, but it is the closest to an absolute fit statistic. It should be smaller than 1.
+
+```{r}
+#generate predictions
+ho_demand=
+    ice_ho %>%   
+      prep_newprediction(ice_cal) %>% 
+        vd_dem_vdm(icecream_est %>% vd_thin_draw) 
+
+ho_demand %>%
+  ec_dem_eval(ice_ho)
+```
+
+## Choice Simulator
+
+Simulating choice quantities and shares is a key feature of `echoice2`. Demand simulators are implemented in functions starting in `vd_dem_`.
+
+### Defining a scenario
+
+Let's consider the Haagen-Dasz brand. They line-price most of their classic flavors. Let's say they usually charge around \$4. Overall, we have 10 flavors in this study.
+
+```{r}
+my_scenario = tibble(
+  id=1L,task=1L,alt=1:10, 
+  Brand=  'HaagenDa',
+  Flavor=c("Chocolate", "ChocChip", "ChocDough", "CookieCream", "Neapolitan", "Oreo", "RockyRoad", "Vanilla", "VanillaBean", "VanillaFudge"),
+  Size=8,
+  p=4)
+```
+
+We need to make sure factor levels match. The `prep_newprediction` function does that. Notice that attribute levels in `my_scenario` are just strings. `prep_newprediction` converts them to factors, with levels matching those in the calibration dataset that was used to estimate the model.
+
+This makes it easy to define whatever scenario for 'market' simulation.
+
+```{r}
+my_scenario <- my_scenario %>% prep_newprediction(ice_cal)
+```
+
+Before we can simulate choices for all our respondents, we need to apply this scenario to all 300 respondents from our study.
+
+```{r}
+N = n_distinct(icecream$id)
+
+my_market=
+  tibble(
+      id = rep(seq_len(N),each=nrow(my_scenario)),
+      task = 1,
+      alt = rep(1:nrow(my_scenario),N)
+    ) %>% 
+  bind_cols(
+      my_scenario[rep(1:nrow(my_scenario),N),-(1:3)]
+    )
+```
+
+### Simulating choices
+
+Now we can simulate choices:
+
+```{r}
+my_market_demand <-  my_market %>%
+                      vd_dem_vdm(est = icecream_est)
+```
+
+The `my_market_demand` object contains draws of demand quantities.
+
+```{r}
+my_market_demand %>% head
+```
+
+`vd_dem_aggregate_summarise` helps us generate summaries. In order to obtain expected demand quantities, we can summarize by all key attributes (in this case: brand, flavor, size).
+
+```{r}
+my_market_demand %>%
+  vd_dem_aggregate_summarise(c('Brand','Flavor','Size'))
+```
+
+We can also look at other levels of aggregation, e.g. brand. Since only one brand was included in the choice scenario, we effectively obtain aggregate demand quantities for all inside goods.
+
+```{r}
+my_market_demand %>%
+  vd_dem_aggregate_summarise(c('Brand'))
+```
+
+## Demand Curves
+
+Elasticities in volumetric demand models are not constant. To better understand implicatiosn of pricing decisions, demand curves can be a helpful tool.
+
+The `ec_demcurve` function can be applied to all demand simulators. Based of an initial market scenario, it generates a series of scenarios where the price of a focal product is changed over an interval. It then runs the demand simulator several times, and we can use the output to draw a demand curve. Pre-simulating error terms using `ec_gen_err_ev1` helps to smooth these demand curves.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+eps_not<-my_market %>% ec_gen_err_ev1(99887766)
+
+my_demcurve =
+  my_market %>%
+    ec_demcurve((my_market %>% transmute(focal=Flavor=='Oreo') %>% pull(focal)),
+                c(.8,.9,1,1.1,1.2),
+                vd_dem_vdm,
+                icecream_est,
+                eps_not) 
+```
+
+The output of `ec_demcurve` is a list, containing demand summaries for each product under the different price scenarios. The list can be stacked into a data.frame, which can be used to generate plots.
+
+```{r}
+my_demcurve %>% do.call('rbind',.) %>%
+  ggplot(aes(x=scenario,y=mean,color=Flavor)) + geom_line()
+```
