@@ -31,10 +31,16 @@ which is still available on
 ## Installation
 
 ``` r
-# Install the cutting edge development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("ninohardt/echoice2")
-#remotes::install_github("ninohardt/echoice2")
+# install.packages("remotes")
+
+#Turn off warning-error-conversion, because the tiniest warning stops installation
+Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = "true")
+
+#install from github
+remotes::install_github("ninohardt/echoice2")
+
+#install from github and compile/include vingette
+remotes::install_github("ninohardt/echoice2", build_vignettes = TRUE)
 ```
 
 ### Installation notes
@@ -42,7 +48,8 @@ devtools::install_github("ninohardt/echoice2")
 -   Make sure you are using a recent R4.0.x version, `tidyerse`, `Rcpp`
     and `RcppArmadillo` before building the package from Github.
 
--   If you use Linux, this should compile just fine.
+-   If you use Linux, you might need to install libgomp before
+    compilation.
 
 -   If you are using OSX, you may have to install CLI, XQuartz and
     potentially other things that Apple removed from OSX. Google ‘+OSX
