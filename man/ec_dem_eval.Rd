@@ -15,7 +15,7 @@ ec_dem_eval(de, true_dem)
 Predictive fit statistics (MAE, MSE, RAE, bias)
 }
 \description{
-This function obtains proper posterior fit statistics. 
-It computes the difference between true demand and each draw from the demand posterior. 
+This function obtains proper posterior fit statistics.
+It computes the difference between true demand and each draw from the demand posterior.
 Then, fit statistics are obtained.
 }

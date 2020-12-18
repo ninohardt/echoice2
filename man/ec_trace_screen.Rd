@@ -16,6 +16,6 @@ draws
 Generate Screening probability traceplot
 }
 \seealso{
-[ec_draws_MU()] to obtain MU_theta draws,
-[ec_boxplot_screen()] to generate boxplot
+\code{\link[=ec_draws_MU]{ec_draws_MU()}} to obtain MU_theta draws,
+\code{\link[=ec_boxplot_screen]{ec_boxplot_screen()}} to generate boxplot
 }

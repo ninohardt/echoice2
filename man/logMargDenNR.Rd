@@ -15,9 +15,6 @@ LMD (double)
 \description{
 Log Marginal Density (Newton-Raftery)
 }
-\details{
-
-}
 \examples{
 \dontrun{
 logMargDenNR(ll)dd_dem_sr

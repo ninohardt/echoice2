@@ -19,6 +19,7 @@
 
 # RStudio files
 .Rproj.user/
+.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -35,3 +36,5 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 docs
+doc
+Meta

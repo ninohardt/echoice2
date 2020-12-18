@@ -13,5 +13,5 @@ ec_boxplot_MU(draws)
 Generate MU_theta boxplot
 }
 \seealso{
-[ec_trace_MU()] to obtain traceplot
+\code{\link[=ec_trace_MU]{ec_trace_MU()}} to obtain traceplot
 }

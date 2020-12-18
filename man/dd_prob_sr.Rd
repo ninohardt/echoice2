@@ -20,5 +20,5 @@ Draws of expected choice
 Discrete Choice Probabilities (HMNL with attribute-based screening)
 }
 \seealso{
-[dd_est_hmnl_screen()] to generate demand predictions based on this model
+\code{\link[=dd_est_hmnl_screen]{dd_est_hmnl_screen()}} to generate demand predictions based on this model
 }

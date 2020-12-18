@@ -16,6 +16,6 @@ draws
 Obtain Screening probability draws
 }
 \seealso{
-[ec_draws_MU()] to obtain MU_theta draws,
-[ec_trace_screen()] to generate a traceplot of screening draws
+\code{\link[=ec_draws_MU]{ec_draws_MU()}} to obtain MU_theta draws,
+\code{\link[=ec_trace_screen]{ec_trace_screen()}} to generate a traceplot of screening draws
 }

@@ -67,7 +67,7 @@ ht_modelMuCompare=function(model_list){
   paras_order=names(paras) %>% enframe %>%  mutate(modelname=str_remove(str_remove(str_remove(value,'mean_'),'sd_'),'sig_')) %>% filter(value!='attribute') %>% filter(value!='parameter') %>% mutate(mean=str_detect(value,'mean'),sd=str_detect(value,'sd'),sig=str_detect(value,'sig')) %>% filter(sig==F) %>% arrange(modelname) %>%pull(name)
   paras_order=c(1,2,paras_order)
   
-  #'significant' paras
+  #significant paras
   paras_order_sig=names(paras) %>% enframe %>%  mutate(modelname=str_remove(str_remove(str_remove(value,'mean_'),'sd_'),'sig_')) %>% filter(value!='attribute') %>% filter(value!='parameter') %>% mutate(mean=str_detect(value,'mean'),sd=str_detect(value,'sd'),sig=str_detect(value,'sig')) %>% filter(sig==T) %>% arrange(modelname) %>%pull(name)
   paras2=paras[,paras_order]
   paras2_sig=paras[,paras_order_sig]
@@ -99,7 +99,7 @@ ht_modelMuCompare=function(model_list){
   prep_4=prep_3[,seq(1,2+n_models*2)]
   
   #generate huxtable
-  ht=prep_4 %>% huxtable
+  ht=prep_4 %>% huxtable::huxtable
   
   #bold-face significant paras
   pickrows= (ht[,1]=="") %>% replace_na(T)
@@ -359,6 +359,7 @@ vd_long_tidy<-function(longdata){
 #' @return list containing information for estimation functions
 #'
 #' @examples
+#' \dontrun{
 #' #Minimal example:
 #' #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
 #'Af=
@@ -380,6 +381,7 @@ vd_long_tidy<-function(longdata){
 #' 
 #' dt %>% vd_prepare 
 #' dt %>% vd_prepare(Af) #with data for attribute-based screening
+#' }
 #' @export
 vd_prepare <- function(dt, Af=NULL){
   
@@ -565,7 +567,6 @@ vd_prepare_nox <- function(dt, Af=NULL){
 #'
 #' @return LMD (double)
 #'
-#' @details
 #'
 #' @examples
 #' \dontrun{
@@ -618,6 +619,20 @@ dd_check_long=function(dat){
   return(check1)
 }
 
+
+
+#' Summarise attributes and levels
+#' 
+#' This functions looks for categorical attributes and summaries their levels
+#' This is helpful when evaluating a new choice data file.
+#'
+#' @usage ec_summarize_attrlvls(data_in)
+#'
+#' @param data_in long-format choice data
+#'
+#' @return tibble with summary
+#'
+#' @export
 ec_summarize_attrlvls<-function(data_in){
   data_in %>% select(-any_of(c('id','task','alt','p','x'))) %>% map(table) %>% 
     map(names) %>% map(paste,collapse=', ') %>% as_tibble() %>% 
@@ -638,7 +653,9 @@ ec_summarize_attrlvls<-function(data_in){
 #' @examples
 #' \dontrun{
 #' est %>% ec_estimates_MU
-#' est %>% ec_estimates_MU %>% ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+facet_wrap(~attribute,scales = 'free') + coord_flip()
+#' est %>% ec_estimates_MU %>% 
+#' ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+
+#' facet_wrap(~attribute,scales = 'free') + coord_flip()
 #' }
 #' @export
 ec_estimates_MU=function(est, quantiles=c(.05,.95)){
@@ -2067,7 +2084,7 @@ vd_dem_vdmssq=function(vd,
 
 #' Estimate discrete choice model (HMNL)
 #'
-#' @usage dd_est_hmnl(dd, R=100000, keep=10)
+#' @usage dd_est_hmnl(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 #'
 #' @param dd discrete choice data (long format)
 #' @param R draws

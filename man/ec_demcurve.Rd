@@ -13,19 +13,19 @@ vd_dem_aggregate_long(de,groupby)
 
 \item{rel_pricerange}{Price range, relative to base case price; this is used to create demand curve}
 
-\item{dem_fun}{demand function (e.g., `dd_prob` for HMNL or `vd_dem_vdm` for volumetric demand). For discrete choice, use choice probabilities instead of choice predictions.}
+\item{dem_fun}{demand function (e.g., \code{dd_prob} for HMNL or \code{vd_dem_vdm} for volumetric demand). For discrete choice, use choice probabilities instead of choice predictions.}
 
-\item{draws}{ec-draws object (e.g., output from `dd_est_hmnl` or `vd_est_vd`)}
+\item{draws}{ec-draws object (e.g., output from \code{dd_est_hmnl} or \code{vd_est_vd})}
 
 \item{epsilon_not}{(optional) error realisatins (this helps make curves look smother for voumetric models)}
 }
 \value{
-List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
+List containing aggregate demand quantities for each scenario defined by \code{rel_pricerange}
 }
 \description{
 This helper function creates demand curves
 }
 \seealso{
-[ec_gen_err_normal()] to generate error realization from Normal distribution,
-[ec_gen_err_ev1()] to generate error realization from EV1 distribution
+\code{\link[=ec_gen_err_normal]{ec_gen_err_normal()}} to generate error realization from Normal distribution,
+\code{\link[=ec_gen_err_ev1]{ec_gen_err_ev1()}} to generate error realization from EV1 distribution
 }

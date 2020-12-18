@@ -20,6 +20,8 @@ Obtain upper level model estimates
 \examples{
 \dontrun{
 est \%>\% ec_estimates_MU
-est \%>\% ec_estimates_MU \%>\% ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+facet_wrap(~attribute,scales = 'free') + coord_flip()
+est \%>\% ec_estimates_MU \%>\% 
+ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+
+facet_wrap(~attribute,scales = 'free') + coord_flip()
 }
 }

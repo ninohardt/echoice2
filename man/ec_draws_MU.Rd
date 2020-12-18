@@ -16,6 +16,6 @@ draws
 Obtain MU_theta draws
 }
 \seealso{
-[ec_draws_screen()] to obtain screening parameter draws (where applicable),
-[ec_trace_MU()] to generate a traceplot of MU_theta draws
+\code{\link[=ec_draws_screen]{ec_draws_screen()}} to obtain screening parameter draws (where applicable),
+\code{\link[=ec_trace_MU]{ec_trace_MU()}} to generate a traceplot of MU_theta draws
 }

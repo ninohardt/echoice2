@@ -15,9 +15,10 @@ vd_prepare(dt, Af=NULL)
 list containing information for estimation functions
 }
 \description{
-Pre-computing task-wise total expenditures `sumpsx` and indices `xfr`,`xto`,`lfr`,`lto` speeds up computation
+Pre-computing task-wise total expenditures \code{sumpsx} and indices \code{xfr},\code{xto},\code{lfr},\code{lto} speeds up computation
 }
 \examples{
+\dontrun{
 #Minimal example:
 #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
 Af=
@@ -38,4 +39,5 @@ dt=tibble( id=c(rep(1L,6),rep(2L,6)),
 
 dt \%>\% vd_prepare 
 dt \%>\% vd_prepare(Af) #with data for attribute-based screening
+}
 }

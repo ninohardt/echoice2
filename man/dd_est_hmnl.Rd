@@ -4,7 +4,7 @@
 \alias{dd_est_hmnl}
 \title{Estimate discrete choice model (HMNL)}
 \usage{
-dd_est_hmnl(dd, R=100000, keep=10)
+dd_est_hmnl(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 }
 \arguments{
 \item{dd}{discrete choice data (long format)}
@@ -24,5 +24,5 @@ est ec-draw object (List)
 Estimate discrete choice model (HMNL)
 }
 \seealso{
-[dd_dem()] to generate demand predictions based on this model
+\code{\link[=dd_dem]{dd_dem()}} to generate demand predictions based on this model
 }

@@ -9,7 +9,7 @@ vd_dem_aggregate_long(de,groupby)
 \arguments{
 \item{de}{demand draws}
 
-\item{groupby}{groupby grouping variables, will be passed to `dplyr::group_by` via `dplyr::vars`}
+\item{groupby}{groupby grouping variables, will be passed to \code{dplyr::group_by} via \code{dplyr::vars}}
 }
 \value{
 Aggregated demand predictions

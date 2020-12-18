@@ -5026,9 +5026,9 @@ List loop_vdrsss2_RWMH( vec const& XX,
 
 
 
-// -----------------------------\
+// -------------
 // demand
-// -------------------------------/
+// -------------
 
 
 //standard volumetric - ev error
@@ -5974,7 +5974,7 @@ arma::mat demagg_2(mat const& xdraw,
                    ivec const& xto,
                    vec quantiles){
   
-  int k = xdraw.n_cols;
+  //int k = xdraw.n_cols;
   mat out(nout,2+quantiles.n_elem);
   
   for(int i = 0; i < nout; i++) {
@@ -6016,7 +6016,7 @@ arma::mat demagg4(mat const& xdraw,
                   int cores=1){
   
   int nout=idx.size();
-  int k = xdraw.n_cols;
+  //int k = xdraw.n_cols;
   mat out(nout,2+quantiles.n_elem);
   
   omp_set_num_threads(cores);

@@ -20,5 +20,5 @@ Draws of choice probabilities
 Discrete Choice Probabilities (HMNL)
 }
 \seealso{
-[dd_est_hmnl()] to generate demand predictions based on this model
+\code{\link[=dd_est_hmnl]{dd_est_hmnl()}} to generate demand predictions based on this model
 }

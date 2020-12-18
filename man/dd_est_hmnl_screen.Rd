@@ -24,5 +24,5 @@ est ec-draw object (List)
 Estimate discrete choice model (HMNL, attribute-based screening (not including price))
 }
 \seealso{
-[dd_dem_sr()] to generate demand predictions based on this model
+\code{\link[=dd_dem_sr]{dd_dem_sr()}} to generate demand predictions based on this model
 }

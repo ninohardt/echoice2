@@ -10,7 +10,7 @@ ec_lmd_NR(M)
 \item{M}{echoice draw object}
 }
 \value{
-tibble with LMDs (first 25% of draws, next 25% of draws, ...)
+tibble with LMDs (first 25\% of draws, next 25\% of draws, ...)
 }
 \description{
 Very rough approximation of LMD based on Newton-Raftery.

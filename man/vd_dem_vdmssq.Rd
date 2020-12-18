@@ -22,10 +22,10 @@ Draws of expected demand
 Generating demand predictions for volumetric demand model with set-size adjustment.
 Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
 The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-Eerror realizations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
+Eerror realizations can be pre-supplied to the \code{epsilon_not}. This helps create smooth demand curves or conduct optimization.
 }
 \seealso{
-[prep_newprediction()] to match `vd`'s factor levels,
-  [ec_gen_err_ev1()] for pre-generating error realizations and
-  [vd_est_vdm_ssq()] for estimating the corresponding model
+\code{\link[=prep_newprediction]{prep_newprediction()}} to match \code{vd}'s factor levels,
+\code{\link[=ec_gen_err_ev1]{ec_gen_err_ev1()}} for pre-generating error realizations and
+\code{\link[=vd_est_vdm_ssq]{vd_est_vdm_ssq()}} for estimating the corresponding model
 }

@@ -2,234 +2,234 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 revd <- function(n = 100L, loc = 0, scale = 1) {
-    .Call(`_echoice2_revd`, n, loc, scale)
+    .Call('_echoice2_revd', PACKAGE = 'echoice2', n, loc, scale)
 }
 
 revdx <- function(locs, scales) {
-    .Call(`_echoice2_revdx`, locs, scales)
+    .Call('_echoice2_revdx', PACKAGE = 'echoice2', locs, scales)
 }
 
 revd0 <- function(n, scale) {
-    .Call(`_echoice2_revd0`, n, scale)
+    .Call('_echoice2_revd0', PACKAGE = 'echoice2', n, scale)
 }
 
 lndMvnc <- function(x, mu, L) {
-    .Call(`_echoice2_lndMvnc`, x, mu, L)
+    .Call('_echoice2_lndMvnc', PACKAGE = 'echoice2', x, mu, L)
 }
 
 ddl <- function(theta, nalts, X, P, A, ntask, p) {
-    .Call(`_echoice2_ddl`, theta, nalts, X, P, A, ntask, p)
+    .Call('_echoice2_ddl', PACKAGE = 'echoice2', theta, nalts, X, P, A, ntask, p)
 }
 
 ddLLs <- function(THETAS, XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_ddLLs`, THETAS, XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_ddLLs', PACKAGE = 'echoice2', THETAS, XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 loop_dd_RWMH <- function(XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_dd_RWMH`, XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_dd_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 ddlsr <- function(theta, taui, nalts, X, P, A, Afull, ntask, p) {
-    .Call(`_echoice2_ddlsr`, theta, taui, nalts, X, P, A, Afull, ntask, p)
+    .Call('_echoice2_ddlsr', PACKAGE = 'echoice2', theta, taui, nalts, X, P, A, Afull, ntask, p)
 }
 
 loop_ddrs_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_ddrs_RWMH`, XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_ddrs_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 ddsrLLs <- function(THETAS, TAUIS, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_ddsrLLs`, THETAS, TAUIS, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_ddsrLLs', PACKAGE = 'echoice2', THETAS, TAUIS, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 dddem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_dddem`, PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
+    .Call('_echoice2_dddem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
 }
 
 ddsrdem <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
-    .Call(`_echoice2_ddsrdem`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
+    .Call('_echoice2_ddsrdem', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
 }
 
 ddprob <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_ddprob`, PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
+    .Call('_echoice2_ddprob', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
 }
 
 ddsrprob <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
-    .Call(`_echoice2_ddsrprob`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
+    .Call('_echoice2_ddsrprob', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
 }
 
 vdl2 <- function(theta, nalts, sumpxs, X, P, A, ntask, p) {
-    .Call(`_echoice2_vdl2`, theta, nalts, sumpxs, X, P, A, ntask, p)
+    .Call('_echoice2_vdl2', PACKAGE = 'echoice2', theta, nalts, sumpxs, X, P, A, ntask, p)
 }
 
 vd2LL <- function(Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vd2LL`, Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vd2LL', PACKAGE = 'echoice2', Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 vd2LLs <- function(THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vd2LLs`, THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vd2LLs', PACKAGE = 'echoice2', THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 loop_vd2_RWMH <- function(XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vd2_RWMH`, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vd2_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdln <- function(theta, nalts, sumpxs, X, P, A, ntask, p) {
-    .Call(`_echoice2_vdln`, theta, nalts, sumpxs, X, P, A, ntask, p)
+    .Call('_echoice2_vdln', PACKAGE = 'echoice2', theta, nalts, sumpxs, X, P, A, ntask, p)
 }
 
 vdnLL <- function(Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdnLL`, Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdnLL', PACKAGE = 'echoice2', Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 vdnLLs <- function(THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdnLLs`, THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdnLLs', PACKAGE = 'echoice2', THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 loop_vdn_RWMH <- function(XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vdn_RWMH`, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vdn_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdlsr2 <- function(theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p) {
-    .Call(`_echoice2_vdlsr2`, theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
+    .Call('_echoice2_vdlsr2', PACKAGE = 'echoice2', theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
 }
 
 vdsr2LL <- function(Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdsr2LL`, Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdsr2LL', PACKAGE = 'echoice2', Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 vdsr2LLs <- function(THETAS, TAUIS, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdsr2LLs`, THETAS, TAUIS, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdsr2LLs', PACKAGE = 'echoice2', THETAS, TAUIS, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 loop_vdrs2_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vdrs2_RWMH`, XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vdrs2_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdlsrpr <- function(theta, taui, tau_pr, nalts, sumpxs, X, P, A, Afull, ntask, p) {
-    .Call(`_echoice2_vdlsrpr`, theta, taui, tau_pr, nalts, sumpxs, X, P, A, Afull, ntask, p)
+    .Call('_echoice2_vdlsrpr', PACKAGE = 'echoice2', theta, taui, tau_pr, nalts, sumpxs, X, P, A, Afull, ntask, p)
 }
 
 loop_vdrspr_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vdrspr_RWMH`, XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vdrspr_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdsrprLL <- function(Theta, tauis, tau_prs, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdsrprLL`, Theta, tauis, tau_prs, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdsrprLL', PACKAGE = 'echoice2', Theta, tauis, tau_prs, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 vdsrprLLs <- function(THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
-    .Call(`_echoice2_vdsrprLLs`, THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+    .Call('_echoice2_vdsrprLLs', PACKAGE = 'echoice2', THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
 }
 
 vdl_ss <- function(theta, nalts, sumpxs, X, P, A, ntask, p) {
-    .Call(`_echoice2_vdl_ss`, theta, nalts, sumpxs, X, P, A, ntask, p)
+    .Call('_echoice2_vdl_ss', PACKAGE = 'echoice2', theta, nalts, sumpxs, X, P, A, ntask, p)
 }
 
 loop_vd_ss_RWMH <- function(XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vd_ss_RWMH`, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vd_ss_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdl_ssQ <- function(theta, nalts, sumpxs, X, P, A, ntask, p) {
-    .Call(`_echoice2_vdl_ssQ`, theta, nalts, sumpxs, X, P, A, ntask, p)
+    .Call('_echoice2_vdl_ssQ', PACKAGE = 'echoice2', theta, nalts, sumpxs, X, P, A, ntask, p)
 }
 
 loop_vd_ssQ_RWMH <- function(XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vd_ssQ_RWMH`, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vd_ssQ_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vd_demand <- function(psi, gamma, E, prices) {
-    .Call(`_echoice2_vd_demand`, psi, gamma, E, prices)
+    .Call('_echoice2_vd_demand', PACKAGE = 'echoice2', psi, gamma, E, prices)
 }
 
 vdlsrss <- function(theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p) {
-    .Call(`_echoice2_vdlsrss`, theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
+    .Call('_echoice2_vdlsrss', PACKAGE = 'echoice2', theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
 }
 
 vdsrssLL <- function(Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N) {
-    .Call(`_echoice2_vdsrssLL`, Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N)
+    .Call('_echoice2_vdsrssLL', PACKAGE = 'echoice2', Theta, tauis, XX, PP, AA, AAf, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N)
 }
 
 loop_vdrsss_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vdrsss_RWMH`, XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vdrsss_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 vdlsrss2 <- function(theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p) {
-    .Call(`_echoice2_vdlsrss2`, theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
+    .Call('_echoice2_vdlsrss2', PACKAGE = 'echoice2', theta, taui, nalts, sumpxs, X, P, A, Afull, ntask, p)
 }
 
 loop_vdrsss2_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
-    .Call(`_echoice2_loop_vdrsss2_RWMH`, XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+    .Call('_echoice2_loop_vdrsss2_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, sumpxs, xlens, tlens, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
 des_dem_vdm <- function(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdm`, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
+    .Call('_echoice2_des_dem_vdm', PACKAGE = 'echoice2', PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
 }
 
 des_dem_vdmn <- function(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdmn`, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
+    .Call('_echoice2_des_dem_vdmn', PACKAGE = 'echoice2', PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
 }
 
 der_dem_vdm <- function(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores = 1L) {
-    .Call(`_echoice2_der_dem_vdm`, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores)
+    .Call('_echoice2_der_dem_vdm', PACKAGE = 'echoice2', PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores)
 }
 
 des_dem_vdm_screen <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdm_screen`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
+    .Call('_echoice2_des_dem_vdm_screen', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
 }
 
 der_dem_vdm_screen <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, epsilon, cores = 1L) {
-    .Call(`_echoice2_der_dem_vdm_screen`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, epsilon, cores)
+    .Call('_echoice2_der_dem_vdm_screen', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, epsilon, cores)
 }
 
 des_dem_vdm_screenpr <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdm_screenpr`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
+    .Call('_echoice2_des_dem_vdm_screenpr', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
 }
 
 der_dem_vdm_screenpr <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, epsilon, cores = 1L) {
-    .Call(`_echoice2_der_dem_vdm_screenpr`, PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, epsilon, cores)
+    .Call('_echoice2_der_dem_vdm_screenpr', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, epsilon, cores)
 }
 
 des_dem_vdm_ss <- function(PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdm_ss`, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
+    .Call('_echoice2_des_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
 }
 
 der_dem_vdm_ss <- function(PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores = 1L) {
-    .Call(`_echoice2_der_dem_vdm_ss`, PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
+    .Call('_echoice2_der_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
 }
 
 des_dem_vdm_ssq <- function(PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
-    .Call(`_echoice2_des_dem_vdm_ssq`, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
+    .Call('_echoice2_des_dem_vdm_ssq', PACKAGE = 'echoice2', PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
 }
 
 der_dem_vdm_ssq <- function(PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores = 1L) {
-    .Call(`_echoice2_der_dem_vdm_ssq`, PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
+    .Call('_echoice2_der_dem_vdm_ssq', PACKAGE = 'echoice2', PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
 }
 
 demagg <- function(xdraw, nout, xfr, xto) {
-    .Call(`_echoice2_demagg`, xdraw, nout, xfr, xto)
+    .Call('_echoice2_demagg', PACKAGE = 'echoice2', xdraw, nout, xfr, xto)
 }
 
 demagg_2 <- function(xdraw, nout, xfr, xto, quantiles) {
-    .Call(`_echoice2_demagg_2`, xdraw, nout, xfr, xto, quantiles)
+    .Call('_echoice2_demagg_2', PACKAGE = 'echoice2', xdraw, nout, xfr, xto, quantiles)
 }
 
 demagg3 <- function(xdraw, idx) {
-    .Call(`_echoice2_demagg3`, xdraw, idx)
+    .Call('_echoice2_demagg3', PACKAGE = 'echoice2', xdraw, idx)
 }
 
 demagg4 <- function(xdraw, idx, quantiles, cores = 1L) {
-    .Call(`_echoice2_demagg4`, xdraw, idx, quantiles, cores)
+    .Call('_echoice2_demagg4', PACKAGE = 'echoice2', xdraw, idx, quantiles, cores)
 }
 
 demagg5 <- function(xdraw, idx) {
-    .Call(`_echoice2_demagg5`, xdraw, idx)
+    .Call('_echoice2_demagg5', PACKAGE = 'echoice2', xdraw, idx)
 }
 
 cpp_vd_dem_eval <- function(draws, truedem, cores = 1L) {
-    .Call(`_echoice2_cpp_vd_dem_eval`, draws, truedem, cores)
+    .Call('_echoice2_cpp_vd_dem_eval', PACKAGE = 'echoice2', draws, truedem, cores)
 }
 
 cpp_vd_dem_eval_pm <- function(draws, truedem, cores = 1L) {
-    .Call(`_echoice2_cpp_vd_dem_eval_pm`, draws, truedem, cores)
+    .Call('_echoice2_cpp_vd_dem_eval_pm', PACKAGE = 'echoice2', draws, truedem, cores)
 }
 

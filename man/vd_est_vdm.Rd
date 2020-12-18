@@ -30,5 +30,5 @@ icecream_est <- icecream \%>\% vd_est_vdm(R=50000)
 }
 }
 \seealso{
-[vd_dem_vdm()] to generate demand predictions based on this model
+\code{\link[=vd_dem_vdm]{vd_dem_vdm()}} to generate demand predictions based on this model
 }

@@ -1,22 +1,20 @@
 ---
 title: "echoice2"
-output: 
-  rmarkdown::html_document:
-    theme: spacelab
-    highlight: pygments
-    toc: true
-    toc_float: true
-    toc_depth: 3
-    number_sections: no
-    fig_caption: yes
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{echice2}
+  %\VignetteIndexEntry{echoice2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
-  library(tidyverse)  
+  library(dplyr)  
+  library(tibble)
+  library(rlang)
+  library(tidyr)
+  library(purrr)
+  library(stringr)
+  library(ggplot2)
   library(echoice2)
   knitr::opts_chunk$set(fig.align  = "center",
                         fig.height = 3.5,

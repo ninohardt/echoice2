@@ -15,6 +15,6 @@ prep_newprediction(data_new,data_old)
 data_new (adjusted)
 }
 \description{
-Makes sure the factor levels in `data_new` are aligned with `data_old`
+Makes sure the factor levels in \code{data_new} are aligned with \code{data_old}
 This is helpful for demand simulations.
 }
