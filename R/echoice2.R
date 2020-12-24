@@ -1046,7 +1046,7 @@ vd_est_vdm_screen = function(vd,
         select(id,task,alt,x) %>% 
         bind_cols(dat$Af%>%as_tibble)  %>%
         mutate_if(is.double,function(col){vd$x*col})%>%
-        group_by(id) %>% summarise_if(is.double,max, .groups="drop") %>%
+        group_by(id) %>% summarise_if(is.double,max) %>%
         arrange(as.numeric(id)) %>%
         select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
   
@@ -1151,7 +1151,7 @@ vd_est_vdm_screenpr = function(vd,
          select(id,task,alt,x) %>% 
          bind_cols(dat$Af%>%as_tibble)  %>%
          mutate_if(is.double,function(col){vd$x*col})%>%
-         group_by(id) %>% summarise_if(is.double,max, .groups="drop") %>%
+         group_by(id) %>% summarise_if(is.double,max) %>%
          arrange(as.numeric(id)) %>%
          select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
   
@@ -2243,7 +2243,7 @@ dd_est_hmnl_screen = function(dd,
     select(id,task,alt,x) %>% 
     bind_cols(dat$Af%>%as_tibble)  %>%
     mutate_if(is.double,function(col){dd$x*col})%>%
-    group_by(id) %>% summarise_if(is.double,max, .groups="drop") %>%
+    group_by(id) %>% summarise_if(is.double,max) %>%
     arrange(as.numeric(id)) %>%
     select(-any_of(c('id','x'))) %>% as.matrix)
   
