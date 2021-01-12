@@ -2323,6 +2323,140 @@ dd_est_hmnl_screen = function(dd,
 
 
 
+
+#' Estimate discrete choice model (HMNL, attribute-based screening (not including price))
+#'
+#' @usage dd_est_hmnl_screen(dd, R=100000, keep=10)
+#'
+#' @param dd discrete choice data (long format)
+#' @param R draws
+#' @param keep thinning
+#' @param cores no of CPU cores to use (default: auto-detect)
+#' @param control list containing additional settings
+#' 
+#' @return est ec-draw object (List)
+#' 
+#' @seealso [dd_dem_sr()] to generate demand predictions based on this model
+#' 
+#' @export
+dd_est_hmnl_screenpr = function(dd,
+                                R=100000,keep=10,
+                                cores=NULL,
+                                control=list(include_data=TRUE)){
+  
+  #check input data
+  if(!dd_check_long(dd)) stop("Check data")
+  
+  #integer variables, double variables
+  dd<-dd %>% 
+    mutate(task=as.integer(task),
+           alt=as.integer(alt),
+           x=as.double(x))
+  
+  #sorting
+  dd<-dd%>%arrange(as.numeric(id),task,alt)
+  
+  #Multicore settings
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  #re-arrange data
+  dat <- 
+    dd %>% 
+    vd_long_tidy %>% vd_prepare
+  
+  dat$Af <- dd %>% vd_long_tidy %>% 
+    attributes() %>% `[[`('Af') %>% as.matrix()
+  
+  
+  dat$tauconst=
+    1-(
+      dd %>% 
+        select(id,task,alt,x) %>% 
+        bind_cols(dat$Af%>%as_tibble)  %>%
+        mutate_if(is.double,function(col){dd$x*col})%>%
+        group_by(id) %>% summarise_if(is.double,max) %>%
+        arrange(as.numeric(id)) %>%
+        select(-any_of(c('id','x'))) %>% as.matrix)
+  
+  
+  #Prior
+  Bbar=matrix(rep(0,ncol(dat$AA)+1), ncol=ncol(dat$AA)+1)
+  A=0.01*diag(1)
+  nu=ncol(dat$AA)+9
+  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+1)
+  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
+  
+  
+  #Run model
+  out=
+    loop_ddrspr_RWMH(dat$XX, 
+                     dat$PP,
+                     dat$AA,
+                     dat$Af,
+                     t(dat$tauconst),
+                     dat$nalts,
+                     dat$ntasks,  
+                     dat$xfr-1,  
+                     dat$xto-1,  
+                     dat$lfr-1,  
+                     dat$lto-1,
+                     p=ncol(dat$AA)+1, 
+                     N=length(dat$xfr),
+                     R=R, 
+                     keep=keep, 
+                     Bbar=Bbar, 
+                     A=A, 
+                     nu=nu,  
+                     V=V, 
+                     tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                     progressinterval=100, cores=cores)
+  
+  
+  
+  #Add data information
+  out$A_names<-colnames(dat$AA)
+  out$Af_names<-colnames(dat$AAf)
+  
+  out$parnames=c(colnames(dat$AA),'ln_beta_p')
+  
+  if(!is.null(dat$attributes_levels)){
+    out$attributes_levels=dat$attributes_levels
+  }
+  
+  colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
+  
+  #Add model information
+  out$ec_type="discrete-conjunctive-price"
+  out$error_specification="EV1"
+  out$ec_type_short="hmnl-conjpr"
+  out$Prior=Prior
+  
+  attributes(out)$Af<-attributes(dat)$Af
+  attributes(out)$ec_data<-attributes(dat)$ec_data
+  
+  
+  ec_model = list(model_name_full="discrete-conjunctive-price",
+                  model_name_short="hmnl-conjpr",
+                  error_specification="EV1",
+                  model_parnames=c('ln_beta_p'),
+                  Prior=Prior)
+  
+  attributes(out)$ec_model=ec_model
+  
+  
+  #Add training data
+  if(control$include_data){
+    out$dat=dat
+  }
+  
+  return(out)
+}
+
+
+
 #logll
 dd_LL <- function(draw, dd, fromdraw=1){
   
