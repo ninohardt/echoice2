@@ -2324,7 +2324,7 @@ dd_est_hmnl_screen = function(dd,
 
 
 
-#' Estimate discrete choice model (HMNL, attribute-based screening (not including price))
+#' Estimate discrete choice model (HMNL, attribute-based screening (including price))
 #'
 #' @usage dd_est_hmnl_screen(dd, R=100000, keep=10)
 #'
@@ -3030,14 +3030,16 @@ ec_demcurve=function(ec_long,
 #' @usage ec_gen_err_normal(ec_dem, seed)
 #'
 #' @param ec_dem discrete or volumetric choice data, with or without x
+#' @param draws draws from volumetric demand model
 #' @param seed seed for reproducible error realisations; seet is automatically reset of running this function
 #' 
 #' @return error realizations
 #' 
 #' @export
-ec_gen_err_normal = function(ec_dem, seed=NULL){
+ec_gen_err_normal = function(ec_dem, draws, seed=NULL){
+  R=dim(draws$MUDraw)[1]
   set.seed(seed)
-  out=rnorm(nrow(ec_dem))
+  out=matrix(rnorm(nrow(ec_dem)*R),nrow(ec_dem),R)
   set.seed(NULL)
   return(out)
 }
@@ -3049,18 +3051,19 @@ ec_gen_err_normal = function(ec_dem, seed=NULL){
 #' @usage ec_gen_err_ev1(ec_dem, seed)
 #'
 #' @param ec_dem discrete or volumetric choice data, with or without x
+#' @param draws draws from volumetric demand model
 #' @param seed seed for reproducible error realisations; seet is automatically reset of running this function
 #' 
 #' @return error realizations
 #' 
 #' @export
-ec_gen_err_ev1 = function(ec_dem, seed=NULL){
+ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
+  R=dim(draws$MUDraw)[1]
   set.seed(seed)
-  out=drop(revd0(nrow(ec_dem),1))
+  out=matrix(revd0(nrow(ec_dem)*R,1),nrow(ec_dem),R)
   set.seed(NULL)
   return(out)
 }
-
 
 
 # Inspect Draws --------------------------------------------------------------
