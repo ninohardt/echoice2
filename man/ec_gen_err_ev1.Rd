@@ -9,6 +9,8 @@ ec_gen_err_ev1(ec_dem, seed)
 \arguments{
 \item{ec_dem}{discrete or volumetric choice data, with or without x}
 
+\item{draws}{draws from volumetric demand model}
+
 \item{seed}{seed for reproducible error realisations; seet is automatically reset of running this function}
 }
 \value{

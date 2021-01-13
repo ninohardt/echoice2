@@ -158,52 +158,6 @@ ht_modelMuCompare=function(model_list){
 # data manipulation -------------------------------------------------------
 
 
-
-#' Split list-of-lists choice data in two (training and holdout)
-#' 
-#'
-#' @usage lol_split=function(lol_data, nho=1)
-#'
-#' @param lol_data is a list of lists (one list per unit) with elements A, X, P
-#'
-#' @return list of two list-of-lists
-#'
-#'
-#' @export
-lol_split=function(lol_data, nho=1){
-  lol_cal = list()
-  lol_ho  = list()
-  N=length(lol_data)
-  
-  for(ii in 1:N){
-    lol_cal[[ii]] = list()
-    lol_ho[[ii]]  = list()
-    tt=nrow(lol_data[[ii]]$P)
-    
-    #set.seed
-    ho=sample(1:12,nho)
-    lol_ho[[ii]]$P = lol_data[[ii]]$P[ho,,drop=F]
-    lol_ho[[ii]]$X = lol_data[[ii]]$X[ho,,drop=F]
-    despicker=as.vector(t(matrix(1:nrow(lol_data[[ii]]$A),12,6,byrow=T)[ho,]))
-    lol_ho[[ii]]$A = lol_data[[ii]]$A[despicker,]
-    lol_ho[[ii]]$A_full = lol_data[[ii]]$A_full[despicker,]
-    
-    
-    lol_cal[[ii]]$P = lol_data[[ii]]$P[-ho,,drop=F]
-    lol_cal[[ii]]$X = lol_data[[ii]]$X[-ho,,drop=F]
-    despicker=as.vector(t(matrix(1:nrow(lol_data[[ii]]$A),12,6,byrow=T)[-ho,]))
-    lol_cal[[ii]]$A = lol_data[[ii]]$A[despicker,]
-    lol_cal[[ii]]$A_full = lol_data[[ii]]$A_full[despicker,]
-    
-    lol_cal[[ii]]$screeni = 1-sign(colSums(lol_cal[[ii]]$A_full[as.vector(t(lol_cal[[ii]]$X))>0,,drop=F]))
-    lol_ho[[ii]]$screeni  = 1-sign(colSums(lol_ho[[ii]]$A_full[as.vector(t(lol_ho[[ii]]$X))>0,,drop=F]))
-  }
-  
-  return(list(lol_cal=lol_cal,lol_ho=lol_ho))
-}
-
-
-
 #utility function
 #tidying a single element of a list-of-lists choice dataset
 vd_lol_tidyelement=function(da){
@@ -1625,45 +1579,45 @@ vd_dem_vdm=function(vd,
   
   #demand sim
   if(is.null(epsilon_not)){
-  out=
-    des_dem_vdm( dat$PP,
-            dat$AA,
-            dat$nalts,
-            dat$ntasks,  
-            dat$xfr-1,
-            dat$xto-1,  
-            dat$lfr-1,
-            dat$lto-1,
-            dat$tlens,
-            est$thetaDraw,
-            cores=cores)
+    out=
+      des_dem_vdm( dat$PP,
+                   dat$AA,
+                   dat$nalts,
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,
+                   dat$lto-1,
+                   dat$tlens,
+                   est$thetaDraw,
+                   cores=cores)
   }else{
-  out=
-    der_dem_vdm( dat$PP,
-                 dat$AA,
-                 dat$nalts,
-                 dat$ntasks,  
-                 dat$xfr-1,
-                 dat$xto-1,  
-                 dat$lfr-1,
-                 dat$lto-1,
-                 dat$tlens,
-                 est$thetaDraw,
-                 epsilon_not,
-                 cores=cores)
+    out=
+      der_dem_vdm( dat$PP,
+                   dat$AA,
+                   dat$nalts,
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,
+                   dat$lto-1,
+                   dat$tlens,
+                   est$thetaDraw,
+                   epsilon_not,
+                   cores=cores)
   }
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  #meta-information upstream
-  attributes(out)$attr_names <- vd %>% 
-    select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  
-  attributes(out)$ec_data  <- attributes(dat)$ec_data
-  attributes(out)$ec_model <- attributes(est)$ec_model
-  
-  return(out)
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
+   
+  return(vd)
 }
+
 
 
 
@@ -2808,102 +2762,89 @@ ec_named_group_split <- function(.tbl, ...) {
 }
 
 
-#' Summarising demand/choice predictions
+
+#' Aggregate posterior draws of demand
 #'
-#' @usage vd_dem_aggregate_summarise(de,groupby)
+#' Aggregate demand draws, e.g. from individual-choice occasion-alternative level to individual level.
+#' (using the new demand draw format)
 #'
-#' @param de demand draws
-#' @param groupby groupby grouping variables, will be passed to `dplyr::group_by` via `dplyr::vars`
-#' 
-#' @return Summary of demand predictions
-#' 
-#' @export
-vd_dem_aggregate_summarise = function(de, groupby, quantiles=c(.05,.95)){
-  
-  outputnames = c('mean','sd',paste0("CI-",quantiles*100,"%"))
-  
-  #indexing variables
-  #todo: change to any_of
-  # options(warn=-1)
-  li<-  de %>% 
-    # select(any_of(c('id','task','alt','p','x','.prodid')),
-    #              attributes(de)$attr_names) %>%
-    select_if((colnames(.)%in%c('id','task','alt','p','x','.prodid',attributes(de)$attr_names))) %>%
-    rowid_to_column 
-  # options(warn=0) 
-  
-  #selection list for aggregation
-  sel_list= li %>% 
-    ec_named_group_split(!!!syms(groupby))%>% 
-    map(pull,rowid)
-  
-  #identifiers
-  indexes_1 <- names(sel_list) %>% as_tibble
-  if(length(groupby)==1){
-    indexes=indexes_1
-    colnames(indexes)=groupby
-  }else{
-    indexes=indexes_1 %>% separate(1,groupby,sep=':/:')  
-  }
-
-
-  #aggregation  
-  # options(warn=-1)
-  agg_sums=
-    de%>%
-    select_if(!((colnames(.)%in%c('id','task','alt','p','x','.prodid',
-                                  attributes(de)$attr_names))))%>%
-    # select_if(!(colnames(.)%in%c('id','task','alt','p','x','.prodid',attributes(de)$attr_names))) %>%
-    data.matrix()%>%
-    demagg4(sel_list, quantiles)
-  # options(warn=0)
-  
-  #output
-  bind_cols( indexes, 
-             agg_sums %>% as_tibble %>% set_names(outputnames)) %>% 
-    return
-  
-}
-
-
-
-
-#' Aggregating demand/choice predictions
-#' 
-#' Aggregates demand prediction draws
-#'
-#' @usage vd_dem_aggregate_long(de,groupby)
+#' @usage ec_dem_aggregate(de,groupby)
 #'
 #' @param de demand draws
-#' @param groupby groupby grouping variables, will be passed to `dplyr::group_by` via `dplyr::vars`
+#' @param groupby groupby grouping variables (as (vector of) string(s))
 #' 
 #' @return Aggregated demand predictions
 #' 
 #' @export
-vd_dem_aggregate_long = function(de, groupby){
-  
-  R=ncol(de)
-  
-  #indexing variables
-  prodid    = icd$AA %>% as_tibble %>% unique() %>% rownames_to_column(".prodid")
-  prodids   = icd$AA %>% as_tibble %>% left_join(prodid, by = colnames(icd$AA)) %>% pull(.prodid)
-  selstuff  = attributes(de)$idx %>% bind_cols(prodid=prodids)
-  
-  #selection list for aggregation
-  sel_list <- selstuff %>% rowid_to_column %>% group_by(!!!groupby) %>%  group_split() %>% map(pull,rowid)
-  ids=selstuff %>% rowid_to_column() %>% distinct(!!!groupby) %>% mutate_all(as.integer)
-  
-  #aggregate
-  
-  ids2=expand_grid(R=seq_len(R),ids)
-  
-  out <- expand_grid(R=seq_len(R),ids) %>% 
-    bind_cols(value=drop(demagg5(de, sel_list) ))
-  
-  attributes(out)$prodids=prodid
-  
-  return(out)
+ec_dem_aggregate = function(de, groupby){
+  de %>% 
+    group_by(!!!syms(groupby)) %>% 
+    summarise(.demdraws=list(reduce(.demdraws,`+`))) %>%
+    return
 }
+
+
+
+#' Summarize posterior draws of demand
+#'
+#' Adds summaries of posterior draws of demand to tibble.
+#' (using the new demand draw format)
+#'
+#' @usage ec_dem_summarise(de,quantiles)
+#'
+#' @param de demand draws
+#' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
+#' 
+#' @return Summary of demand predictions
+#' 
+#' @export
+ec_dem_summarise = function(de, quantiles=c(.05,.95)){
+  quantiles_name=paste0("CI-", quantiles*100, "%")
+  
+  de %>% 
+    mutate(
+      `E(demand)`=map_dbl(.demdraws, mean),
+      `S(demand)`=map_dbl(.demdraws, sd),
+      !!(quantiles_name[1]):=map_dbl(.demdraws, quantile, probs=quantiles[1]),
+      !!(quantiles_name[2]):=map_dbl(.demdraws, quantile, probs=quantiles[2])
+    ) %>%
+    return
+}
+
+
+#' Summarize posterior draws of demand (volumetric models only)
+#'
+#' Adds summaries of posterior draws of demand to tibble.
+#' (using the new demand draw format)
+#'
+#' @usage ec_dem_summarise(de,quantiles)
+#'
+#' @param de demand draws
+#' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
+#' 
+#' @return Summary of demand predictions
+#' 
+#' @export
+vd_dem_summarise = function(de, quantiles=c(.05,.95)){
+  quantiles_name=paste0("CI-", quantiles*100, "%")
+  
+  de %>% 
+    mutate(
+      `E(demand)`=map_dbl(.demdraws, mean),
+      `S(demand)`=map_dbl(.demdraws, sd),
+      !!(quantiles_name[1]):=map_dbl(.demdraws, quantile, probs=quantiles[1]),
+      !!(quantiles_name[2]):=map_dbl(.demdraws, quantile, probs=quantiles[2]),
+      `E(interior)`= map_dbl(map(.demdraws, sign),mean),
+      `S(interior)`= map_dbl(map(.demdraws, sign),sd)
+    ) %>%
+    return
+}
+
+
+
+
+
+
 
 
 
@@ -2916,33 +2857,40 @@ vd_dem_aggregate_long = function(de, groupby){
 #'
 #' @usage ec_dem_eval(de, true_dem)
 #'
-#' @param de demand draws
-#' @param true_dem true demand quantities/choices
+#' @param de demand draws (output from vd_dem_x function)
 #' 
-#' @return Predictive fit statistics (MAE, MSE, RAE, bias)
+#' @return Predictive fit statistics (MAE, MSE, RAE, bias, hit-probability)
 #' 
 #' @export
-ec_dem_eval = function(de, true_dem, cores=1){
+ec_dem_eval = function(de){
   `%!in%` = Negate(`%in%`)
   
   is_this_discrete=attributes(de)$ec_model$model_name_full %>% str_detect('discrete')
   
-  fits =  de %>% select(-any_of(colnames(true_dem))) %>% as.matrix  %>% 
-    cpp_vd_dem_eval(true_dem$x, cores)
-  
   if(is_this_discrete){
-    hitprob=
-      apply(true_dem$x == 
-              (de %>% 
-                 select(-any_of(unique(c('id','task','alt','p','x', colnames(true_dem)))))
-                 # select_if((colnames(.) %!in% c('id','task','alt','p','x'))) %>%
-                 #select_if(is.double)
-                 ),2,mean) %>% mean
-    
-    out=tibble(statistic=c('mae','mse','rae','bias','hitprob'), fit=c(fits[,1], hitprob))
+    out <- ho_demand %>%
+      mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
+             .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
+             .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
+             .R=abs(x-mean(x)),
+             .hp=map_dbl(map2(.demdraws,x,function(draws,x)(draws==x) ),mean)) %>%
+      summarise(MSE=mean(.MSE),
+                MAE=mean(.MAE),
+                bias=mean(.bias),
+                RAE=MAE/mean(.R),
+                hitprob=mean(.hp))
   }else{
-    out=tibble(statistic=c('mae','mse','rae','bias'), fit=fits[,1])
+    out <- ho_demand %>%
+      mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
+             .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
+             .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
+             .R=abs(x-mean(x))) %>%
+      summarise(MSE=mean(.MSE),
+                MAE=mean(.MAE),
+                bias=mean(.bias),
+                RAE=MAE/mean(.R))
   }
+  
   return(out)
 }
 
@@ -2956,7 +2904,7 @@ ec_dem_eval = function(de, true_dem, cores=1){
 #' 
 #' This helper function creates demand curves
 #'
-#' @usage vd_dem_aggregate_long(de,groupby)
+#' @usage ec_demcurve(de,groupby)
 #'
 #' @param ec_long choice scenario (discrete or volumetric)
 #' @param focal_product Logical vector picking the focal product for which to create a demand curve
@@ -3000,7 +2948,7 @@ ec_demcurve=function(ec_long,
       out[[kk]]=
         testmarket_temp %>% 
         demfun(draws) %>% 
-        vd_dem_aggregate_summarise(attr_names) %>% 
+        ec_dem_aggregate(attr_names) %>% ec_dem_summarise %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
       
     }
@@ -3012,7 +2960,7 @@ ec_demcurve=function(ec_long,
       out[[kk]]=
         testmarket_temp %>% 
         demfun(draws, epsilon_not=epsilon_not) %>% 
-        vd_dem_aggregate_summarise(attr_names) %>% 
+        ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
     }  
   }

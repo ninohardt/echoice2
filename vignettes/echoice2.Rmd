@@ -41,6 +41,7 @@ Here is a quick overview of key functions:
 
 -   `dd_est_hmnl`: Discrete Choice (HMNL)
 -   `dd_est_hmnl_screen`: Discrete Choice, attribute-based screening (not including price)
+-   `dd_est_hmnl_screenpr`: Discrete Choice, attribute-based screening (including price)
 -   `vd_est_vd`: Volumetric demand, EV1 errors
 -   `vd_est_vdmn`: Volumetric demand, Normal errors
 -   `vd_est_vdm_screen`: Volumetric demand, attribute-based screening, Normal errors
@@ -284,9 +285,19 @@ ho_demand=
     ice_ho %>%   
       prep_newprediction(ice_cal) %>% 
         vd_dem_vdm(icecream_est %>% vd_thin_draw) 
+```
 
+`ho_demand` adds the `.demdraws` column to the hold-out data (`ice_ho`). Each cell in that column contains posterior draws of predicted demand.
+
+```{r}
+ho_demand
+```
+
+
+
+```{r}
 ho_demand %>%
-  ec_dem_eval(ice_ho)
+  ec_dem_eval
 ```
 
 ## Choice Simulator
@@ -330,43 +341,56 @@ my_market=
     )
 ```
 
+
 ### Simulating choices
 
 Now we can simulate choices:
 
 ```{r}
 my_market_demand <-  my_market %>%
-                      vd_dem_vdm(est = icecream_est)
+                     vd_dem_vdm(est = icecream_est)
 ```
 
-The `my_market_demand` object contains draws of demand quantities.
+The `my_market_demand` object contains draws of demand quantities in column `.demdraws`.
 
 ```{r}
 my_market_demand %>% head
 ```
 
-`vd_dem_aggregate_summarise` helps us generate summaries. In order to obtain expected demand quantities, we can summarize by all key attributes (in this case: brand, flavor, size).
+`ec_dem_aggregate` helps aggregate demand draws - from individual-task-alternative level to Brand or Brand-Flavor-Size-level. We are not computing posterior means just yet.
 
 ```{r}
 my_market_demand %>%
-  vd_dem_aggregate_summarise(c('Brand','Flavor','Size'))
+  ec_dem_aggregate(c('Brand','Flavor','Size'))
 ```
+
+`ec_dem_summarise` computes posterior summaries, e.g. posterior means.
+
+```{r}
+my_market_demand %>%
+  ec_dem_aggregate(c('Brand','Flavor','Size')) %>%
+  ec_dem_summarise()
+```
+
 
 We can also look at other levels of aggregation, e.g. brand. Since only one brand was included in the choice scenario, we effectively obtain aggregate demand quantities for all inside goods.
 
 ```{r}
 my_market_demand %>%
-  vd_dem_aggregate_summarise(c('Brand'))
+  ec_dem_aggregate(c('Brand')) %>%
+  ec_dem_summarise()
 ```
 
 ## Demand Curves
 
-Elasticities in volumetric demand models are not constant. To better understand implicatiosn of pricing decisions, demand curves can be a helpful tool.
+Elasticities in volumetric demand models are not constant. To better understand implications of pricing decisions, demand curves can be a helpful tool.
 
-The `ec_demcurve` function can be applied to all demand simulators. Based of an initial market scenario, it generates a series of scenarios where the price of a focal product is changed over an interval. It then runs the demand simulator several times, and we can use the output to draw a demand curve. Pre-simulating error terms using `ec_gen_err_ev1` helps to smooth these demand curves.
+The `ec_demcurve` function can be applied to all demand simulators. Based of an initial market scenario, it generates a series of scenarios where the price of a focal product is changed over an interval. It then runs the demand simulator several times, and we can use the output to draw a demand curve. 
+
+Pre-simulating error terms using `ec_gen_err_ev1` helps to smooth these demand curves. It generates one error term per draw for each of the alternatives and tasks in the corresponding design dataset.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-eps_not<-my_market %>% ec_gen_err_ev1(99887766)
+eps_not<-my_market %>% ec_gen_err_ev1(icecream_est, 99887766)
 
 my_demcurve =
   my_market %>%
@@ -381,5 +405,5 @@ The output of `ec_demcurve` is a list, containing demand summaries for each prod
 
 ```{r}
 my_demcurve %>% do.call('rbind',.) %>%
-  ggplot(aes(x=scenario,y=mean,color=Flavor)) + geom_line()
+  ggplot(aes(x=scenario,y=`E(demand)`,color=Flavor)) + geom_line()
 ```

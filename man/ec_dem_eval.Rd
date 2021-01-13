@@ -7,12 +7,10 @@
 ec_dem_eval(de, true_dem)
 }
 \arguments{
-\item{de}{demand draws}
-
-\item{true_dem}{true demand quantities/choices}
+\item{de}{demand draws (output from vd_dem_x function)}
 }
 \value{
-Predictive fit statistics (MAE, MSE, RAE, bias)
+Predictive fit statistics (MAE, MSE, RAE, bias, hit-probability)
 }
 \description{
 This function obtains proper posterior fit statistics.

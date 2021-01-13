@@ -65,8 +65,12 @@ ho_demand=
       prep_newprediction(ice_cal) %>% 
         vd_dem_vdm(icecream_est %>% vd_thin_draw) 
 
+## -----------------------------------------------------------------------------
+ho_demand
+
+## -----------------------------------------------------------------------------
 ho_demand %>%
-  ec_dem_eval(ice_ho)
+  ec_dem_eval
 
 ## -----------------------------------------------------------------------------
 my_scenario = tibble(
@@ -94,21 +98,27 @@ my_market=
 
 ## -----------------------------------------------------------------------------
 my_market_demand <-  my_market %>%
-                      vd_dem_vdm(est = icecream_est)
+                     vd_dem_vdm(est = icecream_est)
 
 ## -----------------------------------------------------------------------------
 my_market_demand %>% head
 
 ## -----------------------------------------------------------------------------
 my_market_demand %>%
-  vd_dem_aggregate_summarise(c('Brand','Flavor','Size'))
+  ec_dem_aggregate(c('Brand','Flavor','Size'))
 
 ## -----------------------------------------------------------------------------
 my_market_demand %>%
-  vd_dem_aggregate_summarise(c('Brand'))
+  ec_dem_aggregate(c('Brand','Flavor','Size')) %>%
+  ec_dem_summarise()
+
+## -----------------------------------------------------------------------------
+my_market_demand %>%
+  ec_dem_aggregate(c('Brand')) %>%
+  ec_dem_summarise()
 
 ## ----echo=FALSE, message=FALSE, warning=FALSE---------------------------------
-eps_not<-my_market %>% ec_gen_err_ev1(99887766)
+eps_not<-my_market %>% ec_gen_err_ev1(icecream_est, 99887766)
 
 my_demcurve =
   my_market %>%
@@ -120,5 +130,5 @@ my_demcurve =
 
 ## -----------------------------------------------------------------------------
 my_demcurve %>% do.call('rbind',.) %>%
-  ggplot(aes(x=scenario,y=mean,color=Flavor)) + geom_line()
+  ggplot(aes(x=scenario,y=`E(demand)`,color=Flavor)) + geom_line()
 

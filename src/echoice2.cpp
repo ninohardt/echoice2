@@ -89,7 +89,7 @@ void infoMcmcTimerRRLL(int rep, int R, double RejectionRate, double LogLL) {
 // constants
 static double const log2pi = std::log(2.0 * M_PI);
 
-
+//' @export
 // [[Rcpp::export]]
 vec revd(int n=100, double loc=0, double scale=1){
   return(loc-scale*log(-log(runif(n))));
@@ -113,6 +113,7 @@ vec revdx(vec locs,
 }
 
 
+//' @export
 // [[Rcpp::export]]
 vec revd0(int n, double scale){
   
@@ -284,7 +285,7 @@ double lndMvnc(arma::vec const& x,
 
 
 //log-likelihood
-
+//' @export
 // [[Rcpp::export]]
 double ddl(arma::vec const& theta, 
            arma::uvec const& nalts,
@@ -364,7 +365,7 @@ vec ddLL(mat const&Theta,
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 mat ddLLs(cube const&THETAS,
           vec const& XX, 
@@ -467,7 +468,7 @@ void draw_dd_RWMH( arma::vec& ll_olds,    // vector of current log-likelihoods
 
 // entire loop
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_dd_RWMH(  vec const& XX, 
                     vec const& PP,
@@ -650,6 +651,8 @@ void drawdelta(vec& delta,
 }
 
 //log-likelihood
+
+//' @export
 // [[Rcpp::export]]
 double ddlsr(arma::vec const& theta, 
              arma::ivec const& taui,
@@ -851,6 +854,7 @@ void draw_dd_tau(  arma::vec& ll_olds,
 
 
 //entire loop of DD conjunctive screening model
+//' @export
 // [[Rcpp::export]]
 List loop_ddrs_RWMH(  vec const& XX, 
                       vec const& PP,
@@ -1102,7 +1106,7 @@ vec ddsrLL(mat const& Theta,
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 mat ddsrLLs(cube const&THETAS,
             icube const&TAUIS,
@@ -1152,7 +1156,7 @@ mat ddsrLLs(cube const&THETAS,
 ///////////////////////////////////////////////
 
 
-
+//' @export
 // [[Rcpp::export]]
 double ddlsrpr(arma::vec const& theta, 
                arma::ivec const& taui,
@@ -1431,7 +1435,7 @@ void draw_dd_taupr( vec& ll_olds,
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_ddrspr_RWMH(  vec const& XX, 
                         vec const& PP,
@@ -1713,6 +1717,7 @@ List loop_ddrspr_RWMH(  vec const& XX,
 ///////////////////////////////////////////////
 
 
+//' @export
 //[[Rcpp::export]]
 arma::mat dddem(vec const& PP,
                 mat const& AA,
@@ -1786,7 +1791,7 @@ arma::mat dddem(vec const& PP,
 
 
 
-
+//' @export
 //[[Rcpp::export]]
 arma::mat ddsrdem(vec const& PP,
                   mat const& AA,
@@ -1872,7 +1877,7 @@ arma::mat ddsrdem(vec const& PP,
 ///////////////////////////////////////////////
 
 
-
+//' @export
 //[[Rcpp::export]]
 arma::mat ddprob(vec const& PP,
                 mat const& AA,
@@ -1948,7 +1953,7 @@ arma::mat ddprob(vec const& PP,
 
 
 
-
+//' @export
 //[[Rcpp::export]]
 arma::mat ddsrprob(vec const& PP,
                   mat const& AA,
@@ -2047,7 +2052,7 @@ arma::mat ddsrprob(vec const& PP,
 // VD Compensatory - EV error
 ///////////////////////////////////////
 
-
+//' @export
 // [[Rcpp::export]]
 double vdl2(arma::vec const& theta, 
             arma::uvec const& nalts,
@@ -2107,6 +2112,7 @@ double vdl2(arma::vec const& theta,
   return(ll);
 }
 
+//' @export
 // [[Rcpp::export]]
 vec vd2LL(mat const&Theta,
           vec const& XX, 
@@ -2138,7 +2144,7 @@ vec vd2LL(mat const&Theta,
   return(ll_olds);
 }
 
-
+//' @export
 // [[Rcpp::export]]
 mat vd2LLs(cube const&THETAS,
            vec const& XX, 
@@ -2247,7 +2253,7 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_vd2_RWMH( vec const& XX, 
                     vec const& PP,
@@ -2425,7 +2431,7 @@ List loop_vd2_RWMH( vec const& XX,
 // VD Compensatory - Normal Error
 ///////////////////////////////////////
 
-
+//' @export
 // [[Rcpp::export]]
 double vdln(arma::vec const& theta, 
             arma::uvec const& nalts,
@@ -2481,6 +2487,7 @@ double vdln(arma::vec const& theta,
   return(ll);
 }
 
+//' @export
 // [[Rcpp::export]]
 vec vdnLL(mat const&Theta,
           vec const& XX, 
@@ -2512,7 +2519,7 @@ vec vdnLL(mat const&Theta,
   return(ll_olds);
 }
 
-
+//' @export
 // [[Rcpp::export]]
 mat vdnLLs(cube const&THETAS,
            vec const& XX, 
@@ -2621,7 +2628,7 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_vdn_RWMH( vec const& XX, 
                     vec const& PP,
@@ -2805,7 +2812,7 @@ List loop_vdn_RWMH( vec const& XX,
 ///tauconst [nattrf,N] - 0 if bought, 1 if not and thus screenable
 
 
-
+//' @export
 // [[Rcpp::export]]
 double vdlsr2( arma::vec const& theta, 
                arma::ivec const& taui,
@@ -2867,6 +2874,7 @@ double vdlsr2( arma::vec const& theta,
   return(ll);
 }
 
+//' @export
 // [[Rcpp::export]]
 vec vdsr2LL( mat const&Theta,
              imat const&tauis,
@@ -2904,7 +2912,7 @@ vec vdsr2LL( mat const&Theta,
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 mat vdsr2LLs(cube const&THETAS,
              icube const&TAUIS,
@@ -3104,6 +3112,7 @@ void draw_tau(arma::vec& ll_olds,
   }//nloop
 }
 
+//' @export
 // [[Rcpp::export]]
 List loop_vdrs2_RWMH( vec const& XX, 
                       vec const& PP,
@@ -3361,7 +3370,7 @@ List loop_vdrs2_RWMH( vec const& XX,
 // Volumetric - Conjunctive Screening, including price tag
 ///////////////////////////////////////////////
 
-
+//' @export
 // [[Rcpp::export]]
 double vdlsrpr( arma::vec const& theta, 
                 arma::ivec const& taui,
@@ -3665,7 +3674,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_vdrspr_RWMH( vec const& XX, 
                        vec const& PP,
@@ -3963,7 +3972,7 @@ List loop_vdrspr_RWMH( vec const& XX,
 
 
 
-
+//' @export
 // [[Rcpp::export]]
 vec vdsrprLL(mat const&Theta,
              imat const&tauis,
@@ -4002,7 +4011,7 @@ vec vdsrprLL(mat const&Theta,
   return(ll_olds);
 }
 
-
+//' @export
 // [[Rcpp::export]]
 mat vdsrprLLs(cube const&THETAS,
               icube const&TAUIS,
@@ -4050,7 +4059,7 @@ mat vdsrprLLs(cube const&THETAS,
 ///////////////////////////////////////
 
 
-
+//' @export
 // [[Rcpp::export]]
 double vdl_ss(arma::vec const& theta, 
               arma::uvec const& nalts,
@@ -4189,7 +4198,7 @@ void draw_vdl_ss_RWMH(arma::vec& ll_olds,    // vector of current log-likelihood
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_vd_ss_RWMH( vec const& XX, 
                       vec const& PP,
@@ -4369,7 +4378,7 @@ List loop_vd_ss_RWMH( vec const& XX,
 ///////////////////////////////////////
 
 
-
+//' @export
 // [[Rcpp::export]]
 double vdl_ssQ(arma::vec const& theta, 
                arma::uvec const& nalts,
@@ -4516,7 +4525,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
 }
 
 
-
+//' @export
 // [[Rcpp::export]]
 List loop_vd_ssQ_RWMH( vec const& XX, 
                        vec const& PP,
@@ -4707,7 +4716,7 @@ List loop_vd_ssQ_RWMH( vec const& XX,
 //////////////////////////////////////////
 
 
-
+//' @export
 // [[Rcpp::export]]
 vec vd_demand(arma::vec psi, double gamma, double E, vec prices) {
   arma::vec rho1    = prices / (psi);
@@ -4750,26 +4759,26 @@ vec vd_demand(arma::vec psi, double gamma, double E, vec prices) {
 
 
 
-// -------------
-// demand
-// -------------
+// ------------- - - - - - - - -
+// standard volumetric - ev error
+// ------------- - - - - - - - - 
 
 
-//standard volumetric - ev error
-// vd2dem
-
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdm(vec const& PP,
-                      mat const& AA,
-                      uvec const& nalts,
-                      ivec const& ntasks,  
-                      ivec const& xfr,  //
-                      ivec const& xto,  
-                      ivec const& lfr,  
-                      ivec const& lto,
-                      ivec const& tlens,
-                      cube const& thetaDraw, 
-                      int cores=1){
+List des_dem_vdm(vec const& PP,   //price (vectorised)
+                 mat const& AA,   //attr-lvls (vectorised)
+                 uvec const& nalts,
+                 ivec const& ntasks,  
+                 ivec const& xfr,  //indexing variables
+                 ivec const& xto,  
+                 ivec const& lfr,  
+                 ivec const& lto,
+                 ivec const& tlens,
+                 cube const& thetaDraw, 
+                 int cores=1){
+  
+  // vd2dem
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -4778,7 +4787,7 @@ arma::mat des_dem_vdm(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -4790,59 +4799,73 @@ arma::mat des_dem_vdm(vec const& PP,
     int ntask = tlens(n);
     int xpick = xfr(n);
     
+
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
-        
-        //paras
-        arma::vec theta = thetaDraw.slice(ir).col(n);
-        arma::vec beta  = theta(arma::span(0,p-4));
-        double gamma    = exp(theta(p-2));
-        double E        = exp(theta(p-1));
-        double sigma    = exp(theta(p-3));
-        
-        //compute psi
-        //arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*randn(nalt)); 
-        arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-          revd0(nalt, sigma)); 
-        
-        //find opt demand
-        arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+          
+          //paras
+          arma::vec theta = thetaDraw.slice(ir).col(n);
+          arma::vec beta  = theta(arma::span(0,p-4));
+          double sigma    = exp(theta(p-3));
+          double gamma    = exp(theta(p-2));
+          double E        = exp(theta(p-1));
+          
+          //compute psi
+          //arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*randn(nalt)); 
+          arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
+                              revd0(nalt, sigma)); 
+          
+          //find opt demand
+          arma::vec dem = vd_demand(psi, gamma, E, prcs);
+          
+          demcontainer.col(ir)=dem;
+          //Xd(span(xpick,xpick+nalt-1),ir)   = dem;
       }
+
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-//standard volumetric - Normal error
-// vd2dem
+// ------------- - - - - - - - -
+// standard volumetric - Normal error
+// ------------- - - - - - - - - 
 
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdmn(vec const& PP,
-                       mat const& AA,
-                       uvec const& nalts,
-                       ivec const& ntasks,  
-                       ivec const& xfr,  //
-                       ivec const& xto,  
-                       ivec const& lfr,  
-                       ivec const& lto,
-                       ivec const& tlens,
-                       cube const& thetaDraw, 
-                       int cores=1){
+List des_dem_vdmn(vec const& PP,
+                  mat const& AA,
+                  uvec const& nalts,
+                  ivec const& ntasks,  
+                  ivec const& xfr,
+                  ivec const& xto,  
+                  ivec const& lfr,  
+                  ivec const& lto,
+                  ivec const& tlens,
+                  cube const& thetaDraw, 
+                  int cores=1){
+  
+  // vd2dem
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -4851,7 +4874,7 @@ arma::mat des_dem_vdmn(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -4869,11 +4892,14 @@ arma::mat des_dem_vdmn(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -4884,39 +4910,45 @@ arma::mat des_dem_vdmn(vec const& PP,
         double sigma    = exp(theta(p-3));
         
         //compute psi
-        //arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*randn(nalt)); 
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
           sigma*randn(nalt)); 
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
+        
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      } 
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
+
+// ------------- - - - - - - - -
 //standard volumetric - error argument
-// vd2dem2
+// ------------- - - - - - - - - 
 
 
+//' @export
 //[[Rcpp::export]]
-arma::mat der_dem_vdm(vec const& PP,
-                      mat const& AA,
-                      uvec const& nalts,
-                      ivec const& ntasks,  
-                      ivec const& xfr,  //
-                      ivec const& xto,  
-                      ivec const& lfr,  
-                      ivec const& lto,
-                      ivec const& tlens,
-                      cube const& thetaDraw, 
-                      vec const& epsilon,
-                      int cores=1){
+List der_dem_vdm(vec const& PP,
+                 mat const& AA,
+                 uvec const& nalts,
+                 ivec const& ntasks,  
+                 ivec const& xfr,
+                 ivec const& xto,  
+                 ivec const& lfr,  
+                 ivec const& lto,
+                 ivec const& tlens,
+                 cube const& thetaDraw, 
+                 vec const& epsilon,
+                 int cores=1){
   
   
   //dimensions
@@ -4926,7 +4958,7 @@ arma::mat der_dem_vdm(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -4943,6 +4975,9 @@ arma::mat der_dem_vdm(vec const& PP,
       Rcpp::checkUserInterrupt();
       
       int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -4964,34 +4999,42 @@ arma::mat der_dem_vdm(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-//conjunctive volumetric - normal error
-// vdsr2dem
 
+// ------------- - - - - - - - -
+//conjunctive volumetric - normal error
+// ------------- - - - - - - - - 
+
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdm_screen(vec const& PP,
+List des_dem_vdm_screen(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
-                             uvec const& tlens,  //
+                             uvec const& tlens,
                              ivec const& ntasks,  
-                             ivec const& xfr,  //
+                             ivec const& xfr,
                              ivec const& xto,  
                              ivec const& lfr,  
                              ivec const& lto,
                              cube const& thetaDraw,
                              cube const& tauDraw, 
                              int cores=1){
+  
+  // vdsr2dem
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5000,7 +5043,7 @@ arma::mat des_dem_vdm_screen(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5017,6 +5060,9 @@ arma::mat des_dem_vdm_screen(vec const& PP,
       Rcpp::checkUserInterrupt();
       
       int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5039,29 +5085,31 @@ arma::mat des_dem_vdm_screen(vec const& PP,
         
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
-        //        if(as_scalar(Afull.row(xpicker)*taui)>(0.01)){
 
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        
-      
-
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }  
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-//conjunctive volumetric - error argument
-// vdsr2dem
 
+// ------------- - - - - - - - -
+// conjunctive volumetric - error argument
+// ------------- - - - - - - - - 
+
+//' @export
 //[[Rcpp::export]]
-arma::mat der_dem_vdm_screen(vec const& PP,
+List der_dem_vdm_screen(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
@@ -5075,7 +5123,7 @@ arma::mat der_dem_vdm_screen(vec const& PP,
                              cube const& tauDraw,
                              vec const& epsilon,
                              int cores=1){
-  
+  // vdsr2dem
   //dimensions
   int R=thetaDraw.n_slices;
   int xdim = PP.n_rows;
@@ -5083,7 +5131,7 @@ arma::mat der_dem_vdm_screen(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5101,11 +5149,14 @@ arma::mat der_dem_vdm_screen(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5125,28 +5176,34 @@ arma::mat der_dem_vdm_screen(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-//conjunctive volumetric - normal error
+// ------------- - - - - - - - -
+// conjunctive volumetric - normal error
+// ------------- - - - - - - - - 
 // screening includes screening on price tags
 
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdm_screenpr(vec const& PP,
+List des_dem_vdm_screenpr(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
-                             uvec const& tlens,  //
+                             uvec const& tlens,
                              ivec const& ntasks,  
-                             ivec const& xfr,  //
+                             ivec const& xfr,
                              ivec const& xto,  
                              ivec const& lfr,  
                              ivec const& lto,
@@ -5162,7 +5219,7 @@ arma::mat des_dem_vdm_screenpr(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5180,11 +5237,14 @@ arma::mat des_dem_vdm_screenpr(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5202,36 +5262,35 @@ arma::mat des_dem_vdm_screenpr(vec const& PP,
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
         psi.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
-                   
-        //        if(as_scalar(Afull.row(xpicker)*taui)>(0.01)){
-        
+                 
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        
-        
-        
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
+// ------------- - - - - - - - -
+// conjunctive volumetric - error argument
+// ------------- - - - - - - - - 
 
-//conjunctive volumetric - error argument
-// vdsr2dem
-
+//' @export
 //[[Rcpp::export]]
-arma::mat der_dem_vdm_screenpr(vec const& PP,
+List der_dem_vdm_screenpr(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
-                             uvec const& tlens,  //
+                             uvec const& tlens,
                              ivec const& ntasks,  
-                             ivec const& xfr,  //
+                             ivec const& xfr,
                              ivec const& xto,  
                              ivec const& lfr,  
                              ivec const& lto,
@@ -5241,6 +5300,8 @@ arma::mat der_dem_vdm_screenpr(vec const& PP,
                              vec const& epsilon,
                              int cores=1){
   
+  // vdsr2dem
+  
   //dimensions
   int R=thetaDraw.n_slices;
   int xdim = PP.n_rows;
@@ -5248,7 +5309,7 @@ arma::mat der_dem_vdm_screenpr(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5266,11 +5327,14 @@ arma::mat der_dem_vdm_screenpr(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5291,33 +5355,37 @@ arma::mat der_dem_vdm_screenpr(vec const& PP,
           
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-// *******************************************
-// with set size ------------------------------------------------------------------
-// *******************************************
+// ******************************************* -------------------
+// with set size variation
+// ******************************************* -------------------
 
 
-
+// ------------- - - - - - - - -
 // standard volumetric - setsize - EV error
+// ------------- - - - - - - - - 
 
-
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdm_ss(vec const& PP,
+List des_dem_vdm_ss(vec const& PP,
                              mat const& AA,
                              uvec const& nalts,
                              vec const& sumpxs,  
                              ivec const& ntasks,  
-                             ivec const& xfr,  //
+                             ivec const& xfr,
                              ivec const& xto,  
                              ivec const& lfr,  
                              ivec const& lto,
@@ -5328,13 +5396,11 @@ arma::mat des_dem_vdm_ss(vec const& PP,
   //dimensions
   int R=thetaDraw.n_slices;
   int xdim = PP.n_rows;
-  //int N = tlens.n_elem;
   int N = xfr.n_elem;
-  
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5352,6 +5418,9 @@ arma::mat des_dem_vdm_ss(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
@@ -5363,7 +5432,7 @@ arma::mat des_dem_vdm_ss(vec const& PP,
         arma::vec theta = thetaDraw.slice(ir).col(n);
         arma::vec beta  = theta(arma::span(0,p-5));
         
-        double E      = exp(theta(p-1));
+        double E        = exp(theta(p-1));
         double gamma    = exp(theta(p-2));
         double sigma    = exp(theta(p-3));
         double xi       = exp(theta(p-4));
@@ -5377,14 +5446,17 @@ arma::mat des_dem_vdm_ss(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }  
       xpick+=nalt;
     }
 
   }
-  return(Xd);
+  return(XdL);
 }
 
 
@@ -5393,26 +5465,26 @@ arma::mat des_dem_vdm_ss(vec const& PP,
 
 
 
-
+// ------------- - - - - - - - -
 // standard volumetric - setsize - error argument
-// vd2dem3
+// ------------- - - - - - - - - 
 
-
+//' @export
 //[[Rcpp::export]]
-arma::mat der_dem_vdm_ss(vec const& PP,
-                             mat const& AA,
-                             uvec const& nalts,
-                             uvec const& xlens,  
-                             uvec const& tlens,  //
-                             ivec const& ntasks,  
-                             ivec const& xfr,  //
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             cube const& thetaDraw, 
-                             vec const& epsilon,
-                             int cores=1){
-  
+List der_dem_vdm_ss(vec const& PP,
+                    mat const& AA,
+                    uvec const& nalts,
+                    uvec const& xlens,  
+                    uvec const& tlens,
+                    ivec const& ntasks,  
+                    ivec const& xfr,
+                    ivec const& xto,  
+                    ivec const& lfr,  
+                    ivec const& lto,
+                    cube const& thetaDraw, 
+                    vec const& epsilon,
+                    int cores=1){
+  // vd2dem3
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5421,7 +5493,7 @@ arma::mat der_dem_vdm_ss(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5439,18 +5511,21 @@ arma::mat der_dem_vdm_ss(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
         arma::vec theta = thetaDraw.slice(ir).col(n);
         arma::vec beta  = theta(arma::span(0,p-5));
         
-        double E      = exp(theta(p-1));
+        double E        = exp(theta(p-1));
         double gamma    = exp(theta(p-2));
         double sigma    = exp(theta(p-3));
         double xi       = exp(theta(p-4));
@@ -5462,38 +5537,41 @@ arma::mat der_dem_vdm_ss(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
 
-
+// ------------- - - - - - - - -
 // standard volumetric - setsize quadratic - EVerror 
-// vd2Qdem3
+// ------------- - - - - - - - - 
 
-
+//' @export
 //[[Rcpp::export]]
-arma::mat des_dem_vdm_ssq(vec const& PP,
-                              mat const& AA,
-                              uvec const& nalts,
-                              vec const& sumpxs,  
-                              ivec const& ntasks,  
-                              ivec const& xfr,  //
-                              ivec const& xto,  
-                              ivec const& lfr,  
-                              ivec const& lto,
-                              ivec const& tlens,
-                              cube const& thetaDraw, 
-                              int cores=1){
-  
-  
+List des_dem_vdm_ssq(vec const& PP,
+                     mat const& AA,
+                     uvec const& nalts,
+                     vec const& sumpxs,  
+                     ivec const& ntasks,  
+                     ivec const& xfr,
+                     ivec const& xto,  
+                     ivec const& lfr,  
+                     ivec const& lto,
+                     ivec const& tlens,
+                     cube const& thetaDraw, 
+                     int cores=1){
+  // vd2Qdem3
+
   //dimensions
   int R=thetaDraw.n_slices;
   int xdim = PP.n_rows;
@@ -5501,7 +5579,7 @@ arma::mat des_dem_vdm_ssq(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5519,22 +5597,25 @@ arma::mat des_dem_vdm_ssq(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
         arma::vec theta = thetaDraw.slice(ir).col(n);
         arma::vec beta  = theta(arma::span(0,p-6));
         
-        double E      = exp(theta(p-1));
+        double E        = exp(theta(p-1));
         double gamma    = exp(theta(p-2));
         double sigma    = exp(theta(p-3));
         double xi       = exp(theta(p-4));
-        double tau       = exp(theta(p-5));
+        double tau      = exp(theta(p-5));
         
         
         //compute psi
@@ -5544,35 +5625,40 @@ arma::mat des_dem_vdm_ssq(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
+
+// ------------- - - - - - - - -
 // standard volumetric - setsize quadratic - error argument
-// vd2Qdem3
+// ------------- - - - - - - - - 
 
-
+//' @export
 //[[Rcpp::export]]
-arma::mat der_dem_vdm_ssq(vec const& PP,
+List der_dem_vdm_ssq(vec const& PP,
                               mat const& AA,
                               uvec const& nalts,
                               uvec const& xlens,  
-                              uvec const& tlens,  //
+                              uvec const& tlens,
                               ivec const& ntasks,  
-                              ivec const& xfr,  //
+                              ivec const& xfr,
                               ivec const& xto,  
                               ivec const& lfr,  
                               ivec const& lto,
                               cube const& thetaDraw, 
                               vec const& epsilon,
                               int cores=1){
-  
+  // vd2Qdem3
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5581,7 +5667,7 @@ arma::mat der_dem_vdm_ssq(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -5599,11 +5685,14 @@ arma::mat der_dem_vdm_ssq(vec const& PP,
       
       int nalt = nalts(tt);
       
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5625,237 +5714,16 @@ arma::mat der_dem_vdm_ssq(vec const& PP,
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
-        Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        demcontainer.col(ir)=dem;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }  
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// --------------------------------------------
-
-
-
-
-
-
-
-// nout=nrow(selstuff2)
-//   selstuff2$xfr
-//   selstuff2$xto
-
-//   
-
-
-// [[Rcpp::export]]
-arma::mat demagg(mat const& xdraw,
-                 int nout,
-                 ivec const& xfr,
-                 ivec const& xto){
-  
-  int k = xdraw.n_cols;
-  mat out(nout,k);
-  
-  for(int i = 0; i < nout; i++) {
-    out.row(i)=sum(xdraw.rows(xfr(i),xto(i)),0);
-  }
-  
-  return(out);
-  
-}
-
-
-
-// [[Rcpp::export]]
-arma::mat demagg_2(mat const& xdraw,
-                   int nout,
-                   ivec const& xfr,
-                   ivec const& xto,
-                   vec quantiles){
-  
-  //int k = xdraw.n_cols;
-  mat out(nout,2+quantiles.n_elem);
-  
-  for(int i = 0; i < nout; i++) {
-    out(i,0)=mean(sum(xdraw.rows(xfr(i),xto(i)),0));
-    out(i,1)=stddev(sum(xdraw.rows(xfr(i),xto(i)),0));
-    out(i,span(2,3)) = quantile(sum(xdraw.rows(xfr(i),xto(i)),0), quantiles);
-  }
-  
-  return(out);
-  
-}
-
-
-
-// [[Rcpp::export]]
-arma::mat demagg3(mat const& xdraw, const List& idx){
-  
-  int nout=idx.size();
-  
-  int k = xdraw.n_cols;
-  mat out(nout,k);
-  
-  for(int i = 0; i < nout; i++) {
-    uvec sel = idx[i];
-    
-    out.row(i)=sum(xdraw.rows(sel-1),0);
-  }
-  
-  return(out);
-  
-}
-
-
-
-// [[Rcpp::export]]
-arma::mat demagg4(mat const& xdraw, 
-                  const List& idx, 
-                  vec quantiles,
-                  int cores=1){
-  
-  int nout=idx.size();
-  //int k = xdraw.n_cols;
-  mat out(nout,2+quantiles.n_elem);
-  
-  omp_set_num_threads(cores);
-  #pragma omp parallel for schedule(static)
-  for(int i = 0; i < nout; i++) {
-    uvec sel = idx[i];
-    vec foo = trans(sum(xdraw.rows(sel-1),0));
-    out(i,0)=mean(foo);
-    out(i,1)=stddev(foo);
-    out(i,span(2,3)) = trans(quantile(foo,quantiles));
-  }
-  
-  return(out);
-  
-}
-
-
-
-
-// [[Rcpp::export]]
-arma::mat demagg5(mat const& xdraw, 
-                  const List& idx){
-  
-  int k = xdraw.n_cols;
-  int nout=idx.size();
-  int nout_draw=nout*k;
-  
-  vec out(nout_draw);
-  
-  int cnt=0;
-  
-  for(int i = 0; i < nout; i++) {
-    uvec sel = idx[i];
-    rowvec foo = sum(xdraw.rows(sel-1),0);
-    int foo_len = foo.n_elem;
-    out(span(cnt,cnt+foo_len-1))=trans(foo);
-    cnt+=foo_len;
-  }
-  
-  return(out);
-  
-}
-
-
-
-// [[Rcpp::export]]
-vec cpp_vd_dem_eval(mat const& draws, vec const& truedem, int cores=1){
-  
-  vec out(4);
-  int K = draws.n_cols;
-  double truedem_bar=mean(truedem);
-  double mae=0;
-  double mse=0;
-  double bias=0;
-  double rae=0;
-  
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
-  for(int k=0; k<K; k++){
-    mse+=mean(pow(draws.col(k)-truedem,2));
-    mae+=mean(abs(draws.col(k)-truedem));
-    bias+=mean(draws.col(k)-truedem);
-    rae+=mean(abs(draws.col(k)-truedem))/mean(abs(truedem_bar-truedem));
-  }
-  
-  
-  //output vec
-  out(0)=mae/K;
-  out(1)=mse/K;
-  out(2)=rae/K;
-  out(3)=bias/K;
-  
-  return(out);
-  
-}
-
-
-// [[Rcpp::export]]
-vec cpp_vd_dem_eval_pm(mat const& draws, vec const& truedem, int cores=1){
-  
-  vec out(4);
-  int N = draws.n_rows;
-  vec pred(N);
-  
-  double truedem_bar=mean(truedem);
-  
-  
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
-  for(int n=0; n<N; n++){
-    pred(n)=mean(draws.row(n));
-  }
-  
-  
-  //output vec
-  out(0)=mean(abs(pred-truedem));
-  out(1)=mean(pow(pred-truedem,2));
-  out(2)=mean(abs(pred-truedem))/mean(abs(truedem_bar-truedem));
-  out(3)=mean(pred-truedem);
-  
-  return(out);
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -4,7 +4,7 @@
 \alias{ec_demcurve}
 \title{Create demand curves}
 \usage{
-vd_dem_aggregate_long(de,groupby)
+ec_demcurve(de,groupby)
 }
 \arguments{
 \item{ec_long}{choice scenario (discrete or volumetric)}
