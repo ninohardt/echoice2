@@ -2513,7 +2513,7 @@ dd_dem=function(dd,
   dd$.demdraws<-out  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
@@ -2571,7 +2571,7 @@ dd_prob=function(dd,
   dd$.demdraws<-out  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
@@ -2634,7 +2634,7 @@ dd_dem_sr=function(dd,
   dd$.demdraws<-out  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
@@ -2695,7 +2695,7 @@ dd_prob_sr=function(dd,
   dd$.demdraws<-out  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
@@ -2758,7 +2758,7 @@ dd_dem_srpr=function(dd,
   dd$.demdraws<-out  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
