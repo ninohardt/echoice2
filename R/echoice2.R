@@ -2750,6 +2750,7 @@ dd_dem_srpr=function(dd,
               dat$lto-1,
               est$thetaDraw,
               est$tauDraw, 
+              est$tau_pr_draw,
               cores=cores)
   
   
@@ -2811,6 +2812,7 @@ dd_prob_srpr=function(dd,
                dat$lto-1,
                est$thetaDraw,
                est$tauDraw, 
+               est$tau_pr_draw,
                cores=cores)
   
   
