@@ -1691,16 +1691,15 @@ vd_dem_vdmn=function(vd,
                     cores=cores)
   }
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  #meta-information upstream
-  attributes(out)$attr_names<- vd%>% 
-    select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
   
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(vd)
 }
 
 
@@ -1782,17 +1781,15 @@ vd_dem_vdmsr=function(vd,
              cores=cores)
   }
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  #add meta-info idx
-  #attributes(out)$idx=dat$idx
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
   
-  #meta-information upstream
-  attributes(out)$attr_names<- vd%>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(vd)
 }
 
 
@@ -1875,17 +1872,15 @@ vd_dem_vdmsrpr=function(vd,
                          cores=cores)
   }
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  #add meta-info idx
-  #attributes(out)$idx=dat$idx
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
   
-  #meta-information upstream
-  attributes(out)$attr_names<- vd%>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(vd)
 }
 
 
@@ -1944,16 +1939,15 @@ vd_dem_vdmss=function(vd,
                         est$thetaDraw,
                         cores=cores)
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  #meta-information upstream
-  attributes(out)$attr_names<- vd%>% 
-    select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
   
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(vd)
 }
 
 
@@ -2013,16 +2007,15 @@ vd_dem_vdmssq=function(vd,
                          est$thetaDraw,
                          cores=cores)
   
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-out  
   
-  out = vd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
-
-  #meta-information upstream
-  attributes(out)$attr_names<- vd%>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
   
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(vd)
 }
 
 
