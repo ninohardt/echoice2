@@ -1719,17 +1719,17 @@ List loop_ddrspr_RWMH(  vec const& XX,
 
 //' @export
 //[[Rcpp::export]]
-arma::mat dddem(vec const& PP,
-                mat const& AA,
-                uvec const& nalts,
-                uvec const& tlens,  //
-                ivec const& ntasks,  
-                ivec const& xfr,  //
-                ivec const& xto,  
-                ivec const& lfr,  
-                ivec const& lto,
-                cube const& thetaDraw,
-                int cores=1){
+List dddem(vec const& PP,
+           mat const& AA,
+           uvec const& nalts,
+           uvec const& tlens,
+           ivec const& ntasks,  
+           ivec const& xfr,
+           ivec const& xto,  
+           ivec const& lfr,  
+           ivec const& lto,
+           cube const& thetaDraw,
+           int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1738,9 +1738,8 @@ arma::mat dddem(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
-  Xd.fill(0);
-  
+  Rcpp::List XdL(xdim);
+
   //start timer
   startTimer();
   
@@ -1756,11 +1755,15 @@ arma::mat dddem(vec const& PP,
       Rcpp::checkUserInterrupt();
       
       int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1774,18 +1777,19 @@ arma::mat dddem(vec const& PP,
         
         //if not outside good, choose inside good
         if(ch<nalt){
-          Xd(xpick+ch, ir)=1;
-          
-          // Xd(span(xpick,xpick+nalt-1),ir) = dem;
+          demcontainer(ch,ir)=1;
         }
         
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
@@ -1793,19 +1797,19 @@ arma::mat dddem(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-arma::mat ddsrdem(vec const& PP,
-                  mat const& AA,
-                  mat const& AAf,
-                  uvec const& nalts,
-                  uvec const& tlens,  //
-                  ivec const& ntasks,  
-                  ivec const& xfr,  //
-                  ivec const& xto,  
-                  ivec const& lfr,  
-                  ivec const& lto,
-                  cube const& thetaDraw,
-                  cube const& tauDraw, 
-                  int cores=1){
+List ddsrdem(vec const& PP,
+             mat const& AA,
+             mat const& AAf,
+             uvec const& nalts,
+             uvec const& tlens,
+             ivec const& ntasks,  
+             ivec const& xfr,
+             ivec const& xto,  
+             ivec const& lfr,  
+             ivec const& lto,
+             cube const& thetaDraw,
+             cube const& tauDraw, 
+             int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1814,9 +1818,8 @@ arma::mat ddsrdem(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
-  Xd.fill(0);
-  
+  Rcpp::List XdL(xdim);
+
   //start timer
   startTimer();
   
@@ -1833,14 +1836,14 @@ arma::mat ddsrdem(vec const& PP,
       
       int nalt = nalts(tt);
       
-      ivec nalt_space = linspace<ivec>(0, nalt-1); 
-      
+      //temp storage
+      mat demcontainer(nalt,R);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1858,18 +1861,105 @@ arma::mat ddsrdem(vec const& PP,
         
         //if not outside good, choose inside good
         if(pick_draw!=nalt){
-          Xd(xpick+pick_draw, ir)=1;
+          demcontainer(pick_draw,ir)=1;
         }
       }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
-
+//' @export
+//[[Rcpp::export]]
+List ddsrprdem(vec const& PP,
+               mat const& AA,
+               mat const& AAf,
+               uvec const& nalts,
+               uvec const& tlens,
+               ivec const& ntasks,  
+               ivec const& xfr,
+               ivec const& xto,  
+               ivec const& lfr,  
+               ivec const& lto,
+               cube const& thetaDraw,
+               cube const& tauDraw, 
+               mat const& tau_pr_Draw,
+               int cores=1){
+  
+  //dimensions
+  int R=thetaDraw.n_slices;
+  int xdim = PP.n_rows;
+  int N = tlens.n_elem;
+  int p = thetaDraw.n_rows;
+  
+  //output init
+  Rcpp::List XdL(xdim);
+  
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = tlens(n);
+    int xpick = xfr(n);
+    
+    //task-level
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R);
+      
+      ivec nalt_space = linspace<ivec>(0, nalt-1); 
+      
+      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+      
+      //draw-level
+      omp_set_num_threads(cores);
+      #pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+        
+        //paras
+        arma::vec theta = thetaDraw.slice(ir).col(n);
+        arma::vec beta  = theta(arma::span(0,p-2));
+        double beta_p = exp(theta(p-1));
+        arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
+        arma::vec pr = exp(ab)/(1+sum(exp(ab)));
+        
+        arma::vec taui  = tauDraw.slice(ir).col(n);
+        pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
+        pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
+        
+        //multinomial draw
+        int pick_draw = rmuno2(pr);
+        
+        //if not outside good, choose inside good
+        if(pick_draw!=nalt){
+          demcontainer(pick_draw,ir)=1;
+        }
+        
+      }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      } 
+      xpick+=nalt;
+    }
+    
+  }
+  return(XdL);
+}
 
 
 ///////////////////////////////////////////////
@@ -1879,17 +1969,17 @@ arma::mat ddsrdem(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-arma::mat ddprob(vec const& PP,
-                mat const& AA,
-                uvec const& nalts,
-                uvec const& tlens,  //
-                ivec const& ntasks,  
-                ivec const& xfr,  //
-                ivec const& xto,  
-                ivec const& lfr,  
-                ivec const& lto,
-                cube const& thetaDraw,
-                int cores=1){
+List ddprob(vec const& PP,
+            mat const& AA,
+            uvec const& nalts,
+            uvec const& tlens,
+            ivec const& ntasks,  
+            ivec const& xfr,
+            ivec const& xto,  
+            ivec const& lfr,  
+            ivec const& lto,
+            cube const& thetaDraw,
+            int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1898,9 +1988,8 @@ arma::mat ddprob(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
-  Xd.fill(0);
-  
+  Rcpp::List XdL(xdim);
+
   //start timer
   startTimer();
   
@@ -1916,11 +2005,15 @@ arma::mat ddprob(vec const& PP,
       Rcpp::checkUserInterrupt();
       
       int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R);
+      
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1930,24 +2023,18 @@ arma::mat ddprob(vec const& PP,
         
         arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
         arma::vec pr = exp(ab)/(1+sum(exp(ab)));
-        // int ch = sum(as_scalar(randu(1))>cumsum(pr));
-        
-        //if not outside good, choose inside good
-        // if(ch<nalt){
-          // Xd(xpick+ch, ir)=1;
-          
-          // Xd(span(xpick,xpick+nalt-1),ir) = dem;
-        // }
-        
-        Xd(span(xpick,xpick+nalt-1),ir)=pr;
-        
+
+        demcontainer.col(ir)=pr;
       }
       
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
@@ -1955,19 +2042,19 @@ arma::mat ddprob(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-arma::mat ddsrprob(vec const& PP,
-                  mat const& AA,
-                  mat const& AAf,
-                  uvec const& nalts,
-                  uvec const& tlens,  //
-                  ivec const& ntasks,  
-                  ivec const& xfr,  //
-                  ivec const& xto,  
-                  ivec const& lfr,  
-                  ivec const& lto,
-                  cube const& thetaDraw,
-                  cube const& tauDraw, 
-                  int cores=1){
+List ddsrprob(vec const& PP,
+              mat const& AA,
+              mat const& AAf,
+              uvec const& nalts,
+              uvec const& tlens,
+              ivec const& ntasks,  
+              ivec const& xfr,
+              ivec const& xto,  
+              ivec const& lfr,  
+              ivec const& lto,
+              cube const& thetaDraw,
+              cube const& tauDraw, 
+              int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1976,8 +2063,7 @@ arma::mat ddsrprob(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  arma::mat Xd(xdim,R);
-  Xd.fill(0);
+  Rcpp::List XdL(xdim);
   
   //start timer
   startTimer();
@@ -1995,14 +2081,14 @@ arma::mat ddsrprob(vec const& PP,
       
       int nalt = nalts(tt);
       
-      ivec nalt_space = linspace<ivec>(0, nalt-1); 
-      
+      //temp storage
+      mat demcontainer(nalt,R);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -2015,38 +2101,101 @@ arma::mat ddsrprob(vec const& PP,
         arma::vec taui  = tauDraw.slice(ir).col(n);
         pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
 
-        //multinomial draw
-        // int pick_draw = rmuno2(pr);
-        // 
-        // //if not outside good, choose inside good
-        // if(pick_draw!=nalt){
-        //   Xd(xpick+pick_draw, ir)=1;
-        // }
-        
-        
-        // int ch = sum(as_scalar(randu(1))>cumsum(pr));
-        
-        //if not outside good, choose inside good
-        // if(ch<nalt){
-        // Xd(xpick+ch, ir)=1;
-        
-        // Xd(span(xpick,xpick+nalt-1),ir) = dem;
-        // }
-        
-        Xd(span(xpick,xpick+nalt-1),ir)=pr;
-        
+        demcontainer.col(ir)=pr;
       }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }
+      
       xpick+=nalt;
     }
     
   }
-  return(Xd);
+  return(XdL);
 }
 
 
+//' @export
+//[[Rcpp::export]]
+List ddsrprprob(vec const& PP,
+             mat const& AA,
+             mat const& AAf,
+             uvec const& nalts,
+             uvec const& tlens,
+             ivec const& ntasks,  
+             ivec const& xfr,
+             ivec const& xto,  
+             ivec const& lfr,  
+             ivec const& lto,
+             cube const& thetaDraw,
+             cube const& tauDraw, 
+             mat const& tau_pr_Draw,
+             int cores=1){
+ 
+ //dimensions
+ int R=thetaDraw.n_slices;
+ int xdim = PP.n_rows;
+ int N = tlens.n_elem;
+ int p = thetaDraw.n_rows;
+ 
+ //output init
+ Rcpp::List XdL(xdim);
+ 
+ //start timer
+ startTimer();
+ 
+ //resp-level
+ for(int n=0; n<N; n++){
+   infoTimer(n,N);
+   
+   int ntask = tlens(n);
+   int xpick = xfr(n);
+   
+   //task-level
+   for(int tt=0; tt<ntask; tt++){
+     Rcpp::checkUserInterrupt();
+     
+     int nalt = nalts(tt);
+     
+     //temp storage
+     mat demcontainer(nalt,R);
+     
+     arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+     
+     //draw-level
+     omp_set_num_threads(cores);
+     #pragma omp parallel for schedule(static)
+     for (int ir = 0; ir <R; ++ir){
+       
+       //paras
+       arma::vec theta = thetaDraw.slice(ir).col(n);
+       arma::vec beta  = theta(arma::span(0,p-2));
+       double beta_p = exp(theta(p-1));
+       arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
+       arma::vec pr = exp(ab)/(1+sum(exp(ab)));
+       
+       arma::vec taui  = tauDraw.slice(ir).col(n);
+       pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
+       pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
+       
+       demcontainer.col(ir)=pr;
+     }
+     
+     for(int k=0; k<nalt; k++){
+       XdL(k+xpick)=demcontainer.row(k);
+     }
+     
+     xpick+=nalt;
+   }
+   
+ }
+ return(XdL);
+}
 
-
-
+               
+               
+               
 
 /////////////////////////////////////// 
 // VD Compensatory - EV error

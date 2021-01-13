@@ -2508,14 +2508,15 @@ dd_dem=function(dd,
            cores=cores)
   
   
-  out = dd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
-
-  #meta-information upstream
-  attributes(out)$attr_names<- dd %>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
   
-  return(out)
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
+  
+  return(dd)
 }
 
 
@@ -2565,17 +2566,15 @@ dd_prob=function(dd,
            est$thetaDraw,
            cores=cores)
   
-  out = 
-    dd %>% 
-      select( -any_of('x')) %>% 
-        bind_cols(as_tibble(out))
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
   
-  #meta-information upstream
-  attributes(out)$attr_names<- dd %>% select_if(!(colnames(.)%in%c('id','task','alt','p','x'))) %>% colnames()
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
   
-  return(out)
+  return(dd)
 }
 
 
@@ -2630,18 +2629,15 @@ dd_dem_sr=function(dd,
              cores=cores)
   
   
-  out = dd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
   
-  #add meta-info idx
-  #attributes(out)$idx=dat$idx
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
   
-  #meta-information upstream
-  attributes(out)$attr_names<- dd%>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(dd)
 }
 
 
@@ -2694,19 +2690,141 @@ dd_prob_sr=function(dd,
             cores=cores)
   
   
-  out = dd %>% select( -any_of('x')) %>% bind_cols(as_tibble(out))
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
   
-  #add meta-info idx
-  #attributes(out)$idx=dat$idx
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
   
-  #meta-information upstream
-  attributes(out)$attr_names<- dd%>% select(-any_of(c('id','task','alt','p','x'))) %>% colnames()
-  
-  attributes(out)$ec_data=attributes(dat)$ec_data
-  attributes(out)$ec_model=attributes(est)$ec_model
-  
-  return(out)
+  return(dd)
 }
+
+
+
+
+#' Discrete Choice Predictions (HMNL with attribute-based screening w/price)
+#'
+#' @usage dd_dem_srpr(dd, est, cores)
+#'
+#' @param dd data
+#' @param est est
+#' @param cores cores
+#' 
+#' @return Draws of expected choice
+#' 
+#' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
+#' 
+#' @export
+dd_dem_srpr=function(dd,
+                   est,
+                   cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  
+  #re-arrange data
+  dat <- 
+    dd %>% 
+    vd_long_tidy %>% vd_prepare_nox()
+  
+  #screening-relevant data
+  dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
+  
+  #demand sim
+  out=
+    ddsrprdem(dat$PP,
+              dat$AA,
+              dat$Af,
+              dat$nalts,
+              dat$tlens,  
+              dat$ntasks,  
+              dat$xfr-1,
+              dat$xto-1,  
+              dat$lfr-1,  
+              dat$lto-1,
+              est$thetaDraw,
+              est$tauDraw, 
+              cores=cores)
+  
+  
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
+  
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
+  
+  return(dd)
+}
+
+
+#' Discrete Choice Probabilities (HMNL with attribute-based screening w/ price)
+#'
+#' @usage dd_prob_srpr(dd, est, cores)
+#'
+#' @param dd data
+#' @param est est
+#' @param cores cores
+#' 
+#' @return Draws of expected choice
+#' 
+#' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
+#' 
+#' @export
+dd_prob_srpr=function(dd,
+                    est,
+                    cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  
+  #re-arrange data
+  dat <- 
+    dd %>% 
+    vd_long_tidy %>% vd_prepare_nox()
+  
+  #screening-relevant data
+  dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
+  
+  #demand sim
+  out=
+    ddsrprprob(dat$PP,
+               dat$AA,
+               dat$Af,
+               dat$nalts,
+               dat$tlens,  
+               dat$ntasks,  
+               dat$xfr-1,
+               dat$xto-1,  
+               dat$lfr-1,  
+               dat$lto-1,
+               est$thetaDraw,
+               est$tauDraw, 
+               cores=cores)
+  
+  
+  #add draws to data tibble
+  dd=as_tibble(dd)
+  dd$.demdraws<-out  
+  
+  #add attributes
+  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$ec_model   <- attributes(est)$ec_model
+  
+  return(dd)
+}
+
 
 
 # working with demand -----------------------------------------------------

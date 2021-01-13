@@ -70,6 +70,11 @@ ddsrdem <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, theta
 }
 
 #' @export
+ddsrprdem <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ddsrprdem', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
+}
+
+#' @export
 ddprob <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores = 1L) {
     .Call('_echoice2_ddprob', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
 }
@@ -77,6 +82,11 @@ ddprob <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, 
 #' @export
 ddsrprob <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
     .Call('_echoice2_ddsrprob', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
+}
+
+#' @export
+ddsrprprob <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ddsrprprob', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
 }
 
 #' @export

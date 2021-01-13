@@ -265,7 +265,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // dddem
-arma::mat dddem(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
+List dddem(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_dddem(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -286,7 +286,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrdem
-arma::mat ddsrdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+List ddsrdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_ddsrdem(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -308,8 +308,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ddsrprdem
+List ddsrprdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+RcppExport SEXP _echoice2_ddsrprdem(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AAf(AAfSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type tauDraw(tauDrawSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type tau_pr_Draw(tau_pr_DrawSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ddsrprdem(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ddprob
-arma::mat ddprob(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
+List ddprob(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_ddprob(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -330,7 +354,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrprob
-arma::mat ddsrprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+List ddsrprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_ddsrprob(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -349,6 +373,30 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< cube const& >::type tauDraw(tauDrawSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
     rcpp_result_gen = Rcpp::wrap(ddsrprob(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ddsrprprob
+List ddsrprprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+RcppExport SEXP _echoice2_ddsrprprob(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AAf(AAfSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type tauDraw(tauDrawSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type tau_pr_Draw(tau_pr_DrawSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ddsrprprob(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1155,8 +1203,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_loop_ddrspr_RWMH", (DL_FUNC) &_echoice2_loop_ddrspr_RWMH, 25},
     {"_echoice2_dddem", (DL_FUNC) &_echoice2_dddem, 11},
     {"_echoice2_ddsrdem", (DL_FUNC) &_echoice2_ddsrdem, 13},
+    {"_echoice2_ddsrprdem", (DL_FUNC) &_echoice2_ddsrprdem, 14},
     {"_echoice2_ddprob", (DL_FUNC) &_echoice2_ddprob, 11},
     {"_echoice2_ddsrprob", (DL_FUNC) &_echoice2_ddsrprob, 13},
+    {"_echoice2_ddsrprprob", (DL_FUNC) &_echoice2_ddsrprprob, 14},
     {"_echoice2_vdl2", (DL_FUNC) &_echoice2_vdl2, 8},
     {"_echoice2_vd2LL", (DL_FUNC) &_echoice2_vd2LL, 14},
     {"_echoice2_vd2LLs", (DL_FUNC) &_echoice2_vd2LLs, 14},
