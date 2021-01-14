@@ -2490,7 +2490,7 @@ dd_dem=function(dd,
   #re-arrange data
   dat <- 
     dd %>% 
-    vd_long_tidy %>% vd_prepare
+    vd_long_tidy %>% vd_prepare_nox()
   
   
   #demand sim
