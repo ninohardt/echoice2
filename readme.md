@@ -18,7 +18,9 @@ Marketing](https://www.elsevier.com/books/handbook-of-the-economics-of-marketing
 For details and examples on how to use echoice, please refer to the
 [vignette](http://ninohardt.de/echoice2/articles/echoice2.html) in the
 package. It illustrates model estimation, predictions and model
-evaluation.
+evaluation. 
+
+A short [demo video](https://youtu.be/3t0DWWNCOy8) illustrates the basic functionality. 
 
 All key functions are written in c++ and use
 [openMP](https://www.openmp.org) for multi-threaded computing. C++
