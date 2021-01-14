@@ -41,6 +41,8 @@ which is still available on
 
 -   Version **0.15**:
 
+    -   Initial
+        [release](https://github.com/ninohardt/echoice2/releases/tag/v0.15)
     -   faster and more efficient screening model estimation
     -   improved demand predictions: posterior demand draws are now
         stored in a single column - this is a *major* improvement for
@@ -79,9 +81,11 @@ remotes::install_github("ninohardt/echoice2", build_vignettes = TRUE)
 
 ### Binaries
 
-Binaries for windows can be downloaded
-[here](http://ninohardt.de/echoice2/echoice2_0.15.zip "echoice2"). You
-can install the binary version from the ‘Packages’ tab in RStudio.
+Binaries are made available with
+[releases](https://github.com/ninohardt/echoice2/releases) (under
+‘Assets’).
+
+You can install the binary version from the ‘Packages’ tab in RStudio.
 Select ‘Install’ and change ‘Install from’ to ‘Package Archive File’. Or
 you use `install.packages` on the command line and point it to the
 downloaded .zip file.
@@ -156,30 +160,26 @@ Estimating a simple volumetric demand model is easy. Use the
 est_icecream <- icecream %>% vd_est_vdm(R=10000)
 #> Using 16 cores
 #>  MCMC in progress 
-#>  Total Time Elapsed: 0.17 minutes
+#>  Total Time Elapsed: 0.15 minutes
 ```
 
 Upper-level estimates can be summarized using `ec_estimates_MU`:
 
 ``` r
 est_icecream %>% ec_estimates_MU()
-#> Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.
-#> Using compatibility `.name_repair`.
-#> This warning is displayed once every 8 hours.
-#> Call `lifecycle::last_warnings()` to see where this warning was generated.
 #> # A tibble: 21 x 12
-#>    attribute lvl   par     mean     sd `CI-5%` `CI-95%` sig   model error
-#>    <chr>     <chr> <chr>  <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
-#>  1 <NA>      <NA>  int   -3.20  0.523   -3.49   -2.68   TRUE  VD-c~ EV1  
-#>  2 Brand     Blue~ Bran~ -0.672 0.161   -0.872  -0.395  TRUE  VD-c~ EV1  
-#>  3 Brand     Blue~ Bran~ -0.652 0.174   -0.864  -0.325  TRUE  VD-c~ EV1  
-#>  4 Brand     Brey~ Bran~ -0.101 0.0877  -0.256   0.0320 FALSE VD-c~ EV1  
-#>  5 Brand     Drye~ Bran~ -0.568 0.132   -0.733  -0.350  TRUE  VD-c~ EV1  
-#>  6 Brand     Haag~ Bran~ -0.345 0.0943  -0.481  -0.186  TRUE  VD-c~ EV1  
-#>  7 Brand     Store Bran~ -0.483 0.120   -0.661  -0.290  TRUE  VD-c~ EV1  
-#>  8 Flavor    Choc~ Flav~ -0.352 0.138   -0.556  -0.103  TRUE  VD-c~ EV1  
-#>  9 Flavor    Choc~ Flav~ -0.416 0.117   -0.589  -0.234  TRUE  VD-c~ EV1  
-#> 10 Flavor    Cook~ Flav~ -0.366 0.0958  -0.506  -0.217  TRUE  VD-c~ EV1  
+#>    attribute lvl   par      mean     sd `CI-5%` `CI-95%` sig   model error
+#>    <chr>     <chr> <chr>   <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
+#>  1 <NA>      <NA>  int   -3.20   0.533   -3.54   -2.61   TRUE  VD-c~ EV1  
+#>  2 Brand     Blue~ Bran~ -0.675  0.165   -0.890  -0.400  TRUE  VD-c~ EV1  
+#>  3 Brand     Blue~ Bran~ -0.611  0.149   -0.820  -0.390  TRUE  VD-c~ EV1  
+#>  4 Brand     Brey~ Bran~ -0.0700 0.114   -0.288   0.0801 FALSE VD-c~ EV1  
+#>  5 Brand     Drye~ Bran~ -0.576  0.118   -0.722  -0.413  TRUE  VD-c~ EV1  
+#>  6 Brand     Haag~ Bran~ -0.314  0.0894  -0.450  -0.158  TRUE  VD-c~ EV1  
+#>  7 Brand     Store Bran~ -0.501  0.120   -0.674  -0.304  TRUE  VD-c~ EV1  
+#>  8 Flavor    Choc~ Flav~ -0.432  0.101   -0.586  -0.281  TRUE  VD-c~ EV1  
+#>  9 Flavor    Choc~ Flav~ -0.467  0.124   -0.643  -0.254  TRUE  VD-c~ EV1  
+#> 10 Flavor    Cook~ Flav~ -0.500  0.106   -0.646  -0.356  TRUE  VD-c~ EV1  
 #> # ... with 11 more rows, and 2 more variables: reference_lvl <chr>,
 #> #   parameter <chr>
 ```
@@ -248,16 +248,16 @@ dempres_icecream %>%
 #> # A tibble: 300 x 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        38.7       12.3    19.7      59.5
-#>  2     2 <dbl [1,000]>        98.7       27.6    56.7     143. 
-#>  3     3 <dbl [1,000]>        30.4        5.99   21.3      40.5
-#>  4     4 <dbl [1,000]>        87.7       28.2    46.4     139. 
-#>  5     5 <dbl [1,000]>        31.9       18.7     9.63     70.5
-#>  6     6 <dbl [1,000]>        15.7        8.38    4.44     31.8
-#>  7     7 <dbl [1,000]>        73.3       21.2    49.7     103. 
-#>  8     8 <dbl [1,000]>        49.5       19.9    22.3      88.4
-#>  9     9 <dbl [1,000]>        13.1        4.59    6.01     21.8
-#> 10    10 <dbl [1,000]>        37.0       10.2    20.5      54.0
+#>  1     1 <dbl [1,000]>        40.7       13.6    20.9      64.8
+#>  2     2 <dbl [1,000]>        99.8       28.2    57.4     150. 
+#>  3     3 <dbl [1,000]>        30.8        5.80   21.6      40.7
+#>  4     4 <dbl [1,000]>        92.2       30.9    47.9     146. 
+#>  5     5 <dbl [1,000]>        33.6       18.5    10.5      73.1
+#>  6     6 <dbl [1,000]>        15.9        8.48    5.19     32.7
+#>  7     7 <dbl [1,000]>        71.3       21.0    47.9     104. 
+#>  8     8 <dbl [1,000]>        51.6       21.0    22.6      91.0
+#>  9     9 <dbl [1,000]>        13.7        5.14    5.88     23.0
+#> 10    10 <dbl [1,000]>        36.5       10.0    20.0      53.2
 #> # ... with 290 more rows
 ```
 
