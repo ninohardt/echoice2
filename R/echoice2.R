@@ -99,7 +99,7 @@ ht_modelMuCompare=function(model_list){
   prep_4=prep_3[,seq(1,2+n_models*2)]
   
   #generate huxtable
-  ht=prep_4 %>% huxtable::huxtable
+  ht=prep_4 %>% huxtable::huxtable()
   
   #bold-face significant paras
   pickrows= (ht[,1]=="") %>% replace_na(T)
