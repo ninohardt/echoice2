@@ -2981,7 +2981,7 @@ ec_dem_eval = function(de){
   is_this_discrete=attributes(de)$ec_model$model_name_full %>% str_detect('discrete')
   
   if(is_this_discrete){
-    out <- ho_demand %>%
+    out <- de %>%
       mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
              .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
              .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
@@ -2993,7 +2993,7 @@ ec_dem_eval = function(de){
                 RAE=MAE/mean(.R),
                 hitprob=mean(.hp))
   }else{
-    out <- ho_demand %>%
+    out <- de %>%
       mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
              .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
              .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),

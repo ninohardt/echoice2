@@ -1757,7 +1757,7 @@ List dddem(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
@@ -1774,7 +1774,7 @@ List dddem(vec const& PP,
         arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
         arma::vec pr = exp(ab)/(1+sum(exp(ab)));
         int ch = sum(as_scalar(randu(1))>cumsum(pr));
-        
+
         //if not outside good, choose inside good
         if(ch<nalt){
           demcontainer(ch,ir)=1;
@@ -1837,7 +1837,7 @@ List ddsrdem(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
@@ -1919,7 +1919,7 @@ List ddsrprdem(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       ivec nalt_space = linspace<ivec>(0, nalt-1); 
       
@@ -2007,7 +2007,7 @@ List ddprob(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
@@ -2082,7 +2082,7 @@ List ddsrprob(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs = PP(span(xpick,xpick+nalt-1));
       
@@ -2159,7 +2159,7 @@ List ddsrprprob(vec const& PP,
      int nalt = nalts(tt);
      
      //temp storage
-     mat demcontainer(nalt,R);
+     mat demcontainer(nalt,R, fill::zeros);
      
      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
      
@@ -4956,7 +4956,7 @@ List des_dem_vdm(vec const& PP,   //price (vectorised)
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5042,7 +5042,7 @@ List des_dem_vdmn(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5126,7 +5126,7 @@ List der_dem_vdm(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5211,7 +5211,7 @@ List des_dem_vdm_screen(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5299,7 +5299,7 @@ List der_dem_vdm_screen(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5387,7 +5387,7 @@ List des_dem_vdm_screenpr(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5477,7 +5477,7 @@ List der_dem_vdm_screenpr(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5568,7 +5568,7 @@ List des_dem_vdm_ss(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5661,7 +5661,7 @@ List der_dem_vdm_ss(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5747,7 +5747,7 @@ List des_dem_vdm_ssq(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
@@ -5835,7 +5835,7 @@ List der_dem_vdm_ssq(vec const& PP,
       int nalt = nalts(tt);
       
       //temp storage
-      mat demcontainer(nalt,R);
+      mat demcontainer(nalt,R, fill::zeros);
       
       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
       
