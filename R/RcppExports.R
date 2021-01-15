@@ -249,3 +249,13 @@ der_dem_vdm_ssq <- function(PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, 
     .Call('_echoice2_der_dem_vdm_ssq', PACKAGE = 'echoice2', PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
 }
 
+#' @export
+ec_screen_prob_cpp <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
+    .Call('_echoice2_ec_screen_prob_cpp', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores)
+}
+
+#' @export
+ec_screenpr_prob_cpp <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ec_screenpr_prob_cpp', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
+}
+

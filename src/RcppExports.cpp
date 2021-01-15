@@ -1187,6 +1187,53 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ec_screen_prob_cpp
+List ec_screen_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+RcppExport SEXP _echoice2_ec_screen_prob_cpp(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AAf(AAfSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type tauDraw(tauDrawSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ec_screen_prob_cpp(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ec_screenpr_prob_cpp
+List ec_screenpr_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+RcppExport SEXP _echoice2_ec_screenpr_prob_cpp(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AAf(AAfSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
+    Rcpp::traits::input_parameter< cube const& >::type tauDraw(tauDrawSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type tau_pr_Draw(tau_pr_DrawSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ec_screenpr_prob_cpp(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_revd", (DL_FUNC) &_echoice2_revd, 3},
@@ -1239,6 +1286,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_der_dem_vdm_ss", (DL_FUNC) &_echoice2_der_dem_vdm_ss, 13},
     {"_echoice2_des_dem_vdm_ssq", (DL_FUNC) &_echoice2_des_dem_vdm_ssq, 12},
     {"_echoice2_der_dem_vdm_ssq", (DL_FUNC) &_echoice2_der_dem_vdm_ssq, 13},
+    {"_echoice2_ec_screen_prob_cpp", (DL_FUNC) &_echoice2_ec_screen_prob_cpp, 13},
+    {"_echoice2_ec_screenpr_prob_cpp", (DL_FUNC) &_echoice2_ec_screenpr_prob_cpp, 14},
     {NULL, NULL, 0}
 };
 

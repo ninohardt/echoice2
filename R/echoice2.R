@@ -2925,6 +2925,35 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 }
 
 
+
+
+#' Summarize posterior draws of screening
+#'
+#' Adds summaries of posterior draws of demand to tibble.
+#' (using the new demand draw format)
+#'
+#' @usage ec_dem_summarise(de,quantiles)
+#'
+#' @param sc tibble containing screening draws in .screendraws  
+#' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
+#' 
+#' @return Summary of screening probabilities
+#' 
+#' @export
+ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
+  quantiles_name=paste0("screening-CI-", quantiles*100, "%")
+  
+  sc %>% 
+    mutate(
+      `E(screening)`=map_dbl(.screendraws, mean),
+      `S(screening)`=map_dbl(.screendraws, sd),
+      !!(quantiles_name[1]):=map_dbl(.screendraws, quantile, probs=quantiles[1]),
+      !!(quantiles_name[2]):=map_dbl(.screendraws, quantile, probs=quantiles[2])
+    ) %>%
+    return
+}
+
+
 #' Summarize posterior draws of demand (volumetric models only)
 #'
 #' Adds summaries of posterior draws of demand to tibble.
@@ -3125,6 +3154,142 @@ ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
   set.seed(NULL)
   return(out)
 }
+
+
+
+
+
+
+
+#' Screening probabilities of choice alternatives
+#'
+#' Obtain draws of screening probabilities of choiec alternatives
+#'
+#' @usage ec_screenprob_sr(xd, est, cores=NULL)
+#'
+#' @param xd data
+#' @param est ec-model draws 
+#' @param cores (optional) cores
+#' 
+#' @return Draws of screening probabilities of choice alternatives
+#' 
+#' 
+#' @export
+ec_screenprob_sr=function(xd,
+                          est,
+                          cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  
+  #re-arrange data
+  dat <- 
+    xd %>% 
+    vd_long_tidy %>% vd_prepare_nox()
+  
+  #screening-relevant data
+  dat$Af <- xd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
+  
+  #demand sim
+  
+  out=
+    ec_screen_prob_cpp(dat$PP,
+                   dat$AA,
+                   dat$Af,
+                   dat$nalts,
+                   dat$tlens,  
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,  
+                   dat$lto-1,
+                   est$thetaDraw,
+                   est$tauDraw, 
+                   cores=cores)
+  
+  #add draws to data tibble
+  xd=as_tibble(xd)
+  xd$.screendraws<-out  
+  
+  #add attributes
+  attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(xd)$ec_model   <- attributes(est)$ec_model
+  
+  return(xd)
+}
+
+
+
+#' Screening probabilities of choice alternatives (w/ price)
+#'
+#' Obtain draws of screening probabilities of choiec alternatives
+#'
+#' @usage ec_screenprob_sr(xd, est, cores=NULL)
+#'
+#' @param xd data
+#' @param est ec-model draws 
+#' @param cores (optional) cores
+#' 
+#' @return Draws of screening probabilities of choice alternatives
+#' 
+#' 
+#' @export
+ec_screenprprob_sr=function(xd,
+                            est,
+                            cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  
+  #re-arrange data
+  dat <- 
+    xd %>% 
+    vd_long_tidy %>% vd_prepare_nox()
+  
+  #screening-relevant data
+  dat$Af <- xd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
+  
+  #demand sim
+  
+  out=
+    ec_screenpr_prob_cpp(dat$PP,
+                     dat$AA,
+                     dat$Af,
+                     dat$nalts,
+                     dat$tlens,  
+                     dat$ntasks,  
+                     dat$xfr-1,
+                     dat$xto-1,  
+                     dat$lfr-1,  
+                     dat$lto-1,
+                     est$thetaDraw,
+                     est$tauDraw,
+                     est$tau_pr_draw,
+                     cores=cores)
+
+  #add draws to data tibble
+  xd=as_tibble(xd)
+  xd$.screendraws<-out  
+  
+  #add attributes
+  attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(xd)$ec_model   <- attributes(est)$ec_model
+  
+  
+  return(xd)
+}
+
+
+
+
 
 
 # Inspect Draws --------------------------------------------------------------

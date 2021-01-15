@@ -5876,3 +5876,155 @@ List der_dem_vdm_ssq(vec const& PP,
   return(XdL);
 }
 
+
+
+
+// ------------- - - - - - - - -
+// Screening probabilities (w/o price)
+// ------------- - - - - - - - - 
+
+//' @export
+//[[Rcpp::export]]
+List ec_screen_prob_cpp( vec const& PP,
+                         mat const& AA,
+                         mat const& AAf,
+                         uvec const& nalts,
+                         uvec const& tlens,
+                         ivec const& ntasks,  
+                         ivec const& xfr,
+                         ivec const& xto,  
+                         ivec const& lfr,  
+                         ivec const& lto,
+                         cube const& thetaDraw,
+                         cube const& tauDraw, 
+                         int cores=1){
+  
+  //dimensions
+  int R=thetaDraw.n_slices;
+  int xdim = PP.n_rows;
+  int N = tlens.n_elem;
+  //int p = thetaDraw.n_rows;
+  
+  //output init
+  Rcpp::List XdL(xdim);
+
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = tlens(n);
+    int xpick = xfr(n);
+    
+    //task-level
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R, fill::zeros);
+      
+      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+      
+      //draw-level
+      omp_set_num_threads(cores);
+      #pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+        arma::vec pr(nalt);
+        pr.fill(0);
+        arma::vec taui  = tauDraw.slice(ir).col(n);
+        
+        pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))+=1;
+        demcontainer.col(ir)=pr;
+      }
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }   
+      
+      xpick+=nalt;
+    }
+    
+  }
+  return(XdL);
+}
+
+
+// ------------- - - - - - - - -
+// Screening probabilities (w/ price)
+// ------------- - - - - - - - - 
+
+//' @export
+//[[Rcpp::export]]
+List ec_screenpr_prob_cpp( vec const& PP,
+                           mat const& AA,
+                           mat const& AAf,
+                           uvec const& nalts,
+                           uvec const& tlens,
+                           ivec const& ntasks,  
+                           ivec const& xfr,
+                           ivec const& xto,  
+                           ivec const& lfr,  
+                           ivec const& lto,
+                           cube const& thetaDraw,
+                           cube const& tauDraw, 
+                           mat const& tau_pr_Draw,
+                           int cores=1){
+  
+  //dimensions
+  int R=thetaDraw.n_slices;
+  int xdim = PP.n_rows;
+  int N = tlens.n_elem;
+  //int p = thetaDraw.n_rows;
+  
+  //output init
+  Rcpp::List XdL(xdim);
+  
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = tlens(n);
+    int xpick = xfr(n);
+    
+    //task-level
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R, fill::zeros);
+      
+      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+      
+      //draw-level
+      omp_set_num_threads(cores);
+      #pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+
+        arma::vec pr(nalt);
+        pr.fill(0);
+        arma::vec taui  = tauDraw.slice(ir).col(n);
+        
+        pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))+=1;
+        pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))+=1;
+        pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))=sign(pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  )))));
+        
+        demcontainer.col(ir)=pr;
+      }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=demcontainer.row(k);
+      }
+      xpick+=nalt;
+    }
+    
+  }
+  return(XdL);
+}
