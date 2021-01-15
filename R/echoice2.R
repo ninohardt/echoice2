@@ -1607,9 +1607,10 @@ vd_dem_vdm=function(vd,
                    cores=cores)
   }
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -1691,9 +1692,10 @@ vd_dem_vdmn=function(vd,
                     cores=cores)
   }
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -1781,9 +1783,10 @@ vd_dem_vdmsr=function(vd,
              cores=cores)
   }
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)   
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -1872,9 +1875,10 @@ vd_dem_vdmsrpr=function(vd,
                          cores=cores)
   }
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -1939,9 +1943,10 @@ vd_dem_vdmss=function(vd,
                         est$thetaDraw,
                         cores=cores)
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2007,9 +2012,10 @@ vd_dem_vdmssq=function(vd,
                          est$thetaDraw,
                          cores=cores)
   
+  attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
-  vd$.demdraws<-out  
+  vd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2508,9 +2514,10 @@ dd_dem=function(dd,
            cores=cores)
   
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2566,9 +2573,10 @@ dd_prob=function(dd,
            est$thetaDraw,
            cores=cores)
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2629,9 +2637,10 @@ dd_dem_sr=function(dd,
              cores=cores)
   
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2690,9 +2699,10 @@ dd_prob_sr=function(dd,
             cores=cores)
   
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2754,9 +2764,10 @@ dd_dem_srpr=function(dd,
               cores=cores)
   
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)   
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -2816,9 +2827,10 @@ dd_prob_srpr=function(dd,
                cores=cores)
   
   
+  attributes(out)=NULL
   #add draws to data tibble
   dd=as_tibble(dd)
-  dd$.demdraws<-out  
+  dd$.demdraws<-map(out,drop)  
   
   #add attributes
   attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -3211,9 +3223,11 @@ ec_screenprob_sr=function(xd,
                    est$tauDraw, 
                    cores=cores)
   
+  attributes(out)=NULL
+  
   #add draws to data tibble
   xd=as_tibble(xd)
-  xd$.screendraws<-out  
+  xd$.screendraws<-map(out,drop)
   
   #add attributes
   attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
@@ -3275,9 +3289,11 @@ ec_screenprprob_sr=function(xd,
                      est$tau_pr_draw,
                      cores=cores)
 
+  attributes(out)=NULL
+  
   #add draws to data tibble
   xd=as_tibble(xd)
-  xd$.screendraws<-out  
+  xd$.screendraws<-map(out,drop)
   
   #add attributes
   attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)

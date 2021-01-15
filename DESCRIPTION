@@ -1,8 +1,8 @@
 Package: echoice2
 Type: Package
 Title: Choice Models with economic foundation (v2)
-Version: 0.15
-Date: 2020-10-10
+Version: 0.15.1
+Date: 2021-01-15
 Author: Nino Hardt (nino.marketing)
 Maintainer: Nino <me@ninohardt.com>
 Description: Implements choice/demand models that are rooted in economic theory. This is a re-implementation of echoice (v1), with multicore computation and tidy principles in mind.

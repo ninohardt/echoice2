@@ -265,7 +265,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // dddem
-List dddem(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
+arma::field<arma::vec> dddem(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_dddem(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -286,7 +286,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrdem
-List ddsrdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+arma::field<arma::vec> ddsrdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_ddsrdem(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -309,7 +309,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrprdem
-List ddsrprdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+arma::field<arma::vec> ddsrprdem(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
 RcppExport SEXP _echoice2_ddsrprdem(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -333,7 +333,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddprob
-List ddprob(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
+arma::field<arma::vec> ddprob(vec const& PP, mat const& AA, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_ddprob(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -354,7 +354,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrprob
-List ddsrprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+arma::field<arma::vec> ddsrprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_ddsrprob(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -377,7 +377,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ddsrprprob
-List ddsrprprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+arma::field<arma::vec> ddsrprprob(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
 RcppExport SEXP _echoice2_ddsrprprob(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -938,7 +938,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm
-List des_dem_vdm(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
+arma::field<arma::vec> des_dem_vdm(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdm(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -959,7 +959,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdmn
-List des_dem_vdmn(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
+arma::field<arma::vec> des_dem_vdmn(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdmn(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -980,7 +980,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // der_dem_vdm
-List der_dem_vdm(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, vec const& epsilon, int cores);
+arma::field<arma::vec> der_dem_vdm(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, vec const& epsilon, int cores);
 RcppExport SEXP _echoice2_der_dem_vdm(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1002,7 +1002,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm_screen
-List des_dem_vdm_screen(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+arma::field<arma::vec> des_dem_vdm_screen(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdm_screen(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1025,7 +1025,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // der_dem_vdm_screen
-List der_dem_vdm_screen(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, vec const& epsilon, int cores);
+arma::field<arma::vec> der_dem_vdm_screen(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, vec const& epsilon, int cores);
 RcppExport SEXP _echoice2_der_dem_vdm_screen(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1049,7 +1049,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm_screenpr
-List des_dem_vdm_screenpr(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdm_screenpr(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1073,7 +1073,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // der_dem_vdm_screenpr
-List der_dem_vdm_screenpr(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, vec const& epsilon, int cores);
+arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, vec const& epsilon, int cores);
 RcppExport SEXP _echoice2_der_dem_vdm_screenpr(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1098,7 +1098,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm_ss
-List des_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
+arma::field<arma::vec> des_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP sumpxsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1120,7 +1120,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // der_dem_vdm_ss
-List der_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, uvec const& xlens, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, vec const& epsilon, int cores);
+arma::field<arma::vec> der_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, uvec const& xlens, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, vec const& epsilon, int cores);
 RcppExport SEXP _echoice2_der_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP xlensSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1143,7 +1143,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm_ssq
-List des_dem_vdm_ssq(vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
+arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
 RcppExport SEXP _echoice2_des_dem_vdm_ssq(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP sumpxsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1165,7 +1165,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // der_dem_vdm_ssq
-List der_dem_vdm_ssq(vec const& PP, mat const& AA, uvec const& nalts, uvec const& xlens, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, vec const& epsilon, int cores);
+arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP, mat const& AA, uvec const& nalts, uvec const& xlens, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, vec const& epsilon, int cores);
 RcppExport SEXP _echoice2_der_dem_vdm_ssq(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP xlensSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1188,7 +1188,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ec_screen_prob_cpp
-List ec_screen_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
+arma::field<arma::vec> ec_screen_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, int cores);
 RcppExport SEXP _echoice2_ec_screen_prob_cpp(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1211,7 +1211,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ec_screenpr_prob_cpp
-List ec_screenpr_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
+arma::field<arma::vec> ec_screenpr_prob_cpp(vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, cube const& tauDraw, mat const& tau_pr_Draw, int cores);
 RcppExport SEXP _echoice2_ec_screenpr_prob_cpp(SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP tauDrawSEXP, SEXP tau_pr_DrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

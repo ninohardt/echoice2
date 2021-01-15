@@ -1719,7 +1719,7 @@ List loop_ddrspr_RWMH(  vec const& XX,
 
 //' @export
 //[[Rcpp::export]]
-List dddem(vec const& PP,
+arma::field<arma::vec> dddem(vec const& PP,
            mat const& AA,
            uvec const& nalts,
            uvec const& tlens,
@@ -1738,7 +1738,7 @@ List dddem(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
 
   //start timer
   startTimer();
@@ -1783,7 +1783,7 @@ List dddem(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -1797,7 +1797,7 @@ List dddem(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ddsrdem(vec const& PP,
+arma::field<arma::vec> ddsrdem(vec const& PP,
              mat const& AA,
              mat const& AAf,
              uvec const& nalts,
@@ -1818,7 +1818,7 @@ List ddsrdem(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
 
   //start timer
   startTimer();
@@ -1866,7 +1866,7 @@ List ddsrdem(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -1878,7 +1878,7 @@ List ddsrdem(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ddsrprdem(vec const& PP,
+arma::field<arma::vec> ddsrprdem(vec const& PP,
                mat const& AA,
                mat const& AAf,
                uvec const& nalts,
@@ -1900,7 +1900,7 @@ List ddsrprdem(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -1952,7 +1952,7 @@ List ddsrprdem(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       } 
       xpick+=nalt;
     }
@@ -1969,7 +1969,7 @@ List ddsrprdem(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ddprob(vec const& PP,
+arma::field<arma::vec> ddprob(vec const& PP,
             mat const& AA,
             uvec const& nalts,
             uvec const& tlens,
@@ -1988,7 +1988,7 @@ List ddprob(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
 
   //start timer
   startTimer();
@@ -2028,7 +2028,7 @@ List ddprob(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -2042,7 +2042,7 @@ List ddprob(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ddsrprob(vec const& PP,
+arma::field<arma::vec> ddsrprob(vec const& PP,
               mat const& AA,
               mat const& AAf,
               uvec const& nalts,
@@ -2063,7 +2063,7 @@ List ddsrprob(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -2105,7 +2105,7 @@ List ddsrprob(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }
       
       xpick+=nalt;
@@ -2118,7 +2118,7 @@ List ddsrprob(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ddsrprprob(vec const& PP,
+arma::field<arma::vec> ddsrprprob(vec const& PP,
              mat const& AA,
              mat const& AAf,
              uvec const& nalts,
@@ -2140,7 +2140,7 @@ List ddsrprprob(vec const& PP,
  int p = thetaDraw.n_rows;
  
  //output init
- Rcpp::List XdL(xdim);
+ arma::field<arma::vec>XdL(xdim);
  
  //start timer
  startTimer();
@@ -2183,7 +2183,7 @@ List ddsrprprob(vec const& PP,
      }
      
      for(int k=0; k<nalt; k++){
-       XdL(k+xpick)=demcontainer.row(k);
+       XdL(k+xpick)=trans(demcontainer.row(k));
      }
      
      xpick+=nalt;
@@ -4915,7 +4915,7 @@ vec vd_demand(arma::vec psi, double gamma, double E, vec prices) {
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdm(vec const& PP,   //price (vectorised)
+arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
                  mat const& AA,   //attr-lvls (vectorised)
                  uvec const& nalts,
                  ivec const& ntasks,  
@@ -4936,7 +4936,7 @@ List des_dem_vdm(vec const& PP,   //price (vectorised)
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -4985,7 +4985,7 @@ List des_dem_vdm(vec const& PP,   //price (vectorised)
       }
 
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       
       xpick+=nalt;
@@ -5002,7 +5002,7 @@ List des_dem_vdm(vec const& PP,   //price (vectorised)
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdmn(vec const& PP,
+arma::field<arma::vec> des_dem_vdmn(vec const& PP,
                   mat const& AA,
                   uvec const& nalts,
                   ivec const& ntasks,  
@@ -5023,7 +5023,7 @@ List des_dem_vdmn(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5069,7 +5069,7 @@ List des_dem_vdmn(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       } 
       xpick+=nalt;
     }
@@ -5086,7 +5086,7 @@ List des_dem_vdmn(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List der_dem_vdm(vec const& PP,
+arma::field<arma::vec> der_dem_vdm(vec const& PP,
                  mat const& AA,
                  uvec const& nalts,
                  ivec const& ntasks,  
@@ -5107,7 +5107,7 @@ List der_dem_vdm(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5152,7 +5152,7 @@ List der_dem_vdm(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5169,7 +5169,7 @@ List der_dem_vdm(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdm_screen(vec const& PP,
+arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
@@ -5192,7 +5192,7 @@ List des_dem_vdm_screen(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5241,7 +5241,7 @@ List des_dem_vdm_screen(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }  
       xpick+=nalt;
     }
@@ -5258,7 +5258,7 @@ List des_dem_vdm_screen(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List der_dem_vdm_screen(vec const& PP,
+arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
@@ -5280,7 +5280,7 @@ List der_dem_vdm_screen(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5329,7 +5329,7 @@ List der_dem_vdm_screen(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5346,7 +5346,7 @@ List der_dem_vdm_screen(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdm_screenpr(vec const& PP,
+arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
@@ -5368,7 +5368,7 @@ List des_dem_vdm_screenpr(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5418,7 +5418,7 @@ List des_dem_vdm_screenpr(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5433,7 +5433,7 @@ List des_dem_vdm_screenpr(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List der_dem_vdm_screenpr(vec const& PP,
+arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
                              mat const& AA,
                              mat const& AAf,
                              uvec const& nalts,
@@ -5458,7 +5458,7 @@ List der_dem_vdm_screenpr(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5508,7 +5508,7 @@ List der_dem_vdm_screenpr(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5529,7 +5529,7 @@ List der_dem_vdm_screenpr(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdm_ss(vec const& PP,
+arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
                              mat const& AA,
                              uvec const& nalts,
                              vec const& sumpxs,  
@@ -5549,7 +5549,7 @@ List des_dem_vdm_ss(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5599,7 +5599,7 @@ List des_dem_vdm_ss(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }  
       xpick+=nalt;
     }
@@ -5620,7 +5620,7 @@ List des_dem_vdm_ss(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List der_dem_vdm_ss(vec const& PP,
+arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
                     mat const& AA,
                     uvec const& nalts,
                     uvec const& xlens,  
@@ -5642,7 +5642,7 @@ List der_dem_vdm_ss(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5690,7 +5690,7 @@ List der_dem_vdm_ss(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5707,7 +5707,7 @@ List der_dem_vdm_ss(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List des_dem_vdm_ssq(vec const& PP,
+arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP,
                      mat const& AA,
                      uvec const& nalts,
                      vec const& sumpxs,  
@@ -5728,7 +5728,7 @@ List des_dem_vdm_ssq(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5778,7 +5778,7 @@ List des_dem_vdm_ssq(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       xpick+=nalt;
     }
@@ -5794,7 +5794,7 @@ List des_dem_vdm_ssq(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List der_dem_vdm_ssq(vec const& PP,
+arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
                               mat const& AA,
                               uvec const& nalts,
                               uvec const& xlens,  
@@ -5816,7 +5816,7 @@ List der_dem_vdm_ssq(vec const& PP,
   int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -5867,7 +5867,7 @@ List der_dem_vdm_ssq(vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }  
       xpick+=nalt;
     }
@@ -5885,7 +5885,7 @@ List der_dem_vdm_ssq(vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ec_screen_prob_cpp( vec const& PP,
+arma::field<arma::vec> ec_screen_prob_cpp( vec const& PP,
                          mat const& AA,
                          mat const& AAf,
                          uvec const& nalts,
@@ -5906,8 +5906,8 @@ List ec_screen_prob_cpp( vec const& PP,
   //int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
-
+  arma::field<arma::vec>XdL(xdim);
+  
   //start timer
   startTimer();
   
@@ -5926,22 +5926,19 @@ List ec_screen_prob_cpp( vec const& PP,
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
-      
-      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
-      
+
       //draw-level
       omp_set_num_threads(cores);
       #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
-        arma::vec pr(nalt);
-        pr.fill(0);
+        arma::vec pr(nalt, fill::zeros);
         arma::vec taui  = tauDraw.slice(ir).col(n);
         
         pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))+=1;
         demcontainer.col(ir)=pr;
       }
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }   
       
       xpick+=nalt;
@@ -5958,7 +5955,7 @@ List ec_screen_prob_cpp( vec const& PP,
 
 //' @export
 //[[Rcpp::export]]
-List ec_screenpr_prob_cpp( vec const& PP,
+arma::field<arma::vec> ec_screenpr_prob_cpp( vec const& PP,
                            mat const& AA,
                            mat const& AAf,
                            uvec const& nalts,
@@ -5980,7 +5977,7 @@ List ec_screenpr_prob_cpp( vec const& PP,
   //int p = thetaDraw.n_rows;
   
   //output init
-  Rcpp::List XdL(xdim);
+  arma::field<arma::vec>XdL(xdim);
   
   //start timer
   startTimer();
@@ -6020,7 +6017,7 @@ List ec_screenpr_prob_cpp( vec const& PP,
       }
       
       for(int k=0; k<nalt; k++){
-        XdL(k+xpick)=demcontainer.row(k);
+        XdL(k+xpick)=trans(demcontainer.row(k));
       }
       xpick+=nalt;
     }
