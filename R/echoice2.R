@@ -154,6 +154,132 @@ ht_modelMuCompare=function(model_list){
 }
 
 
+#' Generate huxtable for model comparison - screening vs no screening
+#'
+#' This requires huxtable package
+#' Pass a list of dd or vd models in a named list to this function, and it will generate a huxtable.
+#' This will include posterior mean and standard deviations of the upper-level parameters
+#' The table can easily by converted to latex using huxtable functions.
+#'
+#' @usage ht_screenCompare(vdm,vdmsrpr)
+#
+#' @export
+ht_screenCompare=
+  function(vdm,vdmsrpr){
+    
+    paras = vdmsrpr %>% ec_estimates_MU() %>%transmute(attribute,lvl,par,mean,sd,sig,para='theta',model='vdsr') %>%
+      bind_rows(vdmsrpr %>% ec_estimates_screen()%>%transmute(attribute,lvl,par,mean,sd,sig=NA,para='delta',model='vdsr')) %>%
+      bind_rows(vdm %>% ec_estimates_MU() %>%transmute(attribute,lvl,par,mean,sd,sig,para='theta',model='vd'))%>%
+      pivot_wider(names_from = c(model,para), id_cols = 1:3, values_from = c(mean,sd, sig)) %>% arrange(par!='int',(attribute))%>% relocate(contains('vdsr'),.after=last_col()) %>% relocate(contains('sig_'),.after = last_col()) %>% `[`(
+        c("attribute", "lvl", "par", 
+          "mean_vd_theta", "sd_vd_theta", 
+          "mean_vdsr_theta", "sd_vdsr_theta", "mean_vdsr_delta", "sd_vdsr_delta", 
+          "sig_vd_theta", "sig_vdsr_theta", "sig_vdsr_delta"))
+    
+    paras=
+      rbind(
+        paras, 
+        c(NA, NA, 'MU_delta_p', rep(NA,4), mean(vdmsrpr$prscreenMuSigDraw[,1]), sd(vdmsrpr$prscreenMuSigDraw[,1]), NA, NA, NA),
+        c(NA, NA, 'SIG_delta_p', rep(NA,4), mean(vdmsrpr$prscreenMuSigDraw[,2]), sd(vdmsrpr$prscreenMuSigDraw[,2]), NA, NA, NA))
+    
+    
+    #arrangement
+    paras2=paras %>% select(-contains('sig_'))
+    paras2_sig= paras %>% select(contains('sig_')) %>% mutate_all(as.logical)
+    
+    #add row identifier
+    prep_1 = paras2 %>% rowid_to_column()
+    prep_1$par[!is.na(prep_1$attribute)]=prep_1$lvl[!is.na(prep_1$attribute)]
+    
+    
+    #don't repeat the grouping attribute name
+    prep_2=
+      prep_1  %>% split(.$attribute) %>%
+      map((function(x){x$attribute=NA;x})) %>% map(add_row,.before=1) %>%
+      imap_dfr((function(x,y){x$attribute[1]=y;x}))
+    
+    
+    prep_2$par[is.na(prep_2$rowid)]= prep_2$attribute %>% unique() %>% na.omit()
+    
+    
+    #clean up
+    mpar=prep_2[NA,][1,]
+    mpar[1,2]='model'
+    
+    
+    #put together
+    prep_3=
+      bind_rows(
+        prep_1[1,],
+        prep_2,
+        prep_1[base::setdiff(prep_1$rowid,prep_2$rowid),][-1,]) %>% select(-rowid)
+    
+    
+    prep_3$par[!is.na(prep_3$lvl)] = paste0("~",prep_3$par[!is.na(prep_3$lvl)])
+    
+    #some arrangement
+    prep_4=prep_3[,-(1:2)]
+    
+    
+    #generate huxtable
+    ht=prep_4 %>% huxtable::huxtable() %>%  
+      set_all_padding(0) %>%
+      set_row_height(everywhere,0)
+    
+    
+    #bold-face significant paras
+    #pickrows= (ht[,1]=="") %>% replace_na(T)
+    
+    pickrows=c(FALSE,drop(!is.na(prep_4[-c(nrow(prep_4)-1,nrow(prep_4)),2])))
+    
+    
+    huxtable::bold(ht[-c(nrow(ht)-1,nrow(ht)),])[pickrows,  c(2,4) ] <- (paras2_sig[,1:2] %>% as.matrix %>%na.omit() %>% set_attrs("na.action"=NULL) )
+    
+    #number format
+    huxtable::number_format(ht)[-1,-(1)]= "%.2f"
+    
+    #attributes bold
+    #huxtable::bold(ht)[drop(is.na(ht[,2])&is.na(ht[,6])),1]=T
+    huxtable::italic(ht)[drop(is.na(ht[,2])&is.na(ht[,6])),1]=T
+    
+    
+    
+    ht[1,1]=""
+    
+    
+    ht = ht %>% set_align(everywhere,2:ncol(ht),'right')
+    
+    ht=ht %>% 
+      insert_row(c("",rep('theta',each=2), rep('theta',each=2), rep('delta',each=2)   )) %>%
+      insert_row(c("",rep('vd',each=2), rep('vd-sr',each=4)   ))
+    
+    
+    ht[3,-(1)]=rep(c('mean','sd'),3)
+    ht=ht %>% merge_cells(c(1,1),c(2,3)) %>% set_align(1,2:3,'centre')
+    ht=ht %>% merge_cells(c(1,1),c(4,7)) %>% set_align(1,4:7,'centre')
+    
+    ht=ht %>% merge_cells(c(2,2),c(2,3)) %>% set_align(2,2:3,'centre')
+    ht=ht %>% merge_cells(c(2,2),c(4,5)) %>% set_align(2,4:5,'centre')
+    ht=ht %>% merge_cells(c(2,2),c(6,7)) %>% set_align(2,6:7,'centre')
+    
+    ht=ht[-3,]
+    
+    
+    #standard devs in parentheses
+    huxtable::number_format(ht)[-(1:2),c(3,5,7)]= "(%.2f)"
+    
+    
+    ht=
+      ht %>% 
+      set_right_padding(everywhere,3,3) %>% set_right_padding(everywhere,3,2) %>%  set_right_padding(everywhere,5,2) %>%
+      set_bottom_border(1,2:3,1) %>% set_bottom_border(1,4:7,1) %>%
+      set_bottom_border(2,2:3,1) %>% set_bottom_border(2,4:5,1) %>% set_bottom_border(2,6:7,1) 
+    
+    
+    
+    return(ht)
+  }
+
 
 # data manipulation -------------------------------------------------------
 
@@ -675,6 +801,19 @@ ec_estimates_SIGMA_corr=function(est){
   return(est$SIGMADraw %>% apply(1:2,mean) %>% cov2cor)
 }
 
+#' Obtain posterior mean estimates of upper level covariance
+#'
+#' @usage ec_estimates_SIGMA(est)
+#'
+#' @param est is an echoice draw object (list)
+#' @return estimates of upper level covariance
+#' @export
+ec_estimates_SIGMA=function(est){
+  parnames=est$parnames
+  rownames(est$SIGMADraw)=parnames
+  colnames(est$SIGMADraw)=parnames
+  return(est$SIGMADraw %>% apply(1:2,mean))
+}
 
 
 #' Summarize attribute-based screening parameters
@@ -692,8 +831,8 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   out<-
     est$deltaDraw %>% as_tibble %>%
     set_names(colnames(attributes(est)$Af)) %>% 
-    pivot_longer(cols = everything(), names_to = 'attribute_level') %>%
-    group_by(attribute_level) %>% 
+    pivot_longer(cols = everything(), names_to = 'par') %>%
+    group_by(par) %>% 
     summarise(mean=mean(value), 
               sd=sd(value), 
               !!(quantiles_name[1]):=quantile(value,probs=quantiles[1],na.rm=TRUE),
@@ -703,7 +842,7 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   #add limits (maximum possible screening probability)
   if(!is.null(est$dat)){
     out<- out %>% 
-      left_join(est$dat$tauconst %>% colMeans() %>% enframe(name = 'attribute_level', value = 'limit'))
+      left_join(est$dat$tauconst %>% colMeans() %>% enframe(name = 'par', value = 'limit'))
   }
   
   #add attribute groups
@@ -713,9 +852,9 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
       out %>% 
       left_join(attributes(est)$ec_data$attributes %>%
                   select(attr_level,attribute,lvl), 
-                by=c('attribute_level'='attr_level')) %>%
-      relocate(attribute,.before=attribute_level) %>%
-      relocate(lvl,.before=attribute_level)
+                by=c('par'='attr_level')) %>%
+      relocate(attribute,.before=par) %>%
+      relocate(lvl,.before=par)
   }
   
   return(out)
@@ -1072,7 +1211,22 @@ vd_est_vdm_screen = function(vd,
 }
 
 
-
+#' Estimate volumetric demand model with attribute-based conjunctive screening (w/ price)
+#'
+#' See https://dx.doi.org/10.2139/ssrn.2770025 for more details
+#'
+#' @usage vd_est_vdm_screenpr(vd, R=100000, keep=10)
+#'
+#' @param vd volumetric demand data (long format)
+#' @param R draws
+#' @param keep thinning
+#' @param cores no of CPU cores to use (default: auto-detect)
+#' @param control list containing additional settings
+#' 
+#' 
+#' @return est ec-draw object (List)
+#' 
+#' @export
 vd_est_vdm_screenpr = function(vd,
                              R=100000, 
                              keep=10,
@@ -1425,6 +1579,30 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
              dat$lfr-1, dat$lto-1, 
              ncol(draw$MUDraw), 
              ncol(draw$thetaDraw))
+  
+  return(out) 
+}
+
+vd_LL_vdmss <- function(draw, vd, fromdraw=1){
+  
+  R=dim(draw$thetaDraw)[3]
+  
+  dat <- 
+    vd %>% 
+    vd_long_tidy %>% vd_prepare
+  
+  out<- 
+    vdss_LLs(draw$thetaDraw[,,seq(fromdraw,R)],
+           dat$XX,
+           dat$PP,
+           dat$AA, 
+           dat$nalts, 
+           dat$sumpxs, 
+           dat$ntasks, 
+           dat$xfr-1, dat$xto-1,
+           dat$lfr-1, dat$lto-1, 
+           ncol(draw$MUDraw), 
+           ncol(draw$thetaDraw))
   
   return(out) 
 }
@@ -3113,7 +3291,7 @@ ec_demcurve=function(ec_long,
       
       out[[kk]]=
         testmarket_temp %>% 
-        demfun(draws, epsilon_not=epsilon_not) %>% 
+        demfun(draws) %>% 
         ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
     }  
@@ -3121,6 +3299,201 @@ ec_demcurve=function(ec_long,
   
   return(out)
 }
+
+
+
+#' Create demand-incidence curves
+#' 
+#' This helper function creates demand curves
+#'
+#' @usage ec_demcurve_inci(de,groupby)
+#'
+#' @param ec_long choice scenario (discrete or volumetric)
+#' @param focal_product Logical vector picking the focal product for which to create a demand curve
+#' @param rel_pricerange Price range, relative to base case price; this is used to create demand curve
+#' @param dem_fun demand function (e.g., `dd_prob` for HMNL or `vd_dem_vdm` for volumetric demand). For discrete choice, use choice probabilities instead of choice predictions.
+#' @param draws ec-draws object (e.g., output from `dd_est_hmnl` or `vd_est_vd`)
+#' @param epsilon_not (optional) error realisatins (this helps make curves look smother for voumetric models)
+#' 
+#' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
+#' 
+#' @seealso [ec_gen_err_normal()] to generate error realization from Normal distribution,
+#' [ec_gen_err_ev1()] to generate error realization from EV1 distribution
+#' 
+#' @export
+ec_demcurve_inci=function(ec_long,
+                          focal_product,
+                          rel_pricerange,
+                          dem_fun,
+                          draws,
+                          epsilon_not=NULL){
+  
+  #select correct demand function
+  if(is.function(dem_fun)){
+    demfun={dem_fun}
+  }else{
+    demfun=eval(parse(text=dem_fun))
+  }
+  
+  #get key attributes
+  attr_names=ec_long %>% 
+    select_if(!(colnames(.)%in%c('id','task','alt','p'))) %>% colnames
+  
+  #output
+  out=list()
+  
+  if(is.null(epsilon_not)){
+    for(kk in seq_along(rel_pricerange)){
+      testmarket_temp=ec_long
+      testmarket_temp$p[focal_product]=testmarket_temp$p[focal_product]*rel_pricerange[kk]
+      
+      out[[kk]]=
+        testmarket_temp %>% 
+        demfun(draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
+        ec_dem_aggregate(attr_names) %>% ec_dem_summarise %>% select(-.demdraws) %>%
+        bind_cols( scenario=rel_pricerange[kk])
+      
+    }
+  }else{
+    for(kk in seq_along(rel_pricerange)){
+      testmarket_temp=ec_long
+      testmarket_temp$p[focal_product]=testmarket_temp$p[focal_product]*rel_pricerange[kk]
+      
+      out[[kk]]=
+        testmarket_temp %>% 
+        demfun(draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
+        ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
+        bind_cols( scenario=rel_pricerange[kk])
+    }  
+  }
+  
+  return(out)
+}
+
+
+
+#' Create demand-incidence curves
+#' 
+#' This helper function creates demand curves
+#'
+#' @usage ec_demcurve_cond_dem(de,groupby)
+#'
+#' @param ec_long choice scenario (discrete or volumetric)
+#' @param focal_product Logical vector picking the focal product for which to create a demand curve
+#' @param rel_pricerange Price range, relative to base case price; this is used to create demand curve
+#' @param dem_fun demand function (e.g., `dd_prob` for HMNL or `vd_dem_vdm` for volumetric demand). For discrete choice, use choice probabilities instead of choice predictions.
+#' @param draws ec-draws object (e.g., output from `dd_est_hmnl` or `vd_est_vd`)
+#' @param epsilon_not (optional) error realisatins (this helps make curves look smother for voumetric models)
+#' 
+#' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
+#' 
+#' @seealso [ec_gen_err_normal()] to generate error realization from Normal distribution,
+#' [ec_gen_err_ev1()] to generate error realization from EV1 distribution
+#' 
+#' @export
+ec_demcurve_cond_dem=function(ec_long,
+                          focal_product,
+                          rel_pricerange,
+                          dem_fun,
+                          draws,
+                          epsilon_not=NULL){
+  
+  #select correct demand function
+  if(is.function(dem_fun)){
+    demfun={dem_fun}
+  }else{
+    demfun=eval(parse(text=dem_fun))
+  }
+  
+  #get key attributes
+  attr_names=ec_long %>% 
+    select_if(!(colnames(.)%in%c('id','task','alt','p'))) %>% colnames
+  
+  #output
+  out=list()
+  
+  if(is.null(epsilon_not)){
+    for(kk in seq_along(rel_pricerange)){
+      
+      testmarket_temp=ec_long
+      testmarket_temp$p[focal_product]=testmarket_temp$p[focal_product]*rel_pricerange[kk]
+      
+      # out[[kk]]=
+      #   testmarket_temp %>% 
+      #   demfun(draws) %>% 
+      #   mutate(.demdraws=map(.demdraws, sign))%>%
+      #   ec_dem_aggregate(attr_names) %>% ec_dem_summarise %>% select(-.demdraws) %>%
+      #   bind_cols( scenario=rel_pricerange[kk])
+      # 
+
+      
+      dem_temp=
+      testmarket_temp %>%
+        demfun(draws) %>%
+        add_column(.isfocal=focal_product) %>%
+        filter(.isfocal)%>% select(-.isfocal) 
+      
+      demm_split=
+        dem_temp%>%
+        split(.[c(attr_names)]) 
+      
+      demm_split=demm_split[(demm_split %>% map_dbl(nrow))>0]
+      #%>% map_dbl(length) %>% drop
+
+      res=demm_split %>%
+        map_dfr(.  %>% pull(.demdraws)  %>% 
+                  do.call('rbind',.) %>% apply(2,function(x)mean(x[x>0])))%>%
+        summarise_all(mean)
+        
+      out[[kk]]=bind_cols(demm_split %>% map(.%>%select(attr_names)%>%unique),
+                res %>% set_names('condem')) %>%
+        bind_cols( scenario=rel_pricerange[kk]) 
+
+        
+       
+    }
+  }else{
+    for(kk in seq_along(rel_pricerange)){
+      testmarket_temp=ec_long
+      testmarket_temp$p[focal_product]=testmarket_temp$p[focal_product]*rel_pricerange[kk]
+      
+      # out[[kk]]=
+      #   testmarket_temp %>% 
+      #   demfun(draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
+      #   ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
+      #   bind_cols( scenario=rel_pricerange[kk])
+      # 
+      
+      dem_temp=
+        testmarket_temp %>%
+        demfun(draws) %>%
+        add_column(.isfocal=focal_product) %>%
+        filter(.isfocal)%>% select(-.isfocal) 
+      
+      demm_split=
+        dem_temp%>%
+        split(.[c(attr_names)]) 
+      
+      demm_split=demm_split[(demm_split %>% map_dbl(nrow))>0]
+      #%>% map_dbl(length) %>% drop
+      
+      res=demm_split %>%
+        map_dfr(.  %>% pull(.demdraws)  %>% 
+                  do.call('rbind',.) %>% apply(2,function(x)mean(x[x>0])))%>%
+        summarise_all(mean)
+      
+      out[[kk]]=bind_cols(demm_split %>% map(.%>%select(attr_names)%>%unique),
+                    res %>% set_names('condem')) %>%
+        bind_cols( scenario=rel_pricerange[kk]) 
+      
+      
+      
+    }  
+  }
+  
+  return(out)
+}
+
 
 
 

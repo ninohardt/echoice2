@@ -4850,6 +4850,76 @@ List loop_vd_ssQ_RWMH( vec const& XX,
 
 
 
+//' @export
+// [[Rcpp::export]]
+vec vdss_LL(mat const&Theta,
+          vec const& XX, 
+          vec const& PP,
+          mat const& AA,
+          uvec const& nalts,
+          vec const& sumpxs,  
+          ivec const& ntasks,  
+          ivec const& xfr,  
+          ivec const& xto,  
+          ivec const& lfr,  
+          ivec const& lto,
+          int p, int N, int cores=1){
+  
+  omp_set_num_threads(cores);
+  
+  vec ll_olds(N);
+#pragma omp parallel for schedule(static)
+  for(int n=0; n<N; n++){
+    ll_olds(n)= vdl_ss(Theta.col(n),
+            nalts(span(lfr(n),lto(n))),
+            sumpxs(span(lfr(n),lto(n))), 
+            XX(span(xfr(n),xto(n))), 
+            PP(span(xfr(n),xto(n))), 
+            AA(span(xfr(n),xto(n)),span::all), 
+            ntasks(n), p);
+  }
+  
+  return(ll_olds);
+}
+
+//' @export
+// [[Rcpp::export]]
+mat vdss_LLs(cube const&THETAS,
+           vec const& XX, 
+           vec const& PP,
+           mat const& AA,
+           uvec const& nalts,
+           vec const& sumpxs,  
+           ivec const& ntasks,  
+           ivec const& xfr,  
+           ivec const& xto,  
+           ivec const& lfr,  
+           ivec const& lto,
+           int p, int N, int cores=1){
+  
+  int R = THETAS.n_slices;
+  mat ll_olds(N,R+1);
+  
+  for(int r=0; r<R; r++){
+    Rcpp::checkUserInterrupt();
+    ll_olds.col(r)= 
+      vdss_LL(THETAS.slice(r),
+            XX, 
+            PP,
+            AA,
+            nalts,
+            sumpxs,  
+            ntasks,  
+            xfr,  
+            xto,  
+            lfr,  
+            lto,
+            p,
+            N, cores);
+  }
+  
+  return(ll_olds);
+}
 
 
 
