@@ -2094,51 +2094,6 @@ vd_dem_vdmsrpr=function(vd,
 #'   [vd_est_vdm_ss()] for estimating the corresponding model
 #' 
 #' @export
-vd_dem_vdmssOLD=function(vd,
-                      est,
-                      cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare_nox
-  
-  
-  #demand sim
-  out=
-    des_dem_vdm_ss( dat$PP,
-                        dat$AA,
-                        dat$nalts,
-                        dat$sumpxs,  
-                        dat$ntasks,  
-                        dat$xfr-1,
-                        dat$xto-1,  
-                        dat$lfr-1,
-                        dat$lto-1,
-                        dat$tlens,
-                        est$thetaDraw,
-                        cores=cores)
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  vd=as_tibble(vd)
-  vd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
-  return(vd)
-}
-
-
 vd_dem_vdmss=function(vd,
                     est,
                     epsilon_not=NULL,
@@ -2196,10 +2151,6 @@ vd_dem_vdmss=function(vd,
   
   return(vd)
 }
-
-
-
-
 
 
 
