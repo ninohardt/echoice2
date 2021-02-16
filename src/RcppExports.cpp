@@ -923,6 +923,54 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vdss_LL
+vec vdss_LL(mat const& Theta, vec const& XX, vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, int p, int N, int cores);
+RcppExport SEXP _echoice2_vdss_LL(SEXP ThetaSEXP, SEXP XXSEXP, SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP sumpxsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP pSEXP, SEXP NSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat const& >::type Theta(ThetaSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type XX(XXSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type sumpxs(sumpxsSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(vdss_LL(Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vdss_LLs
+mat vdss_LLs(cube const& THETAS, vec const& XX, vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, int p, int N, int cores);
+RcppExport SEXP _echoice2_vdss_LLs(SEXP THETASSEXP, SEXP XXSEXP, SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP sumpxsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP pSEXP, SEXP NSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< cube const& >::type THETAS(THETASSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type XX(XXSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type sumpxs(sumpxsSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(vdss_LLs(THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // vd_demand
 vec vd_demand(arma::vec psi, double gamma, double E, vec prices);
 RcppExport SEXP _echoice2_vd_demand(SEXP psiSEXP, SEXP gammaSEXP, SEXP ESEXP, SEXP pricesSEXP) {
@@ -1098,15 +1146,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // des_dem_vdm_ss
-arma::field<arma::vec> des_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, vec const& sumpxs, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
-RcppExport SEXP _echoice2_des_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP sumpxsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
+arma::field<arma::vec> des_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, ivec const& tlens, cube const& thetaDraw, int cores);
+RcppExport SEXP _echoice2_des_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
     Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
     Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
-    Rcpp::traits::input_parameter< vec const& >::type sumpxs(sumpxsSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
@@ -1115,30 +1162,29 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< ivec const& >::type tlens(tlensSEXP);
     Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(des_dem_vdm_ss(PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores));
+    rcpp_result_gen = Rcpp::wrap(des_dem_vdm_ss(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores));
     return rcpp_result_gen;
 END_RCPP
 }
 // der_dem_vdm_ss
-arma::field<arma::vec> der_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, uvec const& xlens, uvec const& tlens, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, cube const& thetaDraw, vec const& epsilon, int cores);
-RcppExport SEXP _echoice2_der_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP xlensSEXP, SEXP tlensSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP thetaDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
+arma::field<arma::vec> der_dem_vdm_ss(vec const& PP, mat const& AA, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, uvec const& tlens, cube const& thetaDraw, vec const& epsilon, int cores);
+RcppExport SEXP _echoice2_der_dem_vdm_ss(SEXP PPSEXP, SEXP AASEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP tlensSEXP, SEXP thetaDrawSEXP, SEXP epsilonSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
     Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
     Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
-    Rcpp::traits::input_parameter< uvec const& >::type xlens(xlensSEXP);
-    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
     Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type tlens(tlensSEXP);
     Rcpp::traits::input_parameter< cube const& >::type thetaDraw(thetaDrawSEXP);
     Rcpp::traits::input_parameter< vec const& >::type epsilon(epsilonSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(der_dem_vdm_ss(PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores));
+    rcpp_result_gen = Rcpp::wrap(der_dem_vdm_ss(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1274,6 +1320,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_loop_vd_ss_RWMH", (DL_FUNC) &_echoice2_loop_vd_ss_RWMH, 24},
     {"_echoice2_vdl_ssQ", (DL_FUNC) &_echoice2_vdl_ssQ, 8},
     {"_echoice2_loop_vd_ssQ_RWMH", (DL_FUNC) &_echoice2_loop_vd_ssQ_RWMH, 24},
+    {"_echoice2_vdss_LL", (DL_FUNC) &_echoice2_vdss_LL, 14},
+    {"_echoice2_vdss_LLs", (DL_FUNC) &_echoice2_vdss_LLs, 14},
     {"_echoice2_vd_demand", (DL_FUNC) &_echoice2_vd_demand, 4},
     {"_echoice2_des_dem_vdm", (DL_FUNC) &_echoice2_des_dem_vdm, 11},
     {"_echoice2_des_dem_vdmn", (DL_FUNC) &_echoice2_des_dem_vdmn, 11},
@@ -1282,8 +1330,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_der_dem_vdm_screen", (DL_FUNC) &_echoice2_der_dem_vdm_screen, 14},
     {"_echoice2_des_dem_vdm_screenpr", (DL_FUNC) &_echoice2_des_dem_vdm_screenpr, 14},
     {"_echoice2_der_dem_vdm_screenpr", (DL_FUNC) &_echoice2_der_dem_vdm_screenpr, 15},
-    {"_echoice2_des_dem_vdm_ss", (DL_FUNC) &_echoice2_des_dem_vdm_ss, 12},
-    {"_echoice2_der_dem_vdm_ss", (DL_FUNC) &_echoice2_der_dem_vdm_ss, 13},
+    {"_echoice2_des_dem_vdm_ss", (DL_FUNC) &_echoice2_des_dem_vdm_ss, 11},
+    {"_echoice2_der_dem_vdm_ss", (DL_FUNC) &_echoice2_der_dem_vdm_ss, 12},
     {"_echoice2_des_dem_vdm_ssq", (DL_FUNC) &_echoice2_des_dem_vdm_ssq, 12},
     {"_echoice2_der_dem_vdm_ssq", (DL_FUNC) &_echoice2_der_dem_vdm_ssq, 13},
     {"_echoice2_ec_screen_prob_cpp", (DL_FUNC) &_echoice2_ec_screen_prob_cpp, 13},
