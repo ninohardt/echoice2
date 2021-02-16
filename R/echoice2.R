@@ -8,11 +8,10 @@
 # vd_ functions are specific to volumetric demand models
 # dd_ functions are specific to discrete choice models
 
-
 # Utilities ---------------------------------------------------------------
 
 
-#' Turn Dropbox project sync off to avoid issues with .Rproj.user folders
+#' Turn Dropbox project sync off to avoid issues with .Rproj.user folders (Windows)
 #'
 #' See: https://community.rstudio.com/t/dropbox-conflicts-with-rproj-user/54059/2
 #'
@@ -99,7 +98,11 @@ ht_modelMuCompare=function(model_list){
   prep_4=prep_3[,seq(1,2+n_models*2)]
   
   #generate huxtable
-  ht=prep_4 %>% huxtable::huxtable()
+  ht=prep_4 %>% 
+    huxtable::huxtable() %>%
+    set_all_padding(0) %>%
+    set_row_height(everywhere,0)%>% set_align(everywhere,2:ncol(ht),'right')
+  
   
   #bold-face significant paras
   pickrows= (ht[,1]=="") %>% replace_na(T)
@@ -119,7 +122,7 @@ ht_modelMuCompare=function(model_list){
   huxtable::bold(ht)[,1]=TRUE
   
   #modelname headers
-  modelnames=names(model_list)
+  modelnames=sort(names(model_list))
   ht=ht %>% insert_row(c("","",rep(modelnames,each=2)))
   headers=seq(1,n_models*2,by=2)+2
   
@@ -1381,6 +1384,8 @@ vd_est_vdm_ss = function(vd,
   
   #Prior
   Bbar=matrix(rep(0,ncol(dat$AA)+4), ncol=ncol(dat$AA)+4)
+  Bbar[,ncol(dat$AA)+1]=-3
+  
   A=0.01*diag(1)
   nu=ncol(dat$AA)+9
   V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+4)
@@ -2089,7 +2094,7 @@ vd_dem_vdmsrpr=function(vd,
 #'   [vd_est_vdm_ss()] for estimating the corresponding model
 #' 
 #' @export
-vd_dem_vdmss=function(vd,
+vd_dem_vdmssOLD=function(vd,
                       est,
                       cores=NULL){
   
@@ -2103,7 +2108,7 @@ vd_dem_vdmss=function(vd,
   #re-arrange data
   dat <- 
     vd %>% 
-    vd_long_tidy %>% vd_prepare
+    vd_long_tidy %>% vd_prepare_nox
   
   
   #demand sim
@@ -2132,6 +2137,72 @@ vd_dem_vdmss=function(vd,
   
   return(vd)
 }
+
+
+vd_dem_vdmss=function(vd,
+                    est,
+                    epsilon_not=NULL,
+                    cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  #re-arrange data
+  dat <- 
+    vd %>% 
+    vd_long_tidy %>% vd_prepare_nox()
+  
+  #demand sim
+  if(is.null(epsilon_not)){
+    out=
+      des_dem_vdm_ss( dat$PP,
+                   dat$AA,
+                   dat$nalts,
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,
+                   dat$lto-1,
+                   dat$tlens,
+                   est$thetaDraw,
+                   cores=cores)
+  }else{
+    out=
+      der_dem_vdm_ss( dat$PP,
+                   dat$AA,
+                   dat$nalts,
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,
+                   dat$lto-1,
+                   dat$tlens,
+                   est$thetaDraw,
+                   epsilon_not,
+                   cores=cores)
+  }
+  
+  attributes(out)=NULL
+  #add draws to data tibble
+  vd=as_tibble(vd)
+  vd$.demdraws<-map(out,drop)  
+  
+  #add attributes
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$ec_model   <- attributes(est)$ec_model
+  
+  return(vd)
+}
+
+
+
+
+
+
+
 
 
 
@@ -3227,8 +3298,51 @@ ec_dem_eval = function(de){
 }
 
 
-
-
+#' Evaluate (hold-out) demand predictions based on posterior mean predictions
+#'
+#' This function obtains proper posterior fit statistics. 
+#' 
+#' @usage ec_dem_eval_pm(de, true_dem)
+#'
+#' @param de demand draws (output from vd_dem_x function)
+#' 
+#' @return Predictive fit statistics (MAE, MSE, RAE, bias, hit-probability)
+#' 
+#' @export
+ec_dem_eval_pm=
+  function(de){
+    `%!in%` = Negate(`%in%`)
+    
+    is_this_discrete=attributes(de)$ec_model$model_name_full %>% str_detect('discrete')
+    
+    if(is_this_discrete){
+      out <- 
+        de %>% ec_dem_summarise() %>%
+        mutate(.MSE=(`E(demand)`-x)^2,
+               .MAE=abs(`E(demand)`-x),
+               .bias=(`E(demand)`-x),
+               .R=abs(x-mean(x)),
+               .hp=as.numeric(`E(demand)`==x))%>%
+        summarise(MSE=mean(.MSE),
+                  MAE=mean(.MAE),
+                  bias=mean(.bias),
+                  RAE=MAE/mean(.R),
+                  hitprob=mean(.hp))
+    }else{
+      out <- 
+        de %>% ec_dem_summarise() %>%
+        mutate(.MSE=(`E(demand)`-x)^2,
+               .MAE=abs(`E(demand)`-x),
+               .bias=(`E(demand)`-x),
+               .R=abs(x-mean(x)))%>%
+        summarise(MSE=mean(.MSE),
+                  MAE=mean(.MAE),
+                  bias=mean(.bias),
+                  RAE=MAE/mean(.R))
+    }
+    
+    return(out)
+  }
 
 
 

@@ -4375,7 +4375,7 @@ List loop_vd_ss_RWMH( vec const& XX,
   }
   
   theta_temp.row(p-1) = trans(log(maxspents+0.01));
-  theta_temp.row(p-4) += -6;
+  theta_temp.row(p-4) += -3;
   
   //no covariates (Z) for now
   mat Z(N,1);
@@ -5018,12 +5018,13 @@ arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
     int ntask = tlens(n);
     int xpick = xfr(n);
     
-
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
+  
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5104,12 +5105,13 @@ arma::field<arma::vec> des_dem_vdmn(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5188,12 +5190,13 @@ arma::field<arma::vec> der_dem_vdm(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5273,12 +5276,13 @@ arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5361,12 +5365,13 @@ arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5449,12 +5454,13 @@ arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5539,12 +5545,13 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5602,7 +5609,6 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
 arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
                              mat const& AA,
                              uvec const& nalts,
-                             vec const& sumpxs,  
                              ivec const& ntasks,  
                              ivec const& xfr,
                              ivec const& xto,  
@@ -5630,12 +5636,13 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
   
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5693,13 +5700,12 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
 arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
                     mat const& AA,
                     uvec const& nalts,
-                    uvec const& xlens,  
-                    uvec const& tlens,
                     ivec const& ntasks,  
                     ivec const& xfr,
                     ivec const& xto,  
                     ivec const& lfr,  
                     ivec const& lto,
+                    uvec const& tlens,
                     cube const& thetaDraw, 
                     vec const& epsilon,
                     int cores=1){
@@ -5723,12 +5729,13 @@ arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5809,12 +5816,13 @@ arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5897,12 +5905,13 @@ arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -5987,12 +5996,13 @@ arma::field<arma::vec> ec_screen_prob_cpp( vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
@@ -6058,12 +6068,13 @@ arma::field<arma::vec> ec_screenpr_prob_cpp( vec const& PP,
     
     int ntask = tlens(n);
     int xpick = xfr(n);
+    uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
     
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
       
-      int nalt = nalts(tt);
+      int nalt = nalts_i(tt);
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);

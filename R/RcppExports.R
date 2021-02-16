@@ -190,6 +190,16 @@ loop_vd_ssQ_RWMH <- function(XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, l
 }
 
 #' @export
+vdss_LL <- function(Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
+    .Call('_echoice2_vdss_LL', PACKAGE = 'echoice2', Theta, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+}
+
+#' @export
+vdss_LLs <- function(THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
+    .Call('_echoice2_vdss_LLs', PACKAGE = 'echoice2', THETAS, XX, PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, p, N, cores)
+}
+
+#' @export
 vd_demand <- function(psi, gamma, E, prices) {
     .Call('_echoice2_vd_demand', PACKAGE = 'echoice2', psi, gamma, E, prices)
 }
@@ -230,13 +240,13 @@ der_dem_vdm_screenpr <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lf
 }
 
 #' @export
-des_dem_vdm_ss <- function(PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
-    .Call('_echoice2_des_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, sumpxs, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
+des_dem_vdm_ss <- function(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores = 1L) {
+    .Call('_echoice2_des_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, cores)
 }
 
 #' @export
-der_dem_vdm_ss <- function(PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores = 1L) {
-    .Call('_echoice2_der_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, xlens, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, epsilon, cores)
+der_dem_vdm_ss <- function(PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores = 1L) {
+    .Call('_echoice2_der_dem_vdm_ss', PACKAGE = 'echoice2', PP, AA, nalts, ntasks, xfr, xto, lfr, lto, tlens, thetaDraw, epsilon, cores)
 }
 
 #' @export

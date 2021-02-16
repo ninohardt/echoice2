@@ -2,7 +2,7 @@
 % Please edit documentation in R/echoice2.R
 \name{dropbox_project_sync_off}
 \alias{dropbox_project_sync_off}
-\title{Turn Dropbox project sync off to avoid issues with .Rproj.user folders}
+\title{Turn Dropbox project sync off to avoid issues with .Rproj.user folders (Windows)}
 \usage{
 dropbox_project_sync_off()
 }
