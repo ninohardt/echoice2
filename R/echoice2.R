@@ -284,7 +284,42 @@ ht_screenCompare=
   }
 
 
+
+
 # data manipulation -------------------------------------------------------
+
+
+#clean data
+vd_janitor=function(vd, maxquant=999){
+  `%!in%` <- Negate(`%in%`)
+  
+  #remove too high volumes
+  fid_toomuch   = vd %>% filter(x>maxquant) %>% pull(id) %>% unique
+  
+  #remove all0s
+  fid_toolittle = vd %>% group_by(id) %>% summarise(.s=sum(x)) %>% filter(.s==0) %>% pull(id)
+  
+  #combine filter
+  fid_all = base::intersect(fid_toolittle, fid_toomuch)
+  
+  filter_summary=
+    tibble(
+      `overall`=fid_all%>%n_distinct,
+      `large quantities`=fid_toolittle%>%n_distinct,
+      `all 0` = fid_toolittle %>% n_distinct())
+  
+  
+  #filter and return
+  vd = vd %>% filter(id %!in% fid_all) 
+  
+  print("Filter summary:")
+  print(filter_summary)
+  
+  print("Data:")
+  attributes(vd)$filter=filter_summary
+  
+  return(vd)
+}
 
 
 #utility function
@@ -1564,6 +1599,8 @@ vd_est_vdm_ssq = function(vd,
 
 
 #logll
+
+#' @export
 vd_LL_vdm <- function(draw, vd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
@@ -1588,6 +1625,7 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
+#' @export
 vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
@@ -1612,7 +1650,7 @@ vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
-
+#' @export
 vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
@@ -1643,7 +1681,7 @@ vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
 }
 
 
-
+#' @export
 vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
