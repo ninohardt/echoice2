@@ -138,13 +138,17 @@ vec rmuno(vec const& probs){
 
 //multinomial draw - index
 int rmuno2(vec const& probs){
-  int n = probs.n_elem;
-  vec out(n);
-  out.fill(0);
-  
   int k = sum(as_scalar(randu(1))>cumsum(probs));
   return(k);
 }
+
+
+//' @export
+// [[Rcpp::export]]
+mat riwish(double v, mat S){
+  return(iwishrnd( S, v ));
+}
+
 
 //upper lvl
 void ULwishart(double nu, 
@@ -269,7 +273,11 @@ double lndMvnc(arma::vec const& x,
 }
 
 
-
+//' @export
+// [[Rcpp::export]]
+mat rmvn(int n, vec mu, mat sig){
+  return(trans(mvnrnd(mu, sig, n)));
+}
 
 
 
@@ -1461,7 +1469,7 @@ List loop_ddrspr_RWMH(  vec const& XX,
   
   vec maxpaids(N);
   for(int n=0; n<N; n++){
-    maxpaids(n) = max(XX(span(xfr(n),xto(n)))%PP(span(xfr(n),xto(n))));
+    maxpaids(n) = max(sign(XX(span(xfr(n),xto(n)))%PP(span(xfr(n),xto(n)))));
   }
   
   //no covariates (Z) for now
@@ -2193,6 +2201,12 @@ arma::field<arma::vec> ddsrprprob(vec const& PP,
  return(XdL);
 }
 
+               
+               
+               
+               
+
+               
                
                
                
@@ -5297,9 +5311,9 @@ arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
         //paras
         arma::vec theta = thetaDraw.slice(ir).col(n);
         arma::vec beta  = theta(arma::span(0,p-4));
+        double sigma    = exp(theta(p-3));
         double gamma    = exp(theta(p-2));
         double E        = exp(theta(p-1));
-        double sigma    = exp(theta(p-3));
         arma::vec taui  = tauDraw.slice(ir).col(n);
         
         //compute psi
@@ -6106,3 +6120,524 @@ arma::field<arma::vec> ec_screenpr_prob_cpp( vec const& PP,
   }
   return(XdL);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////
+// Discrete Demand - Screening w/price
+///////////////////////////////////////////////
+
+
+//' @export
+// [[Rcpp::export]]
+double ddlpr(arma::vec const& theta, 
+             double tau_pr,
+             arma::uvec const& nalts,
+             arma::vec const& X, 
+             arma::vec const& P, 
+             arma::mat const& A, 
+             int ntask, 
+             int p ){
+  
+  //para
+  arma::vec beta = theta(arma::span(0,p-2));
+  double beta_p  = exp(theta(p-1));
+  
+  //init ll
+  double ll=0;
+  int xpicker = 0;
+  
+  //task level
+  for(int tt=0; tt<ntask; tt++){
+    int nalt = nalts(tt);
+    double denom=1;
+    double aby=0;
+    
+    //alternative level
+    for(int kk=0; kk<nalt; kk++){
+      
+      double x = X(xpicker);
+      double p = P(xpicker);
+      double ab = as_scalar(A.row(xpicker)*beta);
+      ab+=(-beta_p*p);
+      
+      //screening
+      if(p<=exp(tau_pr)){
+        denom+=exp(ab);
+      }
+      
+      //chosen product
+      if(x>0){
+        aby+=ab;
+      }
+      
+      xpicker+=1; //move up index for X,A,P
+    }
+    
+    //add to LL
+    ll+=(aby-log(denom));
+  }
+  return(ll);
+}
+
+
+
+
+void draw_ddpr_RWMH( arma::vec& ll_olds,       // vector of current log-likelihoods
+                     arma::vec& lp_olds,       // vectors of lp's, just for tracking 
+                     arma::mat& theta_temp,    // container of current betas for all i
+                     vec const& tau_prs,
+                     vec const& XX,            // data
+                     vec const& PP,
+                     mat const& AA,
+                     uvec const& nalts,
+                     ivec const& ntasks,  
+                     ivec const& xfr,ivec const& xto,  
+                     ivec const& lfr,ivec const& lto,
+                     int p, int N, 
+                     arma::vec const& mu,  // upper level mean
+                     arma::mat const& L,   // upper level chol(sigma)
+                     arma::vec& stay,      // rejection tracker, used for tuning
+                     arma::vec& tunes,     // i-level tuning parameters
+                     int cores=1){ 
+  
+  omp_set_num_threads(cores);
+  
+#pragma omp parallel for schedule(static)
+  for(int n=0; n<N; n++){
+    
+    //local variables (thread-safe)
+    double llnew;
+    double lpnew;
+    vec theta_cand = theta_temp.col(n);
+    
+    //lp old draw (with updated mu,L)
+    lp_olds(n) = lndMvnc(theta_temp.col(n), mu, L);
+    
+    //candidate
+    theta_cand+= tunes(n)*(trans(L) * arma::randn(p));
+    
+    //eval
+    llnew = ddlpr(theta_cand,
+                  tau_prs(n),
+                  nalts(span(lfr(n),lto(n))),
+                  XX(span(xfr(n),xto(n))), 
+                  PP(span(xfr(n),xto(n))), 
+                  AA(span(xfr(n),xto(n)),span::all), 
+                  ntasks(n), p );
+    
+    lpnew = lndMvnc(theta_cand, mu, L);
+    
+    //A-R
+    double ldiff = llnew + lpnew - ll_olds(n) - lp_olds(n);
+    
+    if(ldiff > log(randu(1)[0])){
+      theta_temp.col(n)= theta_cand;
+      ll_olds(n)       = llnew;
+      lp_olds(n)       = lpnew;
+    }else{
+      stay(n)+=1;
+    }
+    
+  }
+}
+
+
+
+
+void draw_dd_taupr1( vec& ll_olds,
+                     arma::mat const& theta_temp,
+                     vec& tau_prs,
+                     vec const& maxpaids,
+                     double const& pr_mean,
+                     double const& pr_sd,
+                     vec& stay,
+                     vec const& pricetune,
+                     vec const& XX, 
+                     vec const& PP,
+                     mat const& AA,
+                     uvec const& nalts,
+                     ivec const& ntasks,  
+                     ivec const& xfr,  
+                     ivec const& xto,  
+                     ivec const& lfr,  
+                     ivec const& lto,
+                     int p, int N, int cores){
+  
+  //int K=tauconst.n_rows;
+  
+  omp_set_num_threads(cores);
+  
+#pragma omp parallel for schedule(static)
+  for(int n=0; n<N; n++){
+    
+    
+    //candidate
+    double tau_pr_cand = tau_prs(n) + pricetune(n)*randn(1)[0];
+    
+    //check
+    if(tau_pr_cand>log(maxpaids(n))){
+      
+      
+      double llnew = ddlpr(theta_temp.col(n),
+                           tau_pr_cand,
+                           nalts(span(lfr(n),lto(n))),
+                           XX(span(xfr(n),xto(n))), 
+                           PP(span(xfr(n),xto(n))), 
+                           AA(span(xfr(n),xto(n)),span::all), 
+                           ntasks(n), p);
+      
+      //A-R
+      double ldiff = 
+        llnew      + log_normpdf(tau_pr_cand, pr_mean, pr_sd ) - 
+        ll_olds(n) - log_normpdf(tau_prs(n) , pr_mean, pr_sd );
+      
+      
+      if(ldiff > log(randu(1)[0])){
+        tau_prs(n)  = tau_pr_cand;
+        ll_olds(n)  = llnew;
+      }else{
+        stay(n)+=1;
+      }
+    }else{
+      stay(n)+=1;
+    }
+    
+    
+    
+    
+  }//nloop
+}
+
+
+//' @export
+// [[Rcpp::export]]
+List loop_ddpr_RWMH(  vec const& XX, 
+                      vec const& PP,
+                      mat const& AA,
+                      uvec const& nalts,
+                      ivec const& ntasks,  
+                      ivec const& xfr,  
+                      ivec const& xto,  
+                      ivec const& lfr,  
+                      ivec const& lto,
+                      int p, int N,
+                      int R, int keep, // MCMC parameters draws and keep interval
+                      mat const& Bbar, mat const& A, double nu, mat const& V, //Prior
+                      int tuneinterval = 30, double steptunestart=.5, int tunelength=10000, int tunestart=500, //algo settings
+                      int progressinterval=100, int cores=1){ //report interval
+  
+  //initialize i-parameters
+  arma::mat theta_temp(p,N); // container of current betas for all i
+  theta_temp.fill(0);
+  
+  
+  vec maxpaids(N);
+  for(int n=0; n<N; n++){
+    maxpaids(n) = max(sign(XX(span(xfr(n),xto(n)))%PP(span(xfr(n),xto(n)))));
+  }
+  
+  //no covariates (Z) for now
+  mat Z(N,1);
+  Z.fill(1);
+  
+  // dimensions ..................
+  int Rk=R/keep;
+  int mkeep;
+  int m=1;//Z.n_cols; - no covariates for now
+
+  // start values ..................
+  mat MU      = Bbar;
+  mat SIGMA   = eye(p,p);  
+  mat Lprior  = trimatu(chol(SIGMA));
+  vec tau_prs = maxpaids*1.1;
+  double pr_mean = mean(tau_prs);
+  double pr_sd = 1;
+  
+  // tuning ..................
+  arma::vec stay(N);
+  arma::vec stay_total(N);
+  stay.fill(0);
+  stay_total.fill(0);
+  
+  arma::vec stay_prscr(N);
+  stay_prscr.fill(0);
+  arma::vec pricetunes(N);
+  pricetunes.fill(.1);
+  
+  
+  int tunecounter = 1;
+  vec tunes = ones<vec>(N)*steptunestart;
+  double currentRR=0;
+  vec currentRRs(N);
+  
+  // initial log likelihood ..................
+  vec ll_olds(N);
+  for(int n=0; n<N; n++){
+    
+    ll_olds(n)= 
+      ddlpr(theta_temp.col(n),
+            tau_prs(n),
+            nalts(span(lfr(n),lto(n))),
+            XX(span(xfr(n),xto(n))), 
+            PP(span(xfr(n),xto(n))), 
+            AA(span(xfr(n),xto(n)),span::all), 
+            ntasks(n), p );
+  }
+  
+  vec lp_olds(N);
+  for(int n=0; n<N; n++){
+    lp_olds(n)=lndMvnc(theta_temp.col(n),vectorise(MU),Lprior);
+  }
+  
+  // draw storage ..................
+  cube thetaDraw(p,N,Rk);
+  cube SIGMADraw(p,p,Rk);
+  
+  vec  loglike = zeros<vec>(Rk);
+  vec  logpost = zeros<vec>(Rk);
+  mat  MUDraw(Rk,p*m);  
+  mat  pricescreenPriorDraw(Rk,2);
+  mat  tau_pr_draw(N,Rk);
+  
+  arma::vec rrate(Rk);
+  mat RRs(N,Rk);
+  
+  omp_set_num_threads(cores);
+  
+  // loop ..................    
+  startMcmcTimer();
+  
+  for(int ir=0; ir<R; ir++){
+    Rcpp::checkUserInterrupt();
+    
+    // upper level *********
+    ULreg(trans(theta_temp), 
+          Z,                // upper level covariates if used
+          Bbar,  A, nu, V,  // prior
+          MU,               // outputs (MU, SIGMA, Lprior=chol(SIGMA))
+          SIGMA,
+          Lprior); 
+    
+    // n loop  *********
+    //theta
+    draw_ddpr_RWMH(ll_olds,            // ll for current betas
+                   lp_olds,
+                   theta_temp,          // container of current betas for all i
+                   tau_prs,
+                   XX,
+                   PP,
+                   AA,
+                   nalts,
+                   ntasks,
+                   xfr,xto,lfr,lto,
+                   p,N,
+                   vectorise(MU),      // Mean Prior
+                   Lprior,             // VarCov Prior (chol)
+                   stay,               // tracking rejections
+                   tunes,              // i-level tuning parameters
+                   cores);       
+    
+    if(ir>1000){
+
+      draw_dd_taupr1( ll_olds,
+                      theta_temp,
+                      tau_prs,
+                      maxpaids,
+                      pr_mean,
+                      pr_sd,
+                      stay_prscr,
+                      pricetunes,
+                      XX,
+                      PP,
+                      AA,
+                      nalts,
+                      ntasks,
+                      xfr,xto,lfr,lto,
+                      p,N,
+                      cores);
+      
+      //price screening upper level mu_0, nu, alph, bet
+      ULnormnorm(pr_mean, pr_sd,
+                 tau_prs,
+                 0.0, 0.01, 3.0, 3.0);  
+      
+    }
+    
+    // tuning stuff ..................
+    tunecounter+=1; // update counter within tune interval
+    
+    //rejection rate in window
+    if(tunecounter>=tuneinterval){
+      
+      //just for progress output
+      currentRR=mean(stay/tunecounter); 
+      //tune within tune range
+      if( (ir>=tunestart) & (ir<(tunestart+tunelength))){
+        mh_tuner(tunes,stay/tunecounter);
+      }
+      
+      //reset
+      tunecounter=1;
+      stay_total+=stay;
+      stay.fill(0);
+    }
+    // end of loop
+    
+    
+    // save draws  ..................
+    if((ir+1)%keep==0){
+      
+      mkeep = (ir+1)/keep-1;
+      thetaDraw.slice(mkeep)      = theta_temp;
+      
+      MUDraw.row(mkeep)           = trans(vectorise(MU,0));
+      
+      SIGMADraw.slice(mkeep)      = SIGMA;
+      loglike(mkeep)              = sum(ll_olds);
+      logpost(mkeep)              = sum(ll_olds)+sum(lp_olds);
+      rrate(mkeep)                = currentRR;
+      tau_pr_draw.col(mkeep)        = tau_prs;
+      pricescreenPriorDraw(mkeep,0) = pr_mean;
+      pricescreenPriorDraw(mkeep,1) = pr_sd;
+    }
+    
+    // display progress  ..................
+    if((ir+1)%progressinterval==0){
+      infoMcmcTimerRRLL(ir,R,currentRR,sum(ll_olds));
+    }
+    
+  }
+  endMcmcTimer();
+  
+  //return draws  ..................
+  return List::create(
+    Named("thetaDraw")      = thetaDraw,
+    Named("MUDraw")         = MUDraw,
+    Named("SIGMADraw")      = SIGMADraw,
+    Named("tau_pr_draw")    = tau_pr_draw,
+    Named("prscreenMuSigDraw")  = pricescreenPriorDraw,
+    Named("loglike")        = loglike,
+    Named("logpost")        = logpost,
+    Named("reject")         = rrate,
+    Named("RRs")            = stay_total/R);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////
+///////////////////
+
+
+
+//price screening only
+
+//' @export
+//[[Rcpp::export]]
+arma::field<arma::vec> ddprdem(vec const& PP,
+                                 mat const& AA,
+                                 uvec const& nalts,
+                                 uvec const& tlens,
+                                 ivec const& ntasks,  
+                                 ivec const& xfr,
+                                 ivec const& xto,  
+                                 ivec const& lfr,  
+                                 ivec const& lto,
+                                 cube const& thetaDraw,
+                                 mat const& tau_pr_Draw,
+                                 int cores=1){
+  
+  //dimensions
+  int R=thetaDraw.n_slices;
+  int xdim = PP.n_rows;
+  int N = tlens.n_elem;
+  int p = thetaDraw.n_rows;
+  
+  //output init
+  arma::field<arma::vec>XdL(xdim);
+  
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = tlens(n);
+    int xpick = xfr(n);
+    
+    //task-level
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R, fill::zeros);
+      
+      ivec nalt_space = linspace<ivec>(0, nalt-1); 
+      
+      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+      
+      //draw-level
+      omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+        
+        //paras
+        arma::vec theta = thetaDraw.slice(ir).col(n);
+        arma::vec beta  = theta(arma::span(0,p-2));
+        double beta_p = exp(theta(p-1));
+        arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
+        arma::vec pr = exp(ab)/(1+sum(exp(ab)));
+        
+        pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
+        
+        //multinomial draw
+        int pick_draw = rmuno2(pr);
+        
+        //if not outside good, choose inside good
+        if(pick_draw!=nalt){
+          demcontainer(pick_draw,ir)=1;
+        }
+        
+      }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=trans(demcontainer.row(k));
+      } 
+      xpick+=nalt;
+    }
+    
+  }
+  return(XdL);
+}
+

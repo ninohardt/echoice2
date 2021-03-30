@@ -15,8 +15,18 @@ revd0 <- function(n, scale) {
     .Call('_echoice2_revd0', PACKAGE = 'echoice2', n, scale)
 }
 
+#' @export
+riwish <- function(v, S) {
+    .Call('_echoice2_riwish', PACKAGE = 'echoice2', v, S)
+}
+
 lndMvnc <- function(x, mu, L) {
     .Call('_echoice2_lndMvnc', PACKAGE = 'echoice2', x, mu, L)
+}
+
+#' @export
+rmvn <- function(n, mu, sig) {
+    .Call('_echoice2_rmvn', PACKAGE = 'echoice2', n, mu, sig)
 }
 
 #' @export
@@ -267,5 +277,20 @@ ec_screen_prob_cpp <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr,
 #' @export
 ec_screenpr_prob_cpp <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores = 1L) {
     .Call('_echoice2_ec_screenpr_prob_cpp', PACKAGE = 'echoice2', PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, tau_pr_Draw, cores)
+}
+
+#' @export
+ddlpr <- function(theta, tau_pr, nalts, X, P, A, ntask, p) {
+    .Call('_echoice2_ddlpr', PACKAGE = 'echoice2', theta, tau_pr, nalts, X, P, A, ntask, p)
+}
+
+#' @export
+loop_ddpr_RWMH <- function(XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
+    .Call('_echoice2_loop_ddpr_RWMH', PACKAGE = 'echoice2', XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
+}
+
+#' @export
+ddprdem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ddprdem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tau_pr_Draw, cores)
 }
 

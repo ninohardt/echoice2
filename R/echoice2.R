@@ -286,6 +286,17 @@ ht_screenCompare=
 
 
 
+#' Attribute pipe
+#'
+#' Read attributes of an object, pipe-style
+#'
+#' @usage object %.% attribute_name
+#
+#' @export
+`%.%` <- function(obj,attrname) (attributes(obj))[[attrname]]
+
+
+
 # data manipulation -------------------------------------------------------
 
 
@@ -372,7 +383,10 @@ vd_lol_tidy=function(datalist){
 #'
 #' @export
 dummyvar<-function(data){
-  out=model.matrix(~.-1,data=data) 
+  #retains missing values as NA
+  out = model.matrix.lm(~.-1,
+                        data=data, 
+                        na.action = "na.pass") 
   attributes(out)[c("assign", "contrasts")]=NULL
   return(as_tibble(out))
 }
@@ -2306,11 +2320,21 @@ dd_est_hmnl = function(dd,
   }
   message(paste0("Using ",cores," cores"))
   
-  #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare
+  #outside good present or not?
+  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
   
+  #re-arrange data
+  if(outside_good_check==1){
+    #no outside
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% select(-int) %>% vd_prepare
+  }else{
+    #outside good
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% vd_prepare
+  }
   
   #Prior
   Bbar=matrix(rep(0,ncol(dat$AA)+1), ncol=ncol(dat$AA)+1)
@@ -2419,10 +2443,21 @@ dd_est_hmnl_screen = function(dd,
   }
   message(paste0("Using ",cores," cores"))
   
+  #outside good present or not?
+  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
+  
   #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare
+  if(outside_good_check==1){
+    #no outside
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% select(-int) %>% vd_prepare
+  }else{
+    #outside good
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% vd_prepare
+  }
   
   dat$Af <- dd %>% vd_long_tidy %>% 
     attributes() %>% `[[`('Af') %>% as.matrix()
@@ -2553,10 +2588,21 @@ dd_est_hmnl_screenpr = function(dd,
   }
   message(paste0("Using ",cores," cores"))
   
+  #outside good present or not?
+  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
+  
   #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare
+  if(outside_good_check==1){
+    #no outside
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% select(-int) %>% vd_prepare
+  }else{
+    #outside good
+    dat <- 
+      dd %>% 
+      vd_long_tidy %>% vd_prepare
+  }
   
   dat$Af <- dd %>% vd_long_tidy %>% 
     attributes() %>% `[[`('Af') %>% as.matrix()
@@ -3270,7 +3316,7 @@ ec_dem_eval = function(de){
                 MAE=mean(.MAE),
                 bias=mean(.bias),
                 RAE=MAE/mean(.R),
-                hitprob=mean(.hp))
+                hitrate=mean(.hp))
   }else{
     out <- de %>%
       mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
@@ -3311,12 +3357,19 @@ ec_dem_eval_pm=
                .MAE=abs(`E(demand)`-x),
                .bias=(`E(demand)`-x),
                .R=abs(x-mean(x)),
-               .hp=as.numeric(`E(demand)`==x))%>%
+               .hr=as.numeric(`E(demand)`==x),
+               .hp=ifelse(x==1,`E(demand)`,NA)) %>%
+        group_by(id,task) %>% 
+        mutate(.outside=1-sum(x),.outsideprob=1-sum(`E(demand)`)) %>%
+        ungroup() %>%
+        mutate(.hpoutside=ifelse(.outside==1,.outsideprob,NA)) %>%
+        mutate(.hpall=ifelse(!is.na(.hp),.hp,.hpoutside))%>%
         summarise(MSE=mean(.MSE),
                   MAE=mean(.MAE),
                   bias=mean(.bias),
                   RAE=MAE/mean(.R),
-                  hitprob=mean(.hp))
+                  hitrate=mean(.hr),
+                  hitprob=mean(.hpall,na.rm=T))
     }else{
       out <- 
         de %>% ec_dem_summarise() %>%
@@ -4003,4 +4056,192 @@ vd_thin_draw=function(M,
   return(M)
 }
 
+
+
+
+# (experimental) menu choice models ---------------------------------------
+
+
+
+
+
+dummyvar=
+  function(data){
+    out = model.matrix.lm(~.-1,data=data, na.action = "na.pass") 
+    attributes(out)[c("assign", "contrasts")]=NULL
+    return(as_tibble(out))
+  }
+
+
+dummify
+function(dat, sel){
+  dat=as_tibble(dat)
+  for(i in seq_along(sel)){
+    selv=sel[i]
+    dummidata <- dat %>% select(all_of(selv)) %>% dummyvar()
+    dat<- dat %>% add_column(dummidata, .before = selv) %>% 
+      select(-all_of(selv)) %>% 
+      rename_all(gsub, pattern = paste0("^(",selv,")"), replacement = paste0(selv,":"))
+  }
+  
+  return(dat)
+}
+
+
+
+
+
+ec_long_tidy<-
+  function(longdata, 
+           coding = c('dummy','effects')[1]){
+    
+    catvars = longdata %>% select_if(is.factor) %>% names
+    
+    #names of variables that are attributes to be used
+    #attrvars = longdata %>% names %>% setdiff(c('id','task','alt', 'x', 'p')) %>% str_subset(pattern = '\\.',negate=T)
+    
+    if(coding=='effects'){
+      dummified =
+        longdata %>% 
+        dummify2(catvars) 
+    }
+    
+    if(coding=='dummy'){
+      dummified =
+        longdata %>% 
+        dummify(catvars) 
+    }
+    
+    #sections to be added
+    attrs=dummified %>%get_attr_lvl
+    attrs=attrs %>% mutate(attribute=ifelse(!is.na(attribute),attribute,attr_level))
+    
+    
+    refcats=attrs %>% filter(reference==1) %>% pull(attr_level)
+    
+    #add intercepts?!
+    out<-dummified %>% select(-any_of(refcats)) 
+    
+    attributes(out)$ec_data = list(choice_type='volumetric',
+                                   data_type='vd_tidy_choice',
+                                   attributes=attrs)
+    
+    attributes(out)$Af = dummified %>% 
+      select_if(!(colnames(.)%in%c('id','task','alt','p','x')))
+    
+    return(out)
+  }
+
+
+
+
+ec_prepare=
+  function(dt, Af=NULL){
+    
+    `%!in%` = Negate(`%in%`)
+    #arrange
+    dt <- dt %>% 
+      mutate(id=as.integer(id)) %>%
+      arrange(as.numeric(id),task,alt)
+    
+    #ntasks
+    ntasks<-
+      dt %>% group_by(id) %>% 
+      summarise(ntasks=n_distinct(task), .groups="drop") %>% pull(ntasks)
+    
+    #xfr-xto
+    xfr_xto<-
+      dt %>% group_by(id) %>% rowid_to_column() %>%
+      summarise(xfr=min(rowid),xto=max(rowid), .groups="drop") 
+    
+    #sumpxs+nalts
+    sump_nalts <- 
+      dt %>% group_by(id,task) %>% 
+      summarise(sump=sum(p),nalts=n(), .groups="drop")
+    
+    #lfr-lto
+    lfr_lto<-
+      sump_nalts %>% group_by(id) %>%
+      rowid_to_column() %>% 
+      summarise(lfr=min(rowid),lto=max(rowid), .groups="drop")
+    
+    #tlens
+    tlens<-
+      dt %>% group_by(id) %>% 
+      summarise(tlens=n_distinct(task), .groups='drop') %>% 
+      pull(tlens)
+    
+    #select_if(colnames(.) %in% c("a","c","d","e"))
+    
+    if(sum('x'%in%colnames(dt))==0){
+      out=list(PP=dt$p, 
+               AA=(bind_cols(int=1,
+                             dt %>% 
+                               select_if((colnames(.) %!in% c('id','section','task','alt','p','x')))%>% 
+                               as.matrix())),
+               nalts=sump_nalts$nalts,
+               ntasks=ntasks,
+               xfr=xfr_xto$xfr,xto=xfr_xto$xto,
+               lfr=lfr_lto$lfr,lto=lfr_lto$lto,
+               tlens=tlens,
+               idx=select(dt,id,task,alt))
+      
+    }else{
+      
+      sumpxs_nalts <- dt %>% group_by(id,task) %>% 
+        summarise(sumpxs=sum(xp),nalts=n(), .groups="drop")
+      
+      out=list(XX=dt$x,
+               PP=dt$p, 
+               AA=(dt %>% select(-id,-task,-alt,-x,-p,-xp)%>% as.matrix()),
+               nalts=sumpxs_nalts$nalts,
+               sumpxs=sumpxs_nalts$sumpxs,
+               ntasks=ntasks,
+               xfr=xfr_xto$xfr,xto=xfr_xto$xto,
+               lfr=lfr_lto$lfr,lto=lfr_lto$lto,
+               tlens=tlens,
+               idx=select(dt,id,task,alt))
+    }
+    
+    #meta-information
+    ec_data = attributes(dt)$ec_data
+    
+    #full attribute data, screening lower limit
+    if(!is.null(Af)){
+      
+      if(all(c("id","task","alt") %in% colnames(Af) )){
+        out$AAf=Af%>%select(-id,-task,-alt)%>% as.matrix()
+        foo <- dt %>% select(id,task,alt,x) %>% left_join(Af,by=c("id","task","alt")) %>% arrange(as.numeric(id),task,alt) 
+        foo_check<-foo %>% select(-id,-task,-alt,-x) %>% is.na %>% sum
+        
+        if(foo_check==0){
+          tauconst=1-(foo %>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+        }else{
+          stop("Could not match full attribute tibble with choice data")
+        }
+        
+        #bind_cols(Af)%>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x)
+      }else{
+        message("Af does not contain id, task, alt columns. Assuming that attribute columns are properly sorted...")
+        out$AAf=Af%>% as.matrix()
+        tauconst=1-(dt %>% select(id,task,alt,x) %>%bind_cols(Af)%>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+      }
+      
+      out$tauconst=tauconst
+      
+      #meta-information
+      ec_data$screening='attribute-based'
+    }
+    
+    
+    # if('attributes_levels' %in% names(attributes(dt))){
+    #   out$attributes_levels=attributes(dt)$attributes_levels
+    # }
+    # ec_data$attributes=
+    
+    attributes(out)$ec_data = ec_data
+    attributes(out)$Af =  attributes(dt)$Af
+    
+    return(out)
+  }
 
