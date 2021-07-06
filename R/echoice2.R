@@ -3668,7 +3668,7 @@ ec_demcurve_cond_dem=function(ec_long,
 #' 
 #' @export
 ec_gen_err_normal = function(ec_dem, draws, seed=NULL){
-  R=dim(draws$MUDraw)[1]
+  R=dim(draws$thetaDraw)[3]
   set.seed(seed)
   out=matrix(rnorm(nrow(ec_dem)*R),nrow(ec_dem),R)
   set.seed(NULL)
@@ -3689,7 +3689,7 @@ ec_gen_err_normal = function(ec_dem, draws, seed=NULL){
 #' 
 #' @export
 ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
-  R=dim(draws$MUDraw)[1]
+  R=dim(draws$thetaDraw)[3]
   set.seed(seed)
   out=matrix(revd0(nrow(ec_dem)*R,1),nrow(ec_dem),R)
   set.seed(NULL)
@@ -4245,3 +4245,157 @@ ec_prepare=
     return(out)
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+#' Demand Prediction (Discrete, Sequential Menu Choice)
+#'
+#' Generating demand predictions 
+#' 
+#' 
+#' @export
+dd_dem_prseq1=function(dd_data,
+                       est,
+                       cores=NULL){
+  
+  #cores  
+  if(is.null(cores)){
+    cores=parallel::detectCores(logical=FALSE)
+  }
+  message(paste0("Using ",cores," cores"))
+  
+  
+  #prepare sections
+  datls=  
+    dd_data %>% 
+    base::split(.$section) %>%
+    map(. %>%
+          select_if(~any(!is.na(.))) %>%
+          ec_long_tidy() %>%
+          ec_prepare)
+  
+  #re-arrange data, create list to be passed to model  
+  # XXf     <- datls %>% map(pluck,'XX')
+  PPf     <- datls %>% map(pluck,'PP')
+  AAf     <- datls %>% map(pluck,'AA') %>% map(as.matrix)
+  naltf   <- datls %>% map(pluck,'nalts')
+  ntaskf  <- datls %>% map(pluck,'ntasks')
+  xfrf    <- datls %>% map(pluck,'xfr') %>% map(`-`,1)
+  
+  #lookup information
+  pvecs <- AAf %>% map_dbl(ncol) %>% `+`(1)
+  pfrto= cbind(rev(rev(cumsum(c(1,pvecs)))[-1]), 
+               cumsum(pvecs))-1
+  
+  #stage-output link list 
+  secpick=dd_data %>% 
+    rowid_to_column('.id') %>% 
+    split(.$section) %>% map(pull,.id) %>% map(`-`,1)
+  
+  simdemout=
+    ddprdemseq1( PPf,
+                 AAf,
+                 naltf,
+                 ntaskf,
+                 xfrf,
+                 pvecs,
+                 pfrto,
+                 secpick, 
+                 est$thetaDraw,
+                 est$tau_pr_Draw,
+                 cores=cores)
+  
+  attributes(simdemout)=NULL
+  #add draws to data tibble
+  dd_data$.demdraws<-map(simdemout,drop)   
+  
+  #add attributes
+  attributes(dd_data)$attr_names <- dd_data %>% colnames %>% 
+    setdiff(c("id","task","alt","x","p","section")) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd_data)$ec_model   <- attributes(est)$ec_model
+  
+  return(dd_data)
+}
+
+
+
+
+
+
+
+
+
+
+
+dd_dem_mc_simu=
+  function(dd_data,
+           est,
+           cores=NULL){
+    
+    #cores  
+    if(is.null(cores)){
+      cores=parallel::detectCores(logical=FALSE)
+    }
+    message(paste0("Using ",cores," cores"))
+    
+    
+    #prepare sections
+    datls=  
+      dd_data %>% 
+      base::split(.$section) %>%
+      map(. %>%
+            select_if(~any(!is.na(.))) %>%
+            ec_long_tidy() %>%
+            ec_prepare)
+    
+    #re-arrange data, create list to be passed to model  
+    XXf     <- datls %>% map(pluck,'XX')
+    PPf     <- datls %>% map(pluck,'PP')
+    AAf     <- datls %>% map(pluck,'AA') %>% map(as.matrix)
+    naltf   <- datls %>% map(pluck,'nalts')
+    ntaskf  <- datls %>% map(pluck,'ntasks')
+    xfrf    <- datls %>% map(pluck,'xfr') %>% map(`-`,1)
+    
+    #lookup information
+    pvecs <- AAf %>% map_dbl(ncol) %>% `+`(1)
+    pfrto= cbind(rev(rev(cumsum(c(1,pvecs)))[-1]), 
+                 cumsum(pvecs))-1
+    
+    #stage-output link list 
+    secpick=dd_data %>% 
+      rowid_to_column('.id') %>% 
+      split(.$section) %>% map(pull,.id) %>% map(`-`,1)
+    
+    simdemout=
+      ddprdemsimu1( PPf,
+                    AAf,
+                    naltf,
+                    ntaskf,
+                    xfrf,
+                    pvecs,
+                    pfrto,
+                    secpick, 
+                    est$thetaDraw,
+                    est$tau_pr_Draw,
+                    cores=cores)
+    
+    attributes(simdemout)=NULL
+    #add draws to data tibble
+    dd_data$.demdraws<-map(simdemout,drop)   
+    
+    #add attributes
+    attributes(dd_data)$attr_names <- dd_data %>% colnames %>% 
+      setdiff(c("id","task","alt","x","p","section")) %>% str_subset('^\\.', negate = TRUE)
+    attributes(dd_data)$ec_model   <- attributes(est)$ec_model
+    
+    return(dd_data)
+  }

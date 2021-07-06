@@ -222,7 +222,7 @@ void ULnormnorm(double& prior_mean, double& prior_sd,
   prior_mean=(nu*mu_0+n*xbar)/(nu+n)  +  randn(1)[0]/sqrt(nu+n);
   
   prior_sd= sqrt(1/randg(distr_param(alph+n/2,
-                                1/(bet+0.5*(sum(pow(x-xbar,2)))+n*nu/(nu+n)*0.5*pow(xbar-mu_0,2) )  )));
+                                     1/(bet+0.5*(sum(pow(x-xbar,2)))+n*nu/(nu+n)*0.5*pow(xbar-mu_0,2) )  )));
 }
 
 
@@ -721,22 +721,22 @@ double ddlsr(arma::vec const& theta,
 void draw_ddsr_RWMH( arma::vec& ll_olds,       // vector of current log-likelihoods
                      arma::vec& lp_olds,       // vectors of lp's, just for tracking 
                      arma::mat& theta_temp,    // container of current betas for all i
-                       arma::imat const& tauis, 
-                       arma::imat const& tauconsts,
-                       vec const& XX,            // data
-                       vec const& PP,
-                       mat const& AA,
-                       mat const& AAf,
-                       uvec const& nalts,
-                       ivec const& ntasks,  
-                       ivec const& xfr,ivec const& xto,  
-                       ivec const& lfr,ivec const& lto,
-                       int p, int N, 
-                       arma::vec const& mu,  // upper level mean
-                       arma::mat const& L,   // upper level chol(sigma)
-                         arma::vec& stay,      // rejection tracker, used for tuning
-                         arma::vec& tunes,     // i-level tuning parameters
-                       int cores=1){ 
+                     arma::imat const& tauis, 
+                     arma::imat const& tauconsts,
+                     vec const& XX,            // data
+                     vec const& PP,
+                     mat const& AA,
+                     mat const& AAf,
+                     uvec const& nalts,
+                     ivec const& ntasks,  
+                     ivec const& xfr,ivec const& xto,  
+                     ivec const& lfr,ivec const& lto,
+                     int p, int N, 
+                     arma::vec const& mu,  // upper level mean
+                     arma::mat const& L,   // upper level chol(sigma)
+                     arma::vec& stay,      // rejection tracker, used for tuning
+                     arma::vec& tunes,     // i-level tuning parameters
+                     int cores=1){ 
   
   omp_set_num_threads(cores);
   
@@ -811,11 +811,11 @@ void draw_dd_tau(  arma::vec& ll_olds,
     for(int kk=0; kk<K; kk++){
       
       if(tauconst(kk,n)==1){
-      
+        
         if(tauis(kk,n)==1){
           
           ll1=ll_olds(n);
-            
+          
           ivec tauk0=tauis.col(n);
           tauk0(kk)=0;
           ll0 = ddlsr( theta_temp.col(n),
@@ -826,7 +826,7 @@ void draw_dd_tau(  arma::vec& ll_olds,
                        AA(span(xfr(n),xto(n)),span::all), 
                        AAf(span(xfr(n),xto(n)),span::all), 
                        ntasks(n), p );
-            
+          
         }else{
           ll0=ll_olds(n);
           
@@ -841,18 +841,18 @@ void draw_dd_tau(  arma::vec& ll_olds,
                        AAf(span(xfr(n),xto(n)),span::all), 
                        ntasks(n), p );
         }
-          
+        
         double probsc = (exp(ll1) * (delta(kk))) / 
-               (exp(ll1) * (delta(kk)) + exp(ll0)*(1-delta(kk)  )); 
-          
+          (exp(ll1) * (delta(kk)) + exp(ll0)*(1-delta(kk)  )); 
+        
         tauis(kk,n)= Rf_rbinom( 1, probsc );
-          
+        
         if(tauis(kk,n)==1){
           ll_olds(n)=ll1;
         }else{
           ll_olds(n)=ll0;
         }      
-          
+        
       }
     }//k=loop
   }//nloop
@@ -1003,18 +1003,18 @@ List loop_ddrs_RWMH(  vec const& XX,
       drawdelta(delta, tauis, K, N, cores);
       
       //update LL
-// #pragma omp parallel for schedule(static)
-//       for(int n=0; n<N; n++){
-//         ll_olds(n)= 
-//           ddlsr(theta_temp.col(n),
-//                 tauis.col(n),
-//                 nalts(span(lfr(n),lto(n))),
-//                 XX(span(xfr(n),xto(n))), 
-//                 PP(span(xfr(n),xto(n))), 
-//                 AA(span(xfr(n),xto(n)),span::all), 
-//                 AAf(span(xfr(n),xto(n)),span::all), 
-//                 ntasks(n), p );
-//       }
+      // #pragma omp parallel for schedule(static)
+      //       for(int n=0; n<N; n++){
+      //         ll_olds(n)= 
+      //           ddlsr(theta_temp.col(n),
+      //                 tauis.col(n),
+      //                 nalts(span(lfr(n),lto(n))),
+      //                 XX(span(xfr(n),xto(n))), 
+      //                 PP(span(xfr(n),xto(n))), 
+      //                 AA(span(xfr(n),xto(n)),span::all), 
+      //                 AAf(span(xfr(n),xto(n)),span::all), 
+      //                 ntasks(n), p );
+      //       }
       
     }
     
@@ -1586,40 +1586,40 @@ List loop_ddrspr_RWMH(  vec const& XX,
       //tau
       draw_dd_tauipr(ll_olds,
                      tauis,
-                  theta_temp,
-                  tau_prs, //
-                  tauconst,
-                  delta,
-                  XX, 
-                  PP,
-                  AA,
-                  AAf,
-                  nalts,
-                  ntasks,  
-                  xfr, xto, lfr,lto,
-                  p, N, 
-                  cores);
+                     theta_temp,
+                     tau_prs, //
+                     tauconst,
+                     delta,
+                     XX, 
+                     PP,
+                     AA,
+                     AAf,
+                     nalts,
+                     ntasks,  
+                     xfr, xto, lfr,lto,
+                     p, N, 
+                     cores);
       
-
+      
       
       
       // delta_tau
       drawdelta(delta, tauis, K, N, cores);
       
       //update LL
-// #pragma omp parallel for schedule(static)
-//       for(int n=0; n<N; n++){
-//         ll_olds(n)= 
-//           ddlsrpr(theta_temp.col(n),
-//                   tauis.col(n),
-//                   tau_prs(n),
-//                   nalts(span(lfr(n),lto(n))),
-//                   XX(span(xfr(n),xto(n))), 
-//                   PP(span(xfr(n),xto(n))), 
-//                   AA(span(xfr(n),xto(n)),span::all), 
-//                   AAf(span(xfr(n),xto(n)),span::all), 
-//                   ntasks(n), p );
-       // }
+      // #pragma omp parallel for schedule(static)
+      //       for(int n=0; n<N; n++){
+      //         ll_olds(n)= 
+      //           ddlsrpr(theta_temp.col(n),
+      //                   tauis.col(n),
+      //                   tau_prs(n),
+      //                   nalts(span(lfr(n),lto(n))),
+      //                   XX(span(xfr(n),xto(n))), 
+      //                   PP(span(xfr(n),xto(n))), 
+      //                   AA(span(xfr(n),xto(n)),span::all), 
+      //                   AAf(span(xfr(n),xto(n)),span::all), 
+      //                   ntasks(n), p );
+      // }
       
       
       
@@ -1728,16 +1728,16 @@ List loop_ddrspr_RWMH(  vec const& XX,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> dddem(vec const& PP,
-           mat const& AA,
-           uvec const& nalts,
-           uvec const& tlens,
-           ivec const& ntasks,  
-           ivec const& xfr,
-           ivec const& xto,  
-           ivec const& lfr,  
-           ivec const& lto,
-           cube const& thetaDraw,
-           int cores=1){
+                             mat const& AA,
+                             uvec const& nalts,
+                             uvec const& tlens,
+                             ivec const& ntasks,  
+                             ivec const& xfr,
+                             ivec const& xto,  
+                             ivec const& lfr,  
+                             ivec const& lto,
+                             cube const& thetaDraw,
+                             int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1747,7 +1747,7 @@ arma::field<arma::vec> dddem(vec const& PP,
   
   //output init
   arma::field<arma::vec>XdL(xdim);
-
+  
   //start timer
   startTimer();
   
@@ -1771,7 +1771,7 @@ arma::field<arma::vec> dddem(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1782,7 +1782,7 @@ arma::field<arma::vec> dddem(vec const& PP,
         arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
         arma::vec pr = exp(ab)/(1+sum(exp(ab)));
         int ch = sum(as_scalar(randu(1))>cumsum(pr));
-
+        
         //if not outside good, choose inside good
         if(ch<nalt){
           demcontainer(ch,ir)=1;
@@ -1806,18 +1806,18 @@ arma::field<arma::vec> dddem(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddsrdem(vec const& PP,
-             mat const& AA,
-             mat const& AAf,
-             uvec const& nalts,
-             uvec const& tlens,
-             ivec const& ntasks,  
-             ivec const& xfr,
-             ivec const& xto,  
-             ivec const& lfr,  
-             ivec const& lto,
-             cube const& thetaDraw,
-             cube const& tauDraw, 
-             int cores=1){
+                               mat const& AA,
+                               mat const& AAf,
+                               uvec const& nalts,
+                               uvec const& tlens,
+                               ivec const& ntasks,  
+                               ivec const& xfr,
+                               ivec const& xto,  
+                               ivec const& lfr,  
+                               ivec const& lto,
+                               cube const& thetaDraw,
+                               cube const& tauDraw, 
+                               int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1827,7 +1827,7 @@ arma::field<arma::vec> ddsrdem(vec const& PP,
   
   //output init
   arma::field<arma::vec>XdL(xdim);
-
+  
   //start timer
   startTimer();
   
@@ -1851,7 +1851,7 @@ arma::field<arma::vec> ddsrdem(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1887,19 +1887,19 @@ arma::field<arma::vec> ddsrdem(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddsrprdem(vec const& PP,
-               mat const& AA,
-               mat const& AAf,
-               uvec const& nalts,
-               uvec const& tlens,
-               ivec const& ntasks,  
-               ivec const& xfr,
-               ivec const& xto,  
-               ivec const& lfr,  
-               ivec const& lto,
-               cube const& thetaDraw,
-               cube const& tauDraw, 
-               mat const& tau_pr_Draw,
-               int cores=1){
+                                 mat const& AA,
+                                 mat const& AAf,
+                                 uvec const& nalts,
+                                 uvec const& tlens,
+                                 ivec const& ntasks,  
+                                 ivec const& xfr,
+                                 ivec const& xto,  
+                                 ivec const& lfr,  
+                                 ivec const& lto,
+                                 cube const& thetaDraw,
+                                 cube const& tauDraw, 
+                                 mat const& tau_pr_Draw,
+                                 int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1935,7 +1935,7 @@ arma::field<arma::vec> ddsrprdem(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -1978,16 +1978,16 @@ arma::field<arma::vec> ddsrprdem(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddprob(vec const& PP,
-            mat const& AA,
-            uvec const& nalts,
-            uvec const& tlens,
-            ivec const& ntasks,  
-            ivec const& xfr,
-            ivec const& xto,  
-            ivec const& lfr,  
-            ivec const& lto,
-            cube const& thetaDraw,
-            int cores=1){
+                              mat const& AA,
+                              uvec const& nalts,
+                              uvec const& tlens,
+                              ivec const& ntasks,  
+                              ivec const& xfr,
+                              ivec const& xto,  
+                              ivec const& lfr,  
+                              ivec const& lto,
+                              cube const& thetaDraw,
+                              int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -1997,7 +1997,7 @@ arma::field<arma::vec> ddprob(vec const& PP,
   
   //output init
   arma::field<arma::vec>XdL(xdim);
-
+  
   //start timer
   startTimer();
   
@@ -2021,7 +2021,7 @@ arma::field<arma::vec> ddprob(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -2031,7 +2031,7 @@ arma::field<arma::vec> ddprob(vec const& PP,
         
         arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
         arma::vec pr = exp(ab)/(1+sum(exp(ab)));
-
+        
         demcontainer.col(ir)=pr;
       }
       
@@ -2051,18 +2051,18 @@ arma::field<arma::vec> ddprob(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddsrprob(vec const& PP,
-              mat const& AA,
-              mat const& AAf,
-              uvec const& nalts,
-              uvec const& tlens,
-              ivec const& ntasks,  
-              ivec const& xfr,
-              ivec const& xto,  
-              ivec const& lfr,  
-              ivec const& lto,
-              cube const& thetaDraw,
-              cube const& tauDraw, 
-              int cores=1){
+                                mat const& AA,
+                                mat const& AAf,
+                                uvec const& nalts,
+                                uvec const& tlens,
+                                ivec const& ntasks,  
+                                ivec const& xfr,
+                                ivec const& xto,  
+                                ivec const& lfr,  
+                                ivec const& lto,
+                                cube const& thetaDraw,
+                                cube const& tauDraw, 
+                                int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -2096,7 +2096,7 @@ arma::field<arma::vec> ddsrprob(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -2108,7 +2108,7 @@ arma::field<arma::vec> ddsrprob(vec const& PP,
         
         arma::vec taui  = tauDraw.slice(ir).col(n);
         pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
-
+        
         demcontainer.col(ir)=pr;
       }
       
@@ -2127,89 +2127,89 @@ arma::field<arma::vec> ddsrprob(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddsrprprob(vec const& PP,
-             mat const& AA,
-             mat const& AAf,
-             uvec const& nalts,
-             uvec const& tlens,
-             ivec const& ntasks,  
-             ivec const& xfr,
-             ivec const& xto,  
-             ivec const& lfr,  
-             ivec const& lto,
-             cube const& thetaDraw,
-             cube const& tauDraw, 
-             mat const& tau_pr_Draw,
-             int cores=1){
- 
- //dimensions
- int R=thetaDraw.n_slices;
- int xdim = PP.n_rows;
- int N = tlens.n_elem;
- int p = thetaDraw.n_rows;
- 
- //output init
- arma::field<arma::vec>XdL(xdim);
- 
- //start timer
- startTimer();
- 
- //resp-level
- for(int n=0; n<N; n++){
-   infoTimer(n,N);
-   
-   int ntask = tlens(n);
-   int xpick = xfr(n);
-   
-   //task-level
-   for(int tt=0; tt<ntask; tt++){
-     Rcpp::checkUserInterrupt();
-     
-     int nalt = nalts(tt);
-     
-     //temp storage
-     mat demcontainer(nalt,R, fill::zeros);
-     
-     arma::vec prcs = PP(span(xpick,xpick+nalt-1));
-     
-     //draw-level
-     omp_set_num_threads(cores);
-     #pragma omp parallel for schedule(static)
-     for (int ir = 0; ir <R; ++ir){
-       
-       //paras
-       arma::vec theta = thetaDraw.slice(ir).col(n);
-       arma::vec beta  = theta(arma::span(0,p-2));
-       double beta_p = exp(theta(p-1));
-       arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
-       arma::vec pr = exp(ab)/(1+sum(exp(ab)));
-       
-       arma::vec taui  = tauDraw.slice(ir).col(n);
-       pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
-       pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
-       
-       demcontainer.col(ir)=pr;
-     }
-     
-     for(int k=0; k<nalt; k++){
-       XdL(k+xpick)=trans(demcontainer.row(k));
-     }
-     
-     xpick+=nalt;
-   }
-   
- }
- return(XdL);
+                                  mat const& AA,
+                                  mat const& AAf,
+                                  uvec const& nalts,
+                                  uvec const& tlens,
+                                  ivec const& ntasks,  
+                                  ivec const& xfr,
+                                  ivec const& xto,  
+                                  ivec const& lfr,  
+                                  ivec const& lto,
+                                  cube const& thetaDraw,
+                                  cube const& tauDraw, 
+                                  mat const& tau_pr_Draw,
+                                  int cores=1){
+  
+  //dimensions
+  int R=thetaDraw.n_slices;
+  int xdim = PP.n_rows;
+  int N = tlens.n_elem;
+  int p = thetaDraw.n_rows;
+  
+  //output init
+  arma::field<arma::vec>XdL(xdim);
+  
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = tlens(n);
+    int xpick = xfr(n);
+    
+    //task-level
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      int nalt = nalts(tt);
+      
+      //temp storage
+      mat demcontainer(nalt,R, fill::zeros);
+      
+      arma::vec prcs = PP(span(xpick,xpick+nalt-1));
+      
+      //draw-level
+      omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+        
+        //paras
+        arma::vec theta = thetaDraw.slice(ir).col(n);
+        arma::vec beta  = theta(arma::span(0,p-2));
+        double beta_p = exp(theta(p-1));
+        arma::vec ab = AA(span(xpick,xpick+nalt-1),span::all)*beta - prcs*beta_p;
+        arma::vec pr = exp(ab)/(1+sum(exp(ab)));
+        
+        arma::vec taui  = tauDraw.slice(ir).col(n);
+        pr.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
+        pr.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
+        
+        demcontainer.col(ir)=pr;
+      }
+      
+      for(int k=0; k<nalt; k++){
+        XdL(k+xpick)=trans(demcontainer.row(k));
+      }
+      
+      xpick+=nalt;
+    }
+    
+  }
+  return(XdL);
 }
 
-               
-               
-               
-               
 
-               
-               
-               
-               
+
+
+
+
+
+
+
+
 
 /////////////////////////////////////// 
 // VD Compensatory - EV error
@@ -3057,18 +3057,18 @@ vec vdsr2LL( mat const&Theta,
   omp_set_num_threads(cores);
   
   vec ll_olds(N);
-  #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
   for(int n=0; n<N; n++){
     ll_olds(n)= vdlsr2(
-            Theta.col(n),
-            tauis.col(n),
-              nalts(span(lfr(n),lto(n))),
-              sumpxs(span(lfr(n),lto(n))), 
-            XX(span(xfr(n),xto(n))), 
-            PP(span(xfr(n),xto(n))), 
-            AA(span(xfr(n),xto(n)),span::all), 
-            AAf(span(xfr(n),xto(n)),span::all), 
-              ntasks(n), p);
+      Theta.col(n),
+      tauis.col(n),
+      nalts(span(lfr(n),lto(n))),
+      sumpxs(span(lfr(n),lto(n))), 
+      XX(span(xfr(n),xto(n))), 
+      PP(span(xfr(n),xto(n))), 
+      AA(span(xfr(n),xto(n)),span::all), 
+      AAf(span(xfr(n),xto(n)),span::all), 
+      ntasks(n), p);
   }
   
   return(ll_olds);
@@ -3079,40 +3079,40 @@ vec vdsr2LL( mat const&Theta,
 // [[Rcpp::export]]
 mat vdsr2LLs(cube const&THETAS,
              icube const&TAUIS,
-            vec const& XX, 
-            vec const& PP,
-            mat const& AA,
-            mat const& AAf,
-            uvec const& nalts,
-            vec const& sumpxs,  
-            ivec const& ntasks,  
-            ivec const& xfr,  
-            ivec const& xto,  
-            ivec const& lfr,  
-            ivec const& lto,
-            int p, int N, int cores=1){
+             vec const& XX, 
+             vec const& PP,
+             mat const& AA,
+             mat const& AAf,
+             uvec const& nalts,
+             vec const& sumpxs,  
+             ivec const& ntasks,  
+             ivec const& xfr,  
+             ivec const& xto,  
+             ivec const& lfr,  
+             ivec const& lto,
+             int p, int N, int cores=1){
   
   int R = THETAS.n_slices;
   mat ll_olds(N,R+1);
-
+  
   for(int r=0; r<R; r++){
     Rcpp::checkUserInterrupt();
     ll_olds.col(r)= 
       vdsr2LL(THETAS.slice(r),
               TAUIS.slice(r),
-                XX, 
-                PP,
-                AA,
-                AAf,
-                nalts,
-                sumpxs,  
-                ntasks,  
-                xfr,  
-                xto,  
-                lfr,  
-                lto,
-                p,
-                N, cores);
+              XX, 
+              PP,
+              AA,
+              AAf,
+              nalts,
+              sumpxs,  
+              ntasks,  
+              xfr,  
+              xto,  
+              lfr,  
+              lto,
+              p,
+              N, cores);
   }
   
   return(ll_olds);
@@ -4867,17 +4867,17 @@ List loop_vd_ssQ_RWMH( vec const& XX,
 //' @export
 // [[Rcpp::export]]
 vec vdss_LL(mat const&Theta,
-          vec const& XX, 
-          vec const& PP,
-          mat const& AA,
-          uvec const& nalts,
-          vec const& sumpxs,  
-          ivec const& ntasks,  
-          ivec const& xfr,  
-          ivec const& xto,  
-          ivec const& lfr,  
-          ivec const& lto,
-          int p, int N, int cores=1){
+            vec const& XX, 
+            vec const& PP,
+            mat const& AA,
+            uvec const& nalts,
+            vec const& sumpxs,  
+            ivec const& ntasks,  
+            ivec const& xfr,  
+            ivec const& xto,  
+            ivec const& lfr,  
+            ivec const& lto,
+            int p, int N, int cores=1){
   
   omp_set_num_threads(cores);
   
@@ -4899,17 +4899,17 @@ vec vdss_LL(mat const&Theta,
 //' @export
 // [[Rcpp::export]]
 mat vdss_LLs(cube const&THETAS,
-           vec const& XX, 
-           vec const& PP,
-           mat const& AA,
-           uvec const& nalts,
-           vec const& sumpxs,  
-           ivec const& ntasks,  
-           ivec const& xfr,  
-           ivec const& xto,  
-           ivec const& lfr,  
-           ivec const& lto,
-           int p, int N, int cores=1){
+             vec const& XX, 
+             vec const& PP,
+             mat const& AA,
+             uvec const& nalts,
+             vec const& sumpxs,  
+             ivec const& ntasks,  
+             ivec const& xfr,  
+             ivec const& xto,  
+             ivec const& lfr,  
+             ivec const& lto,
+             int p, int N, int cores=1){
   
   int R = THETAS.n_slices;
   mat ll_olds(N,R+1);
@@ -4918,18 +4918,18 @@ mat vdss_LLs(cube const&THETAS,
     Rcpp::checkUserInterrupt();
     ll_olds.col(r)= 
       vdss_LL(THETAS.slice(r),
-            XX, 
-            PP,
-            AA,
-            nalts,
-            sumpxs,  
-            ntasks,  
-            xfr,  
-            xto,  
-            lfr,  
-            lto,
-            p,
-            N, cores);
+              XX, 
+              PP,
+              AA,
+              nalts,
+              sumpxs,  
+              ntasks,  
+              xfr,  
+              xto,  
+              lfr,  
+              lto,
+              p,
+              N, cores);
   }
   
   return(ll_olds);
@@ -5000,16 +5000,16 @@ vec vd_demand(arma::vec psi, double gamma, double E, vec prices) {
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
-                 mat const& AA,   //attr-lvls (vectorised)
-                 uvec const& nalts,
-                 ivec const& ntasks,  
-                 ivec const& xfr,  //indexing variables
-                 ivec const& xto,  
-                 ivec const& lfr,  
-                 ivec const& lto,
-                 ivec const& tlens,
-                 cube const& thetaDraw, 
-                 int cores=1){
+                                   mat const& AA,   //attr-lvls (vectorised)
+                                   uvec const& nalts,
+                                   ivec const& ntasks,  
+                                   ivec const& xfr,  //indexing variables
+                                   ivec const& xto,  
+                                   ivec const& lfr,  
+                                   ivec const& lto,
+                                   ivec const& tlens,
+                                   cube const& thetaDraw, 
+                                   int cores=1){
   
   // vd2dem
   
@@ -5033,7 +5033,7 @@ arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
     int xpick = xfr(n);
     
     uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
-  
+    
     //task-level
     for(int tt=0; tt<ntask; tt++){
       Rcpp::checkUserInterrupt();
@@ -5047,28 +5047,28 @@ arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
-          
-          //paras
-          arma::vec theta = thetaDraw.slice(ir).col(n);
-          arma::vec beta  = theta(arma::span(0,p-4));
-          double sigma    = exp(theta(p-3));
-          double gamma    = exp(theta(p-2));
-          double E        = exp(theta(p-1));
-          
-          //compute psi
-          //arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*randn(nalt)); 
-          arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-                              revd0(nalt, sigma)); 
-          
-          //find opt demand
-          arma::vec dem = vd_demand(psi, gamma, E, prcs);
-          
-          demcontainer.col(ir)=dem;
-          //Xd(span(xpick,xpick+nalt-1),ir)   = dem;
+        
+        //paras
+        arma::vec theta = thetaDraw.slice(ir).col(n);
+        arma::vec beta  = theta(arma::span(0,p-4));
+        double sigma    = exp(theta(p-3));
+        double gamma    = exp(theta(p-2));
+        double E        = exp(theta(p-1));
+        
+        //compute psi
+        //arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*randn(nalt)); 
+        arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
+          revd0(nalt, sigma)); 
+        
+        //find opt demand
+        arma::vec dem = vd_demand(psi, gamma, E, prcs);
+        
+        demcontainer.col(ir)=dem;
+        //Xd(span(xpick,xpick+nalt-1),ir)   = dem;
       }
-
+      
       for(int k=0; k<nalt; k++){
         XdL(k+xpick)=trans(demcontainer.row(k));
       }   
@@ -5088,16 +5088,16 @@ arma::field<arma::vec> des_dem_vdm(vec const& PP,   //price (vectorised)
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdmn(vec const& PP,
-                  mat const& AA,
-                  uvec const& nalts,
-                  ivec const& ntasks,  
-                  ivec const& xfr,
-                  ivec const& xto,  
-                  ivec const& lfr,  
-                  ivec const& lto,
-                  ivec const& tlens,
-                  cube const& thetaDraw, 
-                  int cores=1){
+                                    mat const& AA,
+                                    uvec const& nalts,
+                                    ivec const& ntasks,  
+                                    ivec const& xfr,
+                                    ivec const& xto,  
+                                    ivec const& lfr,  
+                                    ivec const& lto,
+                                    ivec const& tlens,
+                                    cube const& thetaDraw, 
+                                    int cores=1){
   
   // vd2dem
   
@@ -5134,7 +5134,7 @@ arma::field<arma::vec> des_dem_vdmn(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5173,17 +5173,17 @@ arma::field<arma::vec> des_dem_vdmn(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> der_dem_vdm(vec const& PP,
-                 mat const& AA,
-                 uvec const& nalts,
-                 ivec const& ntasks,  
-                 ivec const& xfr,
-                 ivec const& xto,  
-                 ivec const& lfr,  
-                 ivec const& lto,
-                 ivec const& tlens,
-                 cube const& thetaDraw, 
-                 vec const& epsilon,
-                 int cores=1){
+                                   mat const& AA,
+                                   uvec const& nalts,
+                                   ivec const& ntasks,  
+                                   ivec const& xfr,
+                                   ivec const& xto,  
+                                   ivec const& lfr,  
+                                   ivec const& lto,
+                                   ivec const& tlens,
+                                   cube const& thetaDraw, 
+                                   vec const& epsilon,
+                                   int cores=1){
   
   
   //dimensions
@@ -5219,7 +5219,7 @@ arma::field<arma::vec> der_dem_vdm(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5257,18 +5257,18 @@ arma::field<arma::vec> der_dem_vdm(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
-                             mat const& AA,
-                             mat const& AAf,
-                             uvec const& nalts,
-                             uvec const& tlens,
-                             ivec const& ntasks,  
-                             ivec const& xfr,
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             cube const& thetaDraw,
-                             cube const& tauDraw, 
-                             int cores=1){
+                                          mat const& AA,
+                                          mat const& AAf,
+                                          uvec const& nalts,
+                                          uvec const& tlens,
+                                          ivec const& ntasks,  
+                                          ivec const& xfr,
+                                          ivec const& xto,  
+                                          ivec const& lfr,  
+                                          ivec const& lto,
+                                          cube const& thetaDraw,
+                                          cube const& tauDraw, 
+                                          int cores=1){
   
   // vdsr2dem
   
@@ -5305,7 +5305,7 @@ arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5318,11 +5318,11 @@ arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
         
         //compute psi
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-                            sigma*randn(nalt)); 
+          sigma*randn(nalt)); 
         
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
-
+        
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
         demcontainer.col(ir)=dem;
@@ -5347,19 +5347,19 @@ arma::field<arma::vec> des_dem_vdm_screen(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
-                             mat const& AA,
-                             mat const& AAf,
-                             uvec const& nalts,
-                             uvec const& tlens,  //
-                             ivec const& ntasks,  
-                             ivec const& xfr,  //
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             cube const& thetaDraw,
-                             cube const& tauDraw,
-                             vec const& epsilon,
-                             int cores=1){
+                                          mat const& AA,
+                                          mat const& AAf,
+                                          uvec const& nalts,
+                                          uvec const& tlens,  //
+                                          ivec const& ntasks,  
+                                          ivec const& xfr,  //
+                                          ivec const& xto,  
+                                          ivec const& lfr,  
+                                          ivec const& lto,
+                                          cube const& thetaDraw,
+                                          cube const& tauDraw,
+                                          mat const& epsilon,
+                                          int cores=1){
   // vdsr2dem
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5394,7 +5394,7 @@ arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5407,7 +5407,7 @@ arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
         
         //compute psi
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-          sigma*epsilon(span(xpick,xpick+nalt-1)) ); 
+          sigma*epsilon(span(xpick,xpick+nalt-1),ir) ); 
         
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
@@ -5436,19 +5436,19 @@ arma::field<arma::vec> der_dem_vdm_screen(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
-                             mat const& AA,
-                             mat const& AAf,
-                             uvec const& nalts,
-                             uvec const& tlens,
-                             ivec const& ntasks,  
-                             ivec const& xfr,
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             cube const& thetaDraw,
-                             cube const& tauDraw, 
-                             mat const& tau_pr_Draw,
-                             int cores=1){
+                                            mat const& AA,
+                                            mat const& AAf,
+                                            uvec const& nalts,
+                                            uvec const& tlens,
+                                            ivec const& ntasks,  
+                                            ivec const& xfr,
+                                            ivec const& xto,  
+                                            ivec const& lfr,  
+                                            ivec const& lto,
+                                            cube const& thetaDraw,
+                                            cube const& tauDraw, 
+                                            mat const& tau_pr_Draw,
+                                            int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5483,7 +5483,7 @@ arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5501,7 +5501,7 @@ arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
         psi.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
-                 
+        
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
         demcontainer.col(ir)=dem;
@@ -5524,20 +5524,20 @@ arma::field<arma::vec> des_dem_vdm_screenpr(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
-                             mat const& AA,
-                             mat const& AAf,
-                             uvec const& nalts,
-                             uvec const& tlens,
-                             ivec const& ntasks,  
-                             ivec const& xfr,
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             cube const& thetaDraw,
-                             cube const& tauDraw,
-                             mat const& tau_pr_Draw,
-                             vec const& epsilon,
-                             int cores=1){
+                                            mat const& AA,
+                                            mat const& AAf,
+                                            uvec const& nalts,
+                                            uvec const& tlens,
+                                            ivec const& ntasks,  
+                                            ivec const& xfr,
+                                            ivec const& xto,  
+                                            ivec const& lfr,  
+                                            ivec const& lto,
+                                            cube const& thetaDraw,
+                                            cube const& tauDraw,
+                                            mat const& tau_pr_Draw,
+                                            vec const& epsilon,
+                                            int cores=1){
   
   // vdsr2dem
   
@@ -5574,7 +5574,7 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5592,7 +5592,7 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
         psi.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
-          
+        
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
         demcontainer.col(ir)=dem;
@@ -5621,16 +5621,16 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
-                             mat const& AA,
-                             uvec const& nalts,
-                             ivec const& ntasks,  
-                             ivec const& xfr,
-                             ivec const& xto,  
-                             ivec const& lfr,  
-                             ivec const& lto,
-                             ivec const& tlens,
-                             cube const& thetaDraw, 
-                             int cores=1){
+                                      mat const& AA,
+                                      uvec const& nalts,
+                                      ivec const& ntasks,  
+                                      ivec const& xfr,
+                                      ivec const& xto,  
+                                      ivec const& lfr,  
+                                      ivec const& lto,
+                                      ivec const& tlens,
+                                      cube const& thetaDraw, 
+                                      int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -5647,7 +5647,7 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
   //resp-level
   for(int n=0; n<N; n++){
     infoTimer(n,N);
-  
+    
     int ntask = tlens(n);
     int xpick = xfr(n);
     uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
@@ -5665,7 +5665,7 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5694,7 +5694,7 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
       }  
       xpick+=nalt;
     }
-
+    
   }
   return(XdL);
 }
@@ -5712,17 +5712,17 @@ arma::field<arma::vec> des_dem_vdm_ss(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
-                    mat const& AA,
-                    uvec const& nalts,
-                    ivec const& ntasks,  
-                    ivec const& xfr,
-                    ivec const& xto,  
-                    ivec const& lfr,  
-                    ivec const& lto,
-                    uvec const& tlens,
-                    cube const& thetaDraw, 
-                    vec const& epsilon,
-                    int cores=1){
+                                      mat const& AA,
+                                      uvec const& nalts,
+                                      ivec const& ntasks,  
+                                      ivec const& xfr,
+                                      ivec const& xto,  
+                                      ivec const& lfr,  
+                                      ivec const& lto,
+                                      uvec const& tlens,
+                                      cube const& thetaDraw, 
+                                      vec const& epsilon,
+                                      int cores=1){
   // vd2dem3
   
   //dimensions
@@ -5758,7 +5758,7 @@ arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5799,19 +5799,19 @@ arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP,
-                     mat const& AA,
-                     uvec const& nalts,
-                     vec const& sumpxs,  
-                     ivec const& ntasks,  
-                     ivec const& xfr,
-                     ivec const& xto,  
-                     ivec const& lfr,  
-                     ivec const& lto,
-                     ivec const& tlens,
-                     cube const& thetaDraw, 
-                     int cores=1){
+                                       mat const& AA,
+                                       uvec const& nalts,
+                                       vec const& sumpxs,  
+                                       ivec const& ntasks,  
+                                       ivec const& xfr,
+                                       ivec const& xto,  
+                                       ivec const& lfr,  
+                                       ivec const& lto,
+                                       ivec const& tlens,
+                                       cube const& thetaDraw, 
+                                       int cores=1){
   // vd2Qdem3
-
+  
   //dimensions
   int R=thetaDraw.n_slices;
   int xdim = PP.n_rows;
@@ -5845,7 +5845,7 @@ arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5887,18 +5887,18 @@ arma::field<arma::vec> des_dem_vdm_ssq(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
-                              mat const& AA,
-                              uvec const& nalts,
-                              uvec const& xlens,  
-                              uvec const& tlens,
-                              ivec const& ntasks,  
-                              ivec const& xfr,
-                              ivec const& xto,  
-                              ivec const& lfr,  
-                              ivec const& lto,
-                              cube const& thetaDraw, 
-                              vec const& epsilon,
-                              int cores=1){
+                                       mat const& AA,
+                                       uvec const& nalts,
+                                       uvec const& xlens,  
+                                       uvec const& tlens,
+                                       ivec const& ntasks,  
+                                       ivec const& xfr,
+                                       ivec const& xto,  
+                                       ivec const& lfr,  
+                                       ivec const& lto,
+                                       cube const& thetaDraw, 
+                                       vec const& epsilon,
+                                       int cores=1){
   // vd2Qdem3
   
   //dimensions
@@ -5934,7 +5934,7 @@ arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -5979,18 +5979,18 @@ arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ec_screen_prob_cpp( vec const& PP,
-                         mat const& AA,
-                         mat const& AAf,
-                         uvec const& nalts,
-                         uvec const& tlens,
-                         ivec const& ntasks,  
-                         ivec const& xfr,
-                         ivec const& xto,  
-                         ivec const& lfr,  
-                         ivec const& lto,
-                         cube const& thetaDraw,
-                         cube const& tauDraw, 
-                         int cores=1){
+                                           mat const& AA,
+                                           mat const& AAf,
+                                           uvec const& nalts,
+                                           uvec const& tlens,
+                                           ivec const& ntasks,  
+                                           ivec const& xfr,
+                                           ivec const& xto,  
+                                           ivec const& lfr,  
+                                           ivec const& lto,
+                                           cube const& thetaDraw,
+                                           cube const& tauDraw, 
+                                           int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -6020,10 +6020,10 @@ arma::field<arma::vec> ec_screen_prob_cpp( vec const& PP,
       
       //temp storage
       mat demcontainer(nalt,R, fill::zeros);
-
+      
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         arma::vec pr(nalt, fill::zeros);
         arma::vec taui  = tauDraw.slice(ir).col(n);
@@ -6050,19 +6050,19 @@ arma::field<arma::vec> ec_screen_prob_cpp( vec const& PP,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ec_screenpr_prob_cpp( vec const& PP,
-                           mat const& AA,
-                           mat const& AAf,
-                           uvec const& nalts,
-                           uvec const& tlens,
-                           ivec const& ntasks,  
-                           ivec const& xfr,
-                           ivec const& xto,  
-                           ivec const& lfr,  
-                           ivec const& lto,
-                           cube const& thetaDraw,
-                           cube const& tauDraw, 
-                           mat const& tau_pr_Draw,
-                           int cores=1){
+                                             mat const& AA,
+                                             mat const& AAf,
+                                             uvec const& nalts,
+                                             uvec const& tlens,
+                                             ivec const& ntasks,  
+                                             ivec const& xfr,
+                                             ivec const& xto,  
+                                             ivec const& lfr,  
+                                             ivec const& lto,
+                                             cube const& thetaDraw,
+                                             cube const& tauDraw, 
+                                             mat const& tau_pr_Draw,
+                                             int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -6097,9 +6097,9 @@ arma::field<arma::vec> ec_screenpr_prob_cpp( vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
-
+        
         arma::vec pr(nalt);
         pr.fill(0);
         arma::vec taui  = tauDraw.slice(ir).col(n);
@@ -6360,7 +6360,7 @@ List loop_ddpr_RWMH(  vec const& XX,
   int Rk=R/keep;
   int mkeep;
   int m=1;//Z.n_cols; - no covariates for now
-
+  
   // start values ..................
   mat MU      = Bbar;
   mat SIGMA   = eye(p,p);  
@@ -6454,7 +6454,7 @@ List loop_ddpr_RWMH(  vec const& XX,
                    cores);       
     
     if(ir>1000){
-
+      
       draw_dd_taupr1( ll_olds,
                       theta_temp,
                       tau_prs,
@@ -6563,17 +6563,17 @@ List loop_ddpr_RWMH(  vec const& XX,
 //' @export
 //[[Rcpp::export]]
 arma::field<arma::vec> ddprdem(vec const& PP,
-                                 mat const& AA,
-                                 uvec const& nalts,
-                                 uvec const& tlens,
-                                 ivec const& ntasks,  
-                                 ivec const& xfr,
-                                 ivec const& xto,  
-                                 ivec const& lfr,  
-                                 ivec const& lto,
-                                 cube const& thetaDraw,
-                                 mat const& tau_pr_Draw,
-                                 int cores=1){
+                               mat const& AA,
+                               uvec const& nalts,
+                               uvec const& tlens,
+                               ivec const& ntasks,  
+                               ivec const& xfr,
+                               ivec const& xto,  
+                               ivec const& lfr,  
+                               ivec const& lto,
+                               cube const& thetaDraw,
+                               mat const& tau_pr_Draw,
+                               int cores=1){
   
   //dimensions
   int R=thetaDraw.n_slices;
@@ -6640,4 +6640,320 @@ arma::field<arma::vec> ddprdem(vec const& PP,
   }
   return(XdL);
 }
+
+///////////////////
+///////////////////
+
+//Menu choice and sequential models
+
+
+
+// utility functions
+
+int mod1(int a, int n){
+  return(a - floor(a/n)*n);
+}  
+
+
+// from sequential id to permutation
+
+// [[Rcpp::export]]
+ivec index_id2alt(int id, ivec nalts) {
+  int p = nalts.n_elem;
+  ivec out(p);
+  
+  for(int k=0; k<p; k++){
+    out(k) = floor(mod1(id/(prod(nalts.head(k))),nalts(k)));
+  }
+  return(out);
+}
+
+
+
+
+
+
+
+//implementation isn't super-efficient with memory, but should be fast
+
+//' @export
+//[[Rcpp::export]]
+arma::field<arma::vec> ddprdemseq1(arma::field<arma::vec> PPfield,
+                                   arma::field<arma::mat> AAfield,
+                                   arma::field<arma::uvec> naltfield,
+                                   arma::field<arma::ivec> ntaskfield,
+                                   arma::field<arma::ivec> xfrfield,
+                                   arma::ivec pvecs,
+                                   arma::imat pfrto,
+                                   arma::field<arma::ivec> secpick,
+                                   cube const& thetaDraw,
+                                   mat const& tau_pr_Draw,
+                                   int cores=1){
+  
+  int nstage = PPfield.n_elem;
+  int xdim_all=0;
+  for(int k=0; k<nstage; k++){
+    xdim_all+=PPfield(k).n_rows;
+  }
+  
+  //dimensions
+  int R = thetaDraw.n_slices;
+  int N = ntaskfield(0).n_elem;
+  
+  //output init
+  arma::field<arma::vec>XdL(xdim_all);
+  
+  //start timer
+  startTimer();
+  
+  //resp-level
+  for(int n=0; n<N; n++){
+    // Rcpp::Rcout << n << std::endl;    
+    infoTimer(n,N);
+    
+    int ntask = ntaskfield(0)(n);
+    
+    mat prevstagespent(ntask, R, fill::zeros);
+    
+    //stage-level
+    for(int ss=0; ss<nstage; ss++){
+      
+      int xpick = xfrfield(ss)(n);
+      int p = pvecs(ss);
+      
+      //task-level - each task may have its own previous-stage-spent information
+      //              which we have to pick from stagespents
+      for(int tt=0; tt<ntask; tt++){
+        Rcpp::checkUserInterrupt();
+        
+        int nalt = naltfield(ss)(tt);
+        
+        //temp storage
+        mat demcontainer(nalt, R, fill::zeros);
+        ivec nalt_space = linspace<ivec>(0, nalt-1); 
+        arma::vec prcs = PPfield(ss).subvec(xpick,xpick+nalt-1);
+        
+        //draw-level
+        omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+        for (int ir = 0; ir <R; ++ir){
+          
+          //paras - stage specific
+          arma::vec theta = thetaDraw.slice(ir).col(n).subvec(pfrto(ss,0),pfrto(ss,1));		
+          arma::vec beta  = theta(arma::span(0,p-2));
+          double beta_p   = exp(theta(p-1));
+          
+          //precomputes
+          arma::vec ab = (AAfield(ss)(span(xpick,xpick+nalt-1),span::all)) * beta - prcs*beta_p;
+          arma::vec pr = exp(ab)/(1+sum(exp(ab)));
+          
+          pr.elem(find(prcs>(exp(tau_pr_Draw(n,ir)) - prevstagespent(tt, ir) )  ))*=0;
+          
+          //multinomial draw
+          int pick_draw = rmuno2(pr);
+          
+          //if not outside good, choose inside good
+          if(pick_draw!=nalt){
+            demcontainer(pick_draw,ir)=1;
+          }
+          
+          //update spent on previous stages info for each draw of theta
+          prevstagespent(tt, ir)+=sum(demcontainer.col(ir) % prcs);
+          
+        }
+        for(int k=0; k<nalt; k++){
+          XdL( secpick(ss)(k+xpick) ) = trans( demcontainer.row(k) );
+        } 
+        xpick+=nalt;
+        
+      }//t loop
+      
+    }//stage loop
+    
+  }
+  
+  return(XdL);
+}
+
+
+
+
+
+//simultaneous choice with budget
+
+
+vec pick2demvec(int pick, 
+                int nalt){
+  vec out(nalt,fill::zeros);
+  
+  if(pick<nalt){
+    out(pick)=1;
+  }
+  return(out);
+}
+
+
+
+//' @export
+//[[Rcpp::export]]
+arma::field<arma::vec> ddprdemsimu1(arma::field<arma::vec>  PPfield,
+                                    arma::field<arma::mat>  AAfield,
+                                    arma::field<arma::uvec> naltfield,
+                                    arma::field<arma::ivec> ntaskfield,
+                                    arma::field<arma::ivec> xfrfield,
+                                    arma::ivec pvecs,
+                                    arma::imat pfrto,
+                                    arma::field<arma::ivec> secpick,
+                                    cube const& thetaDraw,
+                                    mat const& tau_pr_Draw,
+                                    int cores=1){
+  
+  int nstage = PPfield.n_elem;
+  int xdim_all=0;
+  for(int k=0; k<nstage; k++){
+    xdim_all+=PPfield(k).n_rows;
+  }
+  
+  //dimensions
+  int R = thetaDraw.n_slices;
+  int N = ntaskfield(0).n_elem;
+  
+  //output init
+  arma::field<arma::vec> XdL(xdim_all);
+  
+  //start timer
+  startTimer();
+  
+  //temp var tracking alternatives in each stage
+  ivec nalt_temp(nstage);
+  
+  //resp-level ------------------------------------------------------
+  for(int n=0; n<N; n++){
+    infoTimer(n,N);
+    
+    int ntask = ntaskfield(0)(n);
+    ivec xpicks(nstage);
+    for(int ss=0; ss<nstage; ss++){
+      xpicks(ss) = xfrfield(ss)(n);
+    }
+    
+    //task-level -----------------------------------------------------
+    for(int tt=0; tt<ntask; tt++){
+      Rcpp::checkUserInterrupt();
+      
+      for(int ss=0; ss<nstage; ss++){
+        nalt_temp(ss) = naltfield(ss)(tt);
+      }
+      
+      arma::field<arma::vec> xbL(nstage);
+      arma::field<arma::mat> demcontainers(nstage);
+      
+      //setup temp storage of draws
+      for(int ss=0; ss<nstage; ss++){
+        demcontainers(ss) = zeros(naltfield(ss)(tt),R);
+      }
+      
+      //draw-level ------------------------------------------------------
+      omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+      for (int ir = 0; ir <R; ++ir){
+        
+        //stage-level ------------------------------------------------------
+        for(int ss=0; ss<nstage; ss++){
+          
+          //temp storage
+          //ivec nalt_space = linspace<ivec>(0, nalt_temp(ss)-1); 
+          arma::vec prcs  = PPfield(ss).subvec(xpicks(ss),xpicks(ss)+nalt_temp(ss)-1);
+          
+          int p = pvecs(ss);
+          
+          //paras - stage specific
+          arma::vec theta = thetaDraw.slice(ir).col(n).subvec(pfrto(ss,0),pfrto(ss,1));		
+          arma::vec beta  = theta(arma::span(0,p-2));
+          double beta_p   = exp(theta(p-1));
+          
+          //precomputes
+          vec nulli(1);
+          nulli(0)=0;
+          xbL(ss)= join_cols( vectorise((AAfield(ss)(span(xpicks(ss),xpicks(ss)+nalt_temp(ss)-1),span::all)) * beta - prcs*beta_p), nulli);
+          
+        } //stage loop =====================================================
+        
+        int ncombs = prod(nalt_temp+1); //include outside option
+        vec logcombprops(ncombs, fill::zeros);
+        vec combprops(ncombs, fill::zeros);
+        
+        //combinations -----
+        for(int kk=0; kk<ncombs; kk++){
+          ivec tempid = index_id2alt(kk, nalt_temp+1);
+          double Etot=0;  //total cost for combination
+          
+          //combination probabilities
+          for(int ss=0; ss<nstage; ss++){
+            
+            if(tempid(ss)<=nalt_temp(ss)){
+              Etot+=PPfield(ss)(tempid(ss)); //0 cost osg
+            }
+            logcombprops(kk)+=xbL(ss)(tempid(ss));
+          }
+          
+          //remove combinations beyond budget
+          if(Etot<exp(tau_pr_Draw(n,ir))){
+            combprops(kk)=exp(logcombprops(kk));
+          }
+          
+        } // combinations  =====
+        
+        //probabilities of combinations          
+        if(sum(combprops)>0){
+          combprops = combprops / sum(combprops);
+        }
+        
+        //draw
+        int pick_draw = rmuno2(combprops);
+        ///
+        ivec tempid = index_id2alt(pick_draw, nalt_temp+1);
+        
+        for(int ss=0; ss<nstage; ss++){
+          // demcontainers(ss).col(ir)+=tempid(ss);// = pick2demvec( tempid(ss), nalt_temp(ss) );
+          Rcout << tempid(ss);
+          
+          demcontainers(ss).col(ir)+=pick2demvec( tempid(ss), nalt_temp(ss) );
+          
+        }
+        
+      } //draw-level =====================================================
+      
+      //each product has its own draw list
+      for(int ss=0; ss<nstage; ss++){
+        for(int k=0; k<nalt_temp(ss); k++){
+          XdL( secpick(ss)(k+xpicks(ss)) ) = trans(demcontainers(ss).row(k));
+        } 
+        xpicks(ss)+=nalt_temp(ss);
+      }
+      
+    } //t loop =====================================================
+    
+  } //n loop =====================================================
+  
+  return(XdL);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
