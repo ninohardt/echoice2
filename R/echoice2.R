@@ -925,6 +925,7 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 #' @usage vd_est_vdm(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
+#' @param tidy apply echoice tidier
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
@@ -940,40 +941,46 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 #' icecream_est <- icecream %>% vd_est_vdm(R=50000)
 #' }
 #' @export
-vd_est_vdm = function(vd,
-                      R=100000, 
-                      keep=10,
-                      cores=NULL,
-                      control=list(include_data=TRUE)){
-  
-  #check input data
-  if(!vd_check_long(vd)) stop("Check data")
-  
-  #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),
-                    alt =as.integer(alt))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+3), ncol=ncol(dat$AA)+3)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  #Run model
-  out=
+vd_est_vdm=
+  function(vd,
+           tidy=T,
+           R=100000, 
+           keep=10,
+           cores=NULL,
+           control=list(include_data=TRUE)){
+    
+    #check input data
+    if(!vd_check_long(vd)) stop("Check data")
+    
+    #integer variables
+    vd<-vd %>% mutate(task=as.integer(task),
+                      alt =as.integer(alt))
+    
+    #Multicore settings
+    if(is.null(cores)){
+      cores=parallel::detectCores(logical=FALSE)
+    }
+    message(paste0("Using ",cores," cores"))
+    
+    #re-arrange data
+    if(tidy){
+      dat <- 
+        vd %>% 
+        vd_long_tidy %>% vd_prepare
+    }else{
+      dat <- 
+        vd %>% vd_prepare    
+    }
+    
+    #Prior
+    Bbar=matrix(rep(0,ncol(dat$AA)+3), ncol=ncol(dat$AA)+3)
+    A=0.01*diag(1)
+    nu=ncol(dat$AA)+9
+    V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3)
+    Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
+    
+    #Run model
+    out=
       loop_vd2_RWMH( dat$XX, 
                      dat$PP,
                      dat$AA,
@@ -994,40 +1001,41 @@ vd_est_vdm = function(vd,
                      V=V, 
                      tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
                      progressinterval=100, cores=cores)
-  
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
+    
+    #Add data information
+    out$A_names<-colnames(dat$AA)
+    out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
+    if(!is.null(dat$attributes_levels)){
+      out$attributes_levels=dat$attributes_levels
+    }
+    
+    #Add model information
+    out$ec_type="volumetric-compensatory"
+    out$error_specification="EV1"
+    out$ec_type_short="VD-comp"
+    out$Prior=Prior
+    
+    attributes(out)$Af<-attributes(dat)$Af
+    attributes(out)$ec_data<-attributes(dat)$ec_data
+    
+    
+    ec_model = list(model_name_full="volumetric-compensatory-EV1",
+                    model_name_short="VD-comp",
+                    error_specification="EV1",
+                    model_parnames=c('sigma','gamma','E'),
+                    Prior=Prior)
+    
+    attributes(out)$ec_model=ec_model
+    
+    
+    #Add training data
+    if(control$include_data){
+      out$dat=dat
+    }
+    
+    return(out)
   }
-  
-  #Add model information
-  out$ec_type="volumetric-compensatory"
-  out$error_specification="EV1"
-  out$ec_type_short="VD-comp"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="volumetric-compensatory-EV1",
-                  model_name_short="VD-comp",
-                  error_specification="EV1",
-                  model_parnames=c('sigma','gamma','E'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
+
 
 
 
@@ -1784,6 +1792,7 @@ prep_newprediction <- function(data_new,data_old){
 #' @usage vd_dem_vdm(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
+#' @param tidy apply echoice tidier
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
 #' @param cores (optional) cores
@@ -1797,6 +1806,7 @@ prep_newprediction <- function(data_new,data_old){
 #' 
 #' @export
 vd_dem_vdm=function(vd,
+                    tidy=T,
                     est,
                     epsilon_not=NULL,
                     cores=NULL){
@@ -1808,9 +1818,14 @@ vd_dem_vdm=function(vd,
   message(paste0("Using ",cores," cores"))
   
   #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
+  if(tidy){
+    dat <- 
+      vd %>% 
+      vd_long_tidy %>% vd_prepare_nox()
+  }else{
+    dat <- 
+      vd  %>% vd_prepare_nox()
+  }
   
   #demand sim
   if(is.null(epsilon_not)){
@@ -1850,7 +1865,7 @@ vd_dem_vdm=function(vd,
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(vd)$ec_model   <- attributes(est)$ec_model
-   
+  
   return(vd)
 }
 
