@@ -3450,7 +3450,7 @@ ec_demcurve=function(ec_long,
       
       out[[kk]]=
         testmarket_temp %>% 
-        demfun(draws) %>% 
+        demfun(est=draws) %>% 
         ec_dem_aggregate(attr_names) %>% ec_dem_summarise %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
       
@@ -3462,7 +3462,7 @@ ec_demcurve=function(ec_long,
       
       out[[kk]]=
         testmarket_temp %>% 
-        demfun(draws) %>% 
+        demfun(est=draws) %>% 
         ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
     }  
@@ -3520,7 +3520,7 @@ ec_demcurve_inci=function(ec_long,
       
       out[[kk]]=
         testmarket_temp %>% 
-        demfun(draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
+        demfun(est=draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
         ec_dem_aggregate(attr_names) %>% ec_dem_summarise %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
       
@@ -3532,7 +3532,7 @@ ec_demcurve_inci=function(ec_long,
       
       out[[kk]]=
         testmarket_temp %>% 
-        demfun(draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
+        demfun(est=draws) %>% mutate(.demdraws=map(.demdraws, sign))%>%
         ec_dem_aggregate(attr_names )%>% ec_dem_summarise  %>% select(-.demdraws) %>%
         bind_cols( scenario=rel_pricerange[kk])
     }  
@@ -3600,7 +3600,7 @@ ec_demcurve_cond_dem=function(ec_long,
       
       dem_temp=
       testmarket_temp %>%
-        demfun(draws) %>%
+        demfun(est=draws) %>%
         add_column(.isfocal=focal_product) %>%
         filter(.isfocal)%>% select(-.isfocal) 
       
@@ -3637,7 +3637,7 @@ ec_demcurve_cond_dem=function(ec_long,
       
       dem_temp=
         testmarket_temp %>%
-        demfun(draws) %>%
+        demfun(est=draws) %>%
         add_column(.isfocal=focal_product) %>%
         filter(.isfocal)%>% select(-.isfocal) 
       
