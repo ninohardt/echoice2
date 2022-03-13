@@ -4024,9 +4024,9 @@ ec_boxplot_screen <- function(draws, burnin=100){
 #'
 #' @param M is an echoice draw object (list)
 #' @param burnin_perc how much burn-in to remove
-#' @param total_draws approximately how many draws to keep after thinning
+#' @param total_draws how many draws to keep after thinning
 #'
-#' @return thined echoice draw object (list)
+#' @return thinned echoice draw object (list)
 #'
 #' @export
 vd_thin_draw=function(M, 
@@ -4037,17 +4037,31 @@ vd_thin_draw=function(M,
   
   #burnin
   first_draw=floor(burnin_perc*R)
+  usableR   =length(first_draw:R)
+  message("Draws post burnin: ",usableR)
   
-  #draw picker
-  if(is.null(total_draws)){
-    total_draws=floor(floor((1-burnin_perc)*R)/2)
-  }
-  if(total_draws>floor((1-burnin_perc)*R)){
-    total_draws=floor((1-burnin_perc)*R)
-  }
-  seqby = floor((R - first_draw)/(total_draws - 1))
-  keepdraws=seq(first_draw,R,by = seqby)
   
+  if(usableR<total_draws){
+    message("More desired draws than original draws")
+    total_draws=usableR
+    keepdraws=sample(first_draw:R, size = total_draws, replace = TRUE)
+  }else{
+    all_draws=first_draw:R
+    
+    #try to thin as much as possible
+    chosen_draws = unique(round(seq.int(first_draw, R, length.out=total_draws),0))
+    
+    #if missing some draws, randomly grab them from remaining draws
+    if(length(chosen_draws)<total_draws){
+      message("draws in quence: ",length(chosen_draws), " adding more")
+      
+      added_draws=sample(all_draws[all_draws%in%chosen_draws],total_draws-length(chosen_draws))
+      keepdraws=c(chosen_draws,added_draws)
+    } else{
+      keepdraws=chosen_draws
+    }
+    
+  }
   
   if(is.null(M$tauDraw)){
     M$thetaDraw=  M$thetaDraw[,,keepdraws]
