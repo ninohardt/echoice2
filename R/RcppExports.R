@@ -294,3 +294,17 @@ ddprdem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw,
     .Call('_echoice2_ddprdem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tau_pr_Draw, cores)
 }
 
+index_id2alt <- function(id, nalts) {
+    .Call('_echoice2_index_id2alt', PACKAGE = 'echoice2', id, nalts)
+}
+
+#' @export
+ddprdemseq1 <- function(PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ddprdemseq1', PACKAGE = 'echoice2', PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores)
+}
+
+#' @export
+ddprdemsimu1 <- function(PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores = 1L) {
+    .Call('_echoice2_ddprdemsimu1', PACKAGE = 'echoice2', PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores)
+}
+

@@ -11,10 +11,10 @@ vd_thin_draw(M, keepf=NULL)
 
 \item{burnin_perc}{how much burn-in to remove}
 
-\item{total_draws}{approximately how many draws to keep after thinning}
+\item{total_draws}{how many draws to keep after thinning}
 }
 \value{
-thined echoice draw object (list)
+thinned echoice draw object (list)
 }
 \description{
 Thin echoice-vd draw objects

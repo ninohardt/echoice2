@@ -9,6 +9,8 @@ vd_est_vdm(vd, R=100000, keep=10)
 \arguments{
 \item{vd}{volumetric demand data (long format)}
 
+\item{tidy}{apply echoice tidier}
+
 \item{R}{draws}
 
 \item{keep}{thinning}

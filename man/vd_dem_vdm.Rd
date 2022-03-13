@@ -9,6 +9,8 @@ vd_dem_vdm(vd, est, epsilon_not=NULL, cores=NULL)
 \arguments{
 \item{vd}{data}
 
+\item{tidy}{apply echoice tidier}
+
 \item{est}{ec-model draws}
 
 \item{epsilon_not}{(optional) error realizations}
