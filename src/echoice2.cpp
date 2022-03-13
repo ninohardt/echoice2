@@ -5182,7 +5182,7 @@ arma::field<arma::vec> der_dem_vdm(vec const& PP,
                                    ivec const& lto,
                                    ivec const& tlens,
                                    cube const& thetaDraw, 
-                                   vec const& epsilon,
+                                   mat const& epsilon,
                                    int cores=1){
   
   
@@ -5231,7 +5231,7 @@ arma::field<arma::vec> der_dem_vdm(vec const& PP,
         
         //compute psi
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-          sigma*epsilon(span(xpick,xpick+nalt-1)) ); 
+          sigma*epsilon(span(xpick,xpick+nalt-1), ir) ); 
         
         //find opt demand
         arma::vec dem = vd_demand(psi, gamma, E, prcs);
@@ -5536,7 +5536,7 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
                                             cube const& thetaDraw,
                                             cube const& tauDraw,
                                             mat const& tau_pr_Draw,
-                                            vec const& epsilon,
+                                            mat const& epsilon,
                                             int cores=1){
   
   // vdsr2dem
@@ -5587,7 +5587,7 @@ arma::field<arma::vec> der_dem_vdm_screenpr(vec const& PP,
         
         //compute psi
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-          sigma*epsilon(span(xpick,xpick+nalt-1)) ); 
+          sigma*epsilon(span(xpick,xpick+nalt-1), ir) ); 
         
         //screen
         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
@@ -5721,7 +5721,7 @@ arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
                                       ivec const& lto,
                                       uvec const& tlens,
                                       cube const& thetaDraw, 
-                                      vec const& epsilon,
+                                      mat const& epsilon,
                                       int cores=1){
   // vd2dem3
   
@@ -5772,7 +5772,8 @@ arma::field<arma::vec> der_dem_vdm_ss(vec const& PP,
         
         
         //compute psi
-        arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +sigma*epsilon(span(xpick,xpick+nalt-1)) - log(nalt*xi+1) ); 
+        arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
+          sigma*epsilon(span(xpick,xpick+nalt-1), ir) - log(nalt*xi+1) ); 
         
         
         //find opt demand
@@ -5897,7 +5898,7 @@ arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
                                        ivec const& lfr,  
                                        ivec const& lto,
                                        cube const& thetaDraw, 
-                                       vec const& epsilon,
+                                       mat const& epsilon,
                                        int cores=1){
   // vd2Qdem3
   
@@ -5950,7 +5951,7 @@ arma::field<arma::vec> der_dem_vdm_ssq(vec const& PP,
         
         //compute psi
         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
-          sigma*epsilon(span(xpick,xpick+nalt-1)) - 
+          sigma*epsilon(span(xpick,xpick+nalt-1), ir) - 
           log(nalt*xi+1+tau*(nalt^2)) ); 
         //revd0(nalt, sigma)
         
@@ -6641,15 +6642,12 @@ arma::field<arma::vec> ddprdem(vec const& PP,
   return(XdL);
 }
 
-///////////////////
-///////////////////
 
-//Menu choice and sequential models
 
+/////////////////// Experimental ///////////////////
 
 
 // utility functions
-
 int mod1(int a, int n){
   return(a - floor(a/n)*n);
 }  
