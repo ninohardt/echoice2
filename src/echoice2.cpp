@@ -102,12 +102,7 @@ vec revdx(vec locs,
   
   int n = locs.n_elem;
   vec out(n);
-  // 
-  // for(int i = 0; i < n; i++) {
-  //   out(i) = loc-scale*log(-log(runif(1)));
-  // }
-  
-  out = locs-scales%log(-log(randu(n) ));
+  out = locs-scales%log(-log(randu(n)));
   
   return(out);
 }
@@ -6610,7 +6605,7 @@ arma::field<arma::vec> ddprdem(vec const& PP,
       
       //draw-level
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //paras
@@ -6644,6 +6639,7 @@ arma::field<arma::vec> ddprdem(vec const& PP,
 
 
 
+
 /////////////////// Experimental ///////////////////
 
 
@@ -6665,10 +6661,6 @@ ivec index_id2alt(int id, ivec nalts) {
   }
   return(out);
 }
-
-
-
-
 
 
 
@@ -6733,7 +6725,7 @@ arma::field<arma::vec> ddprdemseq1(arma::field<arma::vec> PPfield,
         
         //draw-level
         omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+        #pragma omp parallel for schedule(static)
         for (int ir = 0; ir <R; ++ir){
           
           //paras - stage specific
@@ -6853,7 +6845,7 @@ arma::field<arma::vec> ddprdemsimu1(arma::field<arma::vec>  PPfield,
       
       //draw-level ------------------------------------------------------
       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int ir = 0; ir <R; ++ir){
         
         //stage-level ------------------------------------------------------
