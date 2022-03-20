@@ -34,6 +34,12 @@ which is still available on
 
 ## News
 
+-   \`Conjunctive Screening in Models of Multiple Discreteness’ is going
+    to be published. The volumetric screening model is easy to apply.
+    Check out this
+    [example](https://github.com/ninohardt/man/html/echoice2_pizza.html)
+    (3/22/22)
+
 -   **Looking for co-developers!**
 
 -   Next: upper-level covariates, effects-coding, discrete and
@@ -172,19 +178,21 @@ Upper-level estimates can be summarized using `ec_estimates_MU`:
 
 ``` r
 est_icecream %>% ec_estimates_MU()
+#> Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.
+#> Using compatibility `.name_repair`.
 #> # A tibble: 21 x 12
-#>    attribute lvl   par      mean     sd `CI-5%` `CI-95%` sig   model error
-#>    <chr>     <chr> <chr>   <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
-#>  1 <NA>      <NA>  int   -3.24   0.550   -3.55   -2.60   TRUE  VD-c~ EV1  
-#>  2 Brand     Blue~ Bran~ -0.678  0.162   -0.891  -0.419  TRUE  VD-c~ EV1  
-#>  3 Brand     Blue~ Bran~ -0.605  0.151   -0.812  -0.405  TRUE  VD-c~ EV1  
-#>  4 Brand     Brey~ Bran~ -0.0993 0.0963  -0.264   0.0584 FALSE VD-c~ EV1  
-#>  5 Brand     Drye~ Bran~ -0.561  0.122   -0.721  -0.402  TRUE  VD-c~ EV1  
-#>  6 Brand     Haag~ Bran~ -0.324  0.0880  -0.452  -0.188  TRUE  VD-c~ EV1  
-#>  7 Brand     Store Bran~ -0.478  0.117   -0.646  -0.303  TRUE  VD-c~ EV1  
-#>  8 Flavor    Choc~ Flav~ -0.393  0.132   -0.619  -0.195  TRUE  VD-c~ EV1  
-#>  9 Flavor    Choc~ Flav~ -0.437  0.129   -0.643  -0.229  TRUE  VD-c~ EV1  
-#> 10 Flavor    Cook~ Flav~ -0.393  0.101   -0.535  -0.227  TRUE  VD-c~ EV1  
+#>    attribute lvl         par      mean     sd `CI-5%` `CI-95%` sig   model error
+#>    <chr>     <chr>       <chr>   <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
+#>  1 <NA>      <NA>        int   -3.23   0.538   -3.54   -2.52   TRUE  VD-c~ EV1  
+#>  2 Brand     BlueBell    Bran~ -0.675  0.151   -0.881  -0.472  TRUE  VD-c~ EV1  
+#>  3 Brand     BlueBunny   Bran~ -0.625  0.156   -0.824  -0.338  TRUE  VD-c~ EV1  
+#>  4 Brand     Breyers     Bran~ -0.0895 0.102   -0.286   0.0552 FALSE VD-c~ EV1  
+#>  5 Brand     Dryers      Bran~ -0.549  0.117   -0.690  -0.393  TRUE  VD-c~ EV1  
+#>  6 Brand     HaagenDa    Bran~ -0.318  0.0851  -0.451  -0.183  TRUE  VD-c~ EV1  
+#>  7 Brand     Store       Bran~ -0.513  0.123   -0.685  -0.329  TRUE  VD-c~ EV1  
+#>  8 Flavor    ChocChip    Flav~ -0.370  0.101   -0.507  -0.198  TRUE  VD-c~ EV1  
+#>  9 Flavor    ChocDough   Flav~ -0.401  0.120   -0.589  -0.200  TRUE  VD-c~ EV1  
+#> 10 Flavor    CookieCream Flav~ -0.424  0.105   -0.580  -0.263  TRUE  VD-c~ EV1  
 #> # ... with 11 more rows, and 2 more variables: reference_lvl <chr>,
 #> #   parameter <chr>
 ```
@@ -253,16 +261,16 @@ dempres_icecream %>%
 #> # A tibble: 300 x 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        40.2       14.1    19.7      66.7
-#>  2     2 <dbl [1,000]>        99.3       27.7    55.5     148. 
-#>  3     3 <dbl [1,000]>        31.0        6.04   21.9      41.7
-#>  4     4 <dbl [1,000]>        85.9       28.3    44.8     137. 
-#>  5     5 <dbl [1,000]>        32.7       17.8     9.93     67.9
-#>  6     6 <dbl [1,000]>        15.5        8.23    4.65     30.0
-#>  7     7 <dbl [1,000]>        72.9       22.2    48.5     105. 
-#>  8     8 <dbl [1,000]>        52.8       19.9    25.2      89.7
-#>  9     9 <dbl [1,000]>        13.8        4.75    6.46     22.1
-#> 10    10 <dbl [1,000]>        38.1       10.8    20.2      55.8
+#>  1     1 <dbl [1,000]>        38.6       12.4    19.5      60.8
+#>  2     2 <dbl [1,000]>        99.4       27.8    57.7     150. 
+#>  3     3 <dbl [1,000]>        31.3        5.68   21.6      40.5
+#>  4     4 <dbl [1,000]>        90.8       28.7    47.5     142. 
+#>  5     5 <dbl [1,000]>        31.7       17.3    10.2      69.0
+#>  6     6 <dbl [1,000]>        17.1        9.49    5.12     36.9
+#>  7     7 <dbl [1,000]>        72.9       20.5    49.8     109. 
+#>  8     8 <dbl [1,000]>        50.3       20.2    20.8      89.3
+#>  9     9 <dbl [1,000]>        13.9        4.58    6.74     21.6
+#> 10    10 <dbl [1,000]>        37.7       11.2    20.7      56.8
 #> # ... with 290 more rows
 ```
 
