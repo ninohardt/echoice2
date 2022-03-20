@@ -171,7 +171,7 @@ Estimating a simple volumetric demand model is easy. Use the
 est_icecream <- icecream %>% vd_est_vdm(R=10000)
 #> Using 16 cores
 #>  MCMC in progress 
-#>  Total Time Elapsed: 0.15 minutes
+#>  Total Time Elapsed: 0.13 minutes
 ```
 
 Upper-level estimates can be summarized using `ec_estimates_MU`:
@@ -183,16 +183,16 @@ est_icecream %>% ec_estimates_MU()
 #> # A tibble: 21 x 12
 #>    attribute lvl         par      mean     sd `CI-5%` `CI-95%` sig   model error
 #>    <chr>     <chr>       <chr>   <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
-#>  1 <NA>      <NA>        int   -3.23   0.552   -3.59   -2.59   TRUE  VD-c~ EV1  
-#>  2 Brand     BlueBell    Bran~ -0.680  0.151   -0.868  -0.458  TRUE  VD-c~ EV1  
-#>  3 Brand     BlueBunny   Bran~ -0.625  0.142   -0.814  -0.423  TRUE  VD-c~ EV1  
-#>  4 Brand     Breyers     Bran~ -0.0861 0.116   -0.316   0.0717 FALSE VD-c~ EV1  
-#>  5 Brand     Dryers      Bran~ -0.576  0.121   -0.724  -0.425  TRUE  VD-c~ EV1  
-#>  6 Brand     HaagenDa    Bran~ -0.326  0.0951  -0.465  -0.171  TRUE  VD-c~ EV1  
-#>  7 Brand     Store       Bran~ -0.480  0.113   -0.646  -0.307  TRUE  VD-c~ EV1  
-#>  8 Flavor    ChocChip    Flav~ -0.362  0.0978  -0.514  -0.211  TRUE  VD-c~ EV1  
-#>  9 Flavor    ChocDough   Flav~ -0.463  0.141   -0.668  -0.215  TRUE  VD-c~ EV1  
-#> 10 Flavor    CookieCream Flav~ -0.372  0.106   -0.534  -0.207  TRUE  VD-c~ EV1  
+#>  1 <NA>      <NA>        int   -3.24   0.519   -3.50   -2.76   TRUE  VD-c~ EV1  
+#>  2 Brand     BlueBell    Bran~ -0.669  0.142   -0.859  -0.496  TRUE  VD-c~ EV1  
+#>  3 Brand     BlueBunny   Bran~ -0.610  0.140   -0.810  -0.407  TRUE  VD-c~ EV1  
+#>  4 Brand     Breyers     Bran~ -0.0775 0.0936  -0.244   0.0654 FALSE VD-c~ EV1  
+#>  5 Brand     Dryers      Bran~ -0.528  0.120   -0.686  -0.336  TRUE  VD-c~ EV1  
+#>  6 Brand     HaagenDa    Bran~ -0.289  0.0863  -0.420  -0.141  TRUE  VD-c~ EV1  
+#>  7 Brand     Store       Bran~ -0.465  0.108   -0.625  -0.297  TRUE  VD-c~ EV1  
+#>  8 Flavor    ChocChip    Flav~ -0.344  0.140   -0.578  -0.109  TRUE  VD-c~ EV1  
+#>  9 Flavor    ChocDough   Flav~ -0.371  0.119   -0.550  -0.166  TRUE  VD-c~ EV1  
+#> 10 Flavor    CookieCream Flav~ -0.371  0.122   -0.563  -0.166  TRUE  VD-c~ EV1  
 #> # ... with 11 more rows, and 2 more variables: reference_lvl <chr>,
 #> #   parameter <chr>
 ```
@@ -261,16 +261,16 @@ dempres_icecream %>%
 #> # A tibble: 300 x 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        40.5       13.0    21.5      64.0
-#>  2     2 <dbl [1,000]>       100.        28.3    58.3     149. 
-#>  3     3 <dbl [1,000]>        31.3        5.63   22.3      40.5
-#>  4     4 <dbl [1,000]>        87.1       28.4    45.3     137. 
-#>  5     5 <dbl [1,000]>        31.6       19.2     8.25     68.3
-#>  6     6 <dbl [1,000]>        16.2        8.36    5.32     32.5
-#>  7     7 <dbl [1,000]>        73.0       21.2    49.7     104. 
-#>  8     8 <dbl [1,000]>        51.7       20.5    23.3      91.5
-#>  9     9 <dbl [1,000]>        13.2        4.52    6.55     21.5
-#> 10    10 <dbl [1,000]>        36.6       10.6    20.3      53.9
+#>  1     1 <dbl [1,000]>        38.5       12.5    19.7      60.7
+#>  2     2 <dbl [1,000]>        98.1       27.9    56.5     146. 
+#>  3     3 <dbl [1,000]>        30.5        5.76   21.5      40.6
+#>  4     4 <dbl [1,000]>        86.6       28.7    44.8     141. 
+#>  5     5 <dbl [1,000]>        31.3       18.2     7.97     66.4
+#>  6     6 <dbl [1,000]>        15.7        8.84    4.16     32.2
+#>  7     7 <dbl [1,000]>        72.0       21.3    48.6     102. 
+#>  8     8 <dbl [1,000]>        47.4       20.0    20.8      85.8
+#>  9     9 <dbl [1,000]>        13.4        4.33    6.76     21.4
+#> 10    10 <dbl [1,000]>        36.9       10.9    18.8      55.3
 #> # ... with 290 more rows
 ```
 
