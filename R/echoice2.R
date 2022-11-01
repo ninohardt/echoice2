@@ -8,39 +8,130 @@
 # vd_ functions are specific to volumetric demand models
 # dd_ functions are specific to discrete choice models
 
+
+
+
+
+
+# Namespace ---------------------------------------------------------------
+
+#' @importFrom magrittr %>%
+NULL
+
+#' @importFrom dplyr group_by
+NULL
+
+#' @importFrom dplyr select
+NULL
+
+#' @importFrom dplyr select_if
+NULL
+
+#' @importFrom dplyr filter
+NULL
+
+#' @importFrom dplyr mutate
+NULL
+
+#' @importFrom dplyr mutate_if
+NULL
+
+
+#' @importFrom dplyr n_distinct
+NULL
+
+#' @importFrom dplyr left_join
+NULL
+
+#' @importFrom dplyr arrange
+NULL
+
+#' @importFrom dplyr summarise
+NULL
+
+#' @importFrom dplyr summarise_all
+NULL
+
+#' @importFrom dplyr summarise_if
+NULL
+
+
+#' @importFrom dplyr pull
+NULL
+
+#' @importFrom dplyr one_of
+NULL
+
+#' @importFrom dplyr arrange
+NULL
+
+#' @importFrom dplyr bind_rows
+NULL
+
+#' @importFrom dplyr bind_cols
+NULL
+
+#' @importFrom dplyr relocate
+NULL
+
+
+
+
+#' @importFrom tidyr pivot_longer
+NULL
+
+
+
+
+#' @importFrom stringr str_subset
+NULL
+
+#' @importFrom stringr str_remove
+NULL
+
+#' @importFrom stringr str_extract
+NULL
+
+
+
+
+#' @importFrom purrr map
+NULL
+
+#' @importFrom purrr map_dfr
+NULL
+
+
+#' @importFrom tidyselect any_of
+NULL
+
+#' @importFrom tidyselect all_of
+NULL
+
+#' @importFrom tidyselect contains
+NULL
+
+#' @importFrom tidyselect last_col
+NULL
+
+
+
+
+
+#' @importFrom tibble tibble
+NULL
+
+#' @importFrom tibble as_tibble
+NULL
+
+#' @importFrom tibble add_row
+NULL
+
+#' @importFrom tibble rowid_to_column
+NULL
+
+
 # Utilities ---------------------------------------------------------------
-
-
-#' Turn Dropbox project sync off to avoid issues with .Rproj.user folders (Windows)
-#'
-#' See: https://community.rstudio.com/t/dropbox-conflicts-with-rproj-user/54059/2
-#'
-#' @usage dropbox_project_sync_off()
-#'
-#' @export
-dropbox_project_sync_off <- function(){
-  require(usethis)
-  this_project <- usethis::proj_get()
-  
-  if (grep("Dropbox", this_project) == 0) {warning("This project is not in a Dropbox folder")}
-  
-  dir_to_block <- paste0(this_project,"/.Rproj.user")
-  file_to_block <- paste0(this_project,".Rproj")
-  
-  dir_to_block <- gsub("/", "\\\\", dir_to_block)
-  file_to_block <- gsub("/", "\\\\", file_to_block)
-  
-  # Powershell command examples:
-  # These set flags to prevent syncing
-  # Set-Content -Path C:\Users\myname\Dropbox\mywork\test\test.Rproj -Stream com.dropbox.ignored -Value 1
-  # Set-Content -Path C:\Users\myname\Dropbox\mywork\test\.Rproj.user -Stream com.dropbox.ignored -Value 1
-  
-  s1 <- paste0('powershell -Command \"& {Set-Content -Path ', file_to_block, ' -Stream com.dropbox.ignored -Value 1}\"')
-  s2 <- paste0('powershell -Command \"& {Set-Content -Path ', dir_to_block, ' -Stream com.dropbox.ignored -Value 1}\"')
-  
-  shell(s1)
-  shell(s2)
-}
 
 
 #' Generate huxtable for model comparison
@@ -766,9 +857,10 @@ dd_check_long=function(dat){
 #'
 #' @export
 ec_summarize_attrlvls<-function(data_in){
+  return(
   data_in %>% select(-any_of(c('id','task','alt','p','x'))) %>% map(table) %>% 
     map(names) %>% map(paste,collapse=', ') %>% as_tibble() %>% 
-    pivot_longer(everything()) %>% set_names(c('attribute','levels')) %>% return
+    pivot_longer(everything()) %>% set_names(c('attribute','levels')) )
 }
 
 
@@ -3201,10 +3293,10 @@ ec_named_group_split <- function(.tbl, ...) {
 #' 
 #' @export
 ec_dem_aggregate = function(de, groupby){
+  return(
   de %>% 
     group_by(!!!syms(groupby)) %>% 
-    summarise(.demdraws=list(reduce(.demdraws,`+`))) %>%
-    return
+    summarise(.demdraws=list(reduce(.demdraws,`+`))) )
 }
 
 
@@ -3225,14 +3317,14 @@ ec_dem_aggregate = function(de, groupby){
 ec_dem_summarise = function(de, quantiles=c(.05,.95)){
   quantiles_name=paste0("CI-", quantiles*100, "%")
   
+  return(
   de %>% 
     mutate(
       `E(demand)`=map_dbl(.demdraws, mean),
       `S(demand)`=map_dbl(.demdraws, sd),
       !!(quantiles_name[1]):=map_dbl(.demdraws, quantile, probs=quantiles[1]),
       !!(quantiles_name[2]):=map_dbl(.demdraws, quantile, probs=quantiles[2])
-    ) %>%
-    return
+    ) )
 }
 
 
@@ -3254,14 +3346,14 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
   quantiles_name=paste0("screening-CI-", quantiles*100, "%")
   
+  return(
   sc %>% 
     mutate(
       `E(screening)`=map_dbl(.screendraws, mean),
       `S(screening)`=map_dbl(.screendraws, sd),
       !!(quantiles_name[1]):=map_dbl(.screendraws, quantile, probs=quantiles[1]),
       !!(quantiles_name[2]):=map_dbl(.screendraws, quantile, probs=quantiles[2])
-    ) %>%
-    return
+    ) )
 }
 
 
@@ -3281,6 +3373,7 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 vd_dem_summarise = function(de, quantiles=c(.05,.95)){
   quantiles_name=paste0("CI-", quantiles*100, "%")
   
+  return(
   de %>% 
     mutate(
       `E(demand)`=map_dbl(.demdraws, mean),
@@ -3289,8 +3382,7 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
       !!(quantiles_name[2]):=map_dbl(.demdraws, quantile, probs=quantiles[2]),
       `E(interior)`= map_dbl(map(.demdraws, sign),mean),
       `S(interior)`= map_dbl(map(.demdraws, sign),sd)
-    ) %>%
-    return
+    ) )
 }
 
 

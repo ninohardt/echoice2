@@ -44,7 +44,12 @@ which is still available on
 
 -   Next: upper-level covariates, effects-coding, discrete and
     continuous attributes, discrete choice example vignette, …
+    
+-   Version
+    [**0.20**](https://github.com/ninohardt/echoice2/releases/tag/v0.20):
 
+    -   Made changes to pass CRAN checks
+    
 -   Version
     [**0.16**](https://github.com/ninohardt/echoice2/releases/tag/v0.16):
 
