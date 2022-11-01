@@ -4,10 +4,12 @@
 \alias{ec_boxplot_screen}
 \title{Generate Screening probability boxplot}
 \usage{
-ec_boxplot_screen(draws)
+ec_boxplot_screen(draws, burnin = 100)
 }
 \arguments{
 \item{draws}{ec-draws, output from any ec-model with screening}
+
+\item{burnin}{burn-in to remove}
 }
 \value{
 draws

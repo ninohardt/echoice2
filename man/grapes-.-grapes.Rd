@@ -4,7 +4,12 @@
 \alias{\%.\%}
 \title{Attribute pipe}
 \usage{
-object %.% attribute_name
+obj \%.\% attrname
+}
+\arguments{
+\item{obj}{object}
+
+\item{attrname}{Attribute to pull}
 }
 \description{
 Read attributes of an object, pipe-style

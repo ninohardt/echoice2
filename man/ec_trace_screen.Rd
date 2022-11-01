@@ -4,10 +4,12 @@
 \alias{ec_trace_screen}
 \title{Generate Screening probability traceplot}
 \usage{
-ec_trace_screen(draws)
+ec_trace_screen(draws, burnin = 100)
 }
 \arguments{
 \item{draws}{ec-draws, output from any ec-model with screening}
+
+\item{burnin}{burn-in to remove}
 }
 \value{
 draws

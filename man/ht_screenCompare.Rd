@@ -4,7 +4,12 @@
 \alias{ht_screenCompare}
 \title{Generate huxtable for model comparison - screening vs no screening}
 \usage{
-ht_screenCompare(vdm,vdmsrpr)
+ht_screenCompare(vdm, vdmsrpr)
+}
+\arguments{
+\item{vdm}{vdm object}
+
+\item{vdmsrpr}{vdmsrpr object}
 }
 \description{
 This requires huxtable package

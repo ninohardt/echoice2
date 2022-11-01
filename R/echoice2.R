@@ -141,6 +141,8 @@ NULL
 #' This will include posterior mean and standard deviations of the upper-level parameters
 #' The table can easily by converted to latex using huxtable functions.
 #'
+#' @param model_list model_list
+#'
 #' @usage ht_modelMuCompare(model_list)
 #
 #' @export
@@ -255,7 +257,8 @@ ht_modelMuCompare=function(model_list){
 #' This will include posterior mean and standard deviations of the upper-level parameters
 #' The table can easily by converted to latex using huxtable functions.
 #'
-#' @usage ht_screenCompare(vdm,vdmsrpr)
+#' @param vdm vdm object
+#' @param vdmsrpr vdmsrpr object
 #
 #' @export
 ht_screenCompare=
@@ -381,7 +384,8 @@ ht_screenCompare=
 #'
 #' Read attributes of an object, pipe-style
 #'
-#' @usage object %.% attribute_name
+#' @param obj object
+#' @param attrname Attribute to pull
 #
 #' @export
 `%.%` <- function(obj,attrname) (attributes(obj))[[attrname]]
@@ -441,7 +445,6 @@ vd_lol_tidyelement=function(da){
 
 #' Convert list-of-lists choice format to stacked tidy data
 #'
-#' @usage vd_lol_tidy(datalist)
 #'
 #' @param datalist is a list of lists (one list per unit) with elements A, X, P
 #'
@@ -466,7 +469,6 @@ vd_lol_tidy=function(datalist){
 
 #' Dummy-code a categorical variable
 #'
-#' @usage dummyvar(data)
 #'
 #' @param data one column of categorical data to be dummy-coded
 #'
@@ -485,7 +487,6 @@ dummyvar<-function(data){
 
 #' Dummy-code select variables in a tibble
 #'
-#' @usage dummify(dat, sel)
 #'
 #' @param dat tibble
 #' @param sel vector of strings, variables to be replaced by dummy coding
@@ -510,7 +511,6 @@ dummify=function(dat, sel){
 
 #' Obtain attributes and levels from tidy choice data
 #'
-#' @usage get_attr_lvl(tdc)
 #'
 #' @param tdc tibble
 #'
@@ -536,7 +536,6 @@ get_attr_lvl=function(tdc){
 
 #' vd_tidy_choice data from long-format choice data
 #'
-#' @usage vd_long_tidy(longdata)
 #'
 #' @param longdata tibble
 #'
@@ -574,7 +573,6 @@ vd_long_tidy<-function(longdata){
 #'
 #' Pre-computing task-wise total expenditures `sumpsx` and indices `xfr`,`xto`,`lfr`,`lto` speeds up computation
 #'
-#' @usage vd_prepare(dt, Af=NULL)
 #'
 #' @param dt is tidy choice data (columns: id, task, alt, x, p, attributes)
 #' @param Af (optional) contains a full design matrix (for attribute-based screening), or, more generally, a design matrix used for attribute-based screening
@@ -690,9 +688,9 @@ vd_prepare <- function(dt, Af=NULL){
 #' 
 #' This is mostly for internal use
 #'
-#' @usage vd_prepare_nox(dt, Af=NULL)
 #'
 #' @param dt is tidy choice data (columns: id, task, alt, x, p, attributes)
+#' @param Af Af
 #'
 #' @return list containing information for estimation functions
 #' @export
@@ -784,7 +782,6 @@ vd_prepare_nox <- function(dt, Af=NULL){
 
 #' Log Marginal Density (Newton-Raftery)
 #'
-#' @usage logMargDenNR(ll)
 #'
 #' @param ll vector of likelihood draws
 #'
@@ -810,7 +807,6 @@ logMargDenNR=function(ll)
 #' Draws are split in 4 equal parts from start to finish, and LMD
 #' is computed for each part. This helps to double-check convergence.
 #'
-#' @usage ec_lmd_NR(M)
 #'
 #' @param M echoice draw object
 #'
@@ -849,7 +845,6 @@ dd_check_long=function(dat){
 #' This functions looks for categorical attributes and summaries their levels
 #' This is helpful when evaluating a new choice data file.
 #'
-#' @usage ec_summarize_attrlvls(data_in)
 #'
 #' @param data_in long-format choice data
 #'
@@ -869,7 +864,6 @@ ec_summarize_attrlvls<-function(data_in){
 
 #' Obtain upper level model estimates
 #'
-#' @usage ec_estimates_MU(est, quantiles=c(.05,.95))
 #'
 #' @param est is an echoice draw object (list)
 #' @param quantiles quantile for CI
@@ -925,7 +919,6 @@ ec_estimates_MU=function(est, quantiles=c(.05,.95)){
 
 #' Obtain posterior mean estimates of upper level correlations
 #'
-#' @usage ec_estimates_SIGMA_corr(est)
 #'
 #' @param est is an echoice draw object (list)
 #' @return estimates of upper level correlations
@@ -947,7 +940,6 @@ ec_estimates_SIGMA_corr=function(est){
 
 #' Obtain posterior mean estimates of upper level covariance
 #'
-#' @usage ec_estimates_SIGMA(est)
 #'
 #' @param est is an echoice draw object (list)
 #' @return estimates of upper level covariance
@@ -962,7 +954,6 @@ ec_estimates_SIGMA=function(est){
 
 #' Summarize attribute-based screening parameters
 #'
-#' @usage ec_estimates_screen(est, quantiles=c(.05,.95))
 #'
 #' @param est is an echoice draw object (list)
 #' @param quantiles quantile for CI
@@ -1014,7 +1005,6 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 
 #' Estimate volumetric demand model, EV1 errors
 #'
-#' @usage vd_est_vdm(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
 #' @param tidy apply echoice tidier
@@ -1133,7 +1123,6 @@ vd_est_vdm=
 
 #' Estimate volumetric demand model (Normal Error)
 #'
-#' @usage vd_est_vdmn(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
 #' @param R draws
@@ -1244,7 +1233,6 @@ vd_est_vdmn = function(vd,
 #'
 #' See https://dx.doi.org/10.2139/ssrn.2770025 for more details
 #'
-#' @usage vd_est_vdm_screen(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
 #' @param R draws
@@ -1367,7 +1355,6 @@ vd_est_vdm_screen = function(vd,
 #'
 #' See https://dx.doi.org/10.2139/ssrn.2770025 for more details
 #'
-#' @usage vd_est_vdm_screenpr(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
 #' @param R draws
@@ -1494,7 +1481,6 @@ vd_est_vdm_screenpr = function(vd,
 #' For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
 #' This model REQUIRES variation in choice-set size
 #' 
-#' @usage vd_est_vdm_ss(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format) with set size variation
 #' @param R draws
@@ -1606,7 +1592,6 @@ vd_est_vdm_ss = function(vd,
 #' For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
 #' This model REQUIRES variation in choice-set size
 #' 
-#' @usage vd_est_vdm_ssq(vd, R=100000, keep=10)
 #'
 #' @param vd volumetric demand data (long format)
 #' @param R draws
@@ -1714,6 +1699,17 @@ vd_est_vdm_ssq = function(vd,
 
 #logll
 
+
+#' Log-Likelihood for compensatory volumetric demand model
+#' 
+#' @usage vd_LL_vdm(draw, vd, fromdraw=1)
+#' 
+#' @param draw draws
+#' @param vd vd object
+#' @param fromdraw from which draw (excl. burnin)
+#' 
+#' @return Log-Likelihood
+#' 
 #' @export
 vd_LL_vdm <- function(draw, vd, fromdraw=1){
   
@@ -1739,6 +1735,15 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
+#' Log-Likelihood for volumetric demand model with set-size variation
+#' 
+#' 
+#' @param draw draws
+#' @param vd vd object
+#' @param fromdraw from which draw (excl. burnin)
+#' 
+#' @return Log-Likelihood
+#' 
 #' @export
 vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   
@@ -1764,6 +1769,15 @@ vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
+#' Log-Likelihood for conjunctive-screening volumetric demand model
+#' 
+#' 
+#' @param draw draws
+#' @param vd vd object
+#' @param fromdraw from which draw (excl. burnin)
+#' 
+#' @return Log-Likelihood
+#' 
 #' @export
 vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
   
@@ -1794,7 +1808,15 @@ vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
-
+#' Log-Likelihood for conjunctive-screening (with price) volumetric demand model
+#' 
+#' 
+#' @param draw draws
+#' @param vd vd object
+#' @param fromdraw from which draw (excl. burnin)
+#' 
+#' @return Log-Likelihood
+#' 
 #' @export
 vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
   
@@ -1881,7 +1903,6 @@ prep_newprediction <- function(data_new,data_old){
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdm(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param tidy apply echoice tidier
@@ -1973,7 +1994,6 @@ vd_dem_vdm=function(vd,
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdm(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param est ec-model draws 
@@ -2324,11 +2344,9 @@ vd_dem_vdmss=function(vd,
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realizations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdmssq(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param est ec-model draws 
-#' @param epsilon_not (optional) error realizations
 #' @param cores (optional) cores
 #' 
 #' @return Draws of expected demand
@@ -2514,7 +2532,7 @@ dd_est_hmnl = function(dd,
 
 #' Estimate discrete choice model (HMNL, attribute-based screening (not including price))
 #'
-#' @usage dd_est_hmnl_screen(dd, R=100000, keep=10)
+#' @usage dd_est_hmnl_screen(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 #'
 #' @param dd discrete choice data (long format)
 #' @param R draws
@@ -2528,7 +2546,8 @@ dd_est_hmnl = function(dd,
 #' 
 #' @export
 dd_est_hmnl_screen = function(dd,
-                     R=100000,keep=10,
+                     R=100000,
+                     keep=10,
                      cores=NULL,
                      control=list(include_data=TRUE)){
   
@@ -2659,7 +2678,6 @@ dd_est_hmnl_screen = function(dd,
 
 #' Estimate discrete choice model (HMNL, attribute-based screening (including price))
 #'
-#' @usage dd_est_hmnl_screen(dd, R=100000, keep=10)
 #'
 #' @param dd discrete choice data (long format)
 #' @param R draws
@@ -2673,7 +2691,8 @@ dd_est_hmnl_screen = function(dd,
 #' 
 #' @export
 dd_est_hmnl_screenpr = function(dd,
-                                R=100000,keep=10,
+                                R=100000,
+                                keep=10,
                                 cores=NULL,
                                 control=list(include_data=TRUE)){
   
@@ -2923,7 +2942,6 @@ dd_dem=function(dd,
 
 #' Discrete Choice Probabilities (HMNL)
 #'
-#' @usage dd_dem(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -3335,7 +3353,6 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #' Adds summaries of posterior draws of demand to tibble.
 #' (using the new demand draw format)
 #'
-#' @usage ec_dem_summarise(de,quantiles)
 #'
 #' @param sc tibble containing screening draws in .screendraws  
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
@@ -3362,7 +3379,6 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 #' Adds summaries of posterior draws of demand to tibble.
 #' (using the new demand draw format)
 #'
-#' @usage ec_dem_summarise(de,quantiles)
 #'
 #' @param de demand draws
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
@@ -3400,7 +3416,6 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
 #' It computes the difference between true demand and each draw from the demand posterior. 
 #' Then, fit statistics are obtained.
 #'
-#' @usage ec_dem_eval(de, true_dem)
 #'
 #' @param de demand draws (output from vd_dem_x function)
 #' 
@@ -3444,7 +3459,6 @@ ec_dem_eval = function(de){
 #'
 #' This function obtains proper posterior fit statistics. 
 #' 
-#' @usage ec_dem_eval_pm(de, true_dem)
 #'
 #' @param de demand draws (output from vd_dem_x function)
 #' 
@@ -3499,7 +3513,6 @@ ec_dem_eval_pm=
 #' 
 #' This helper function creates demand curves
 #'
-#' @usage ec_demcurve(de,groupby)
 #'
 #' @param ec_long choice scenario (discrete or volumetric)
 #' @param focal_product Logical vector picking the focal product for which to create a demand curve
@@ -3569,7 +3582,6 @@ ec_demcurve=function(ec_long,
 #' 
 #' This helper function creates demand curves
 #'
-#' @usage ec_demcurve_inci(de,groupby)
 #'
 #' @param ec_long choice scenario (discrete or volumetric)
 #' @param focal_product Logical vector picking the focal product for which to create a demand curve
@@ -3639,7 +3651,6 @@ ec_demcurve_inci=function(ec_long,
 #' 
 #' This helper function creates demand curves
 #'
-#' @usage ec_demcurve_cond_dem(de,groupby)
 #'
 #' @param ec_long choice scenario (discrete or volumetric)
 #' @param focal_product Logical vector picking the focal product for which to create a demand curve
@@ -3765,7 +3776,6 @@ ec_demcurve_cond_dem=function(ec_long,
 #' Simulate error realization from Normal distribution
 #'
 #'
-#' @usage ec_gen_err_normal(ec_dem, seed)
 #'
 #' @param ec_dem discrete or volumetric choice data, with or without x
 #' @param draws draws from volumetric demand model
@@ -3786,7 +3796,6 @@ ec_gen_err_normal = function(ec_dem, draws, seed=NULL){
 #' Simulate error realization from EV1 distribution
 #'
 #'
-#' @usage ec_gen_err_ev1(ec_dem, seed)
 #'
 #' @param ec_dem discrete or volumetric choice data, with or without x
 #' @param draws draws from volumetric demand model
@@ -3878,7 +3887,6 @@ ec_screenprob_sr=function(xd,
 #'
 #' Obtain draws of screening probabilities of choiec alternatives
 #'
-#' @usage ec_screenprob_sr(xd, est, cores=NULL)
 #'
 #' @param xd data
 #' @param est ec-model draws 
@@ -3995,10 +4003,9 @@ ec_draws_screen <- function(draws){
 #' Generate MU_theta traceplot
 #'
 #'
-#' @usage ec_trace_MU(draws)
 #'
 #' @param draws ec-draws, output from any ec-model
-#' 
+#' @param burnin burn-in to remove
 #' 
 #' @seealso [ec_boxplot_MU()] to obtain boxplot
 #' 
@@ -4021,9 +4028,9 @@ ec_trace_MU <- function(draws, burnin=100){
 #' Generate Screening probability traceplot
 #'
 #'
-#' @usage ec_trace_screen(draws)
 #'
 #' @param draws ec-draws, output from any ec-model with screening
+#' @param burnin burn-in to remove
 #' 
 #' @return  draws
 #' 
@@ -4051,10 +4058,9 @@ ec_trace_screen <- function(draws, burnin=100){
 #' Generate MU_theta boxplot
 #'
 #'
-#' @usage ec_boxplot_MU(draws)
 #'
 #' @param draws ec-draws, output from any ec-model
-#' 
+#' @param burnin burn-in to remove
 #' 
 #' @seealso [ec_trace_MU()] to obtain traceplot
 #' 
@@ -4081,9 +4087,9 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' Generate Screening probability boxplot
 #'
 #'
-#' @usage ec_boxplot_screen(draws)
 #'
 #' @param draws ec-draws, output from any ec-model with screening
+#' @param burnin burn-in to remove
 #' 
 #' @return  draws
 #' 
@@ -4112,7 +4118,6 @@ ec_boxplot_screen <- function(draws, burnin=100){
 
 #' Thin echoice-vd draw objects
 #'
-#' @usage vd_thin_draw(M, keepf=NULL)
 #'
 #' @param M is an echoice draw object (list)
 #' @param burnin_perc how much burn-in to remove

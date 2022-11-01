@@ -9,7 +9,7 @@
 #' @useDynLib echoice2
 #' @name echoice2
 NULL
-
+#'
 #' icecream
 #'
 #' @name icecream

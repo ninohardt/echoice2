@@ -4,7 +4,14 @@
 \alias{vd_est_vdm}
 \title{Estimate volumetric demand model, EV1 errors}
 \usage{
-vd_est_vdm(vd, R=100000, keep=10)
+vd_est_vdm(
+  vd,
+  tidy = T,
+  R = 1e+05,
+  keep = 10,
+  cores = NULL,
+  control = list(include_data = TRUE)
+)
 }
 \arguments{
 \item{vd}{volumetric demand data (long format)}

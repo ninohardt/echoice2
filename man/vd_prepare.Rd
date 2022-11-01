@@ -4,7 +4,7 @@
 \alias{vd_prepare}
 \title{Prepare choice data for analysis}
 \usage{
-vd_prepare(dt, Af=NULL)
+vd_prepare(dt, Af = NULL)
 }
 \arguments{
 \item{dt}{is tidy choice data (columns: id, task, alt, x, p, attributes)}

@@ -4,7 +4,14 @@
 \alias{ec_demcurve}
 \title{Create demand curves}
 \usage{
-ec_demcurve(de,groupby)
+ec_demcurve(
+  ec_long,
+  focal_product,
+  rel_pricerange,
+  dem_fun,
+  draws,
+  epsilon_not = NULL
+)
 }
 \arguments{
 \item{ec_long}{choice scenario (discrete or volumetric)}

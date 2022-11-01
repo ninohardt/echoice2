@@ -4,7 +4,13 @@
 \alias{vd_est_vdm_screenpr}
 \title{Estimate volumetric demand model with attribute-based conjunctive screening (w/ price)}
 \usage{
-vd_est_vdm_screenpr(vd, R=100000, keep=10)
+vd_est_vdm_screenpr(
+  vd,
+  R = 1e+05,
+  keep = 10,
+  cores = NULL,
+  control = list(include_data = TRUE)
+)
 }
 \arguments{
 \item{vd}{volumetric demand data (long format)}

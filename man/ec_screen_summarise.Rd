@@ -4,7 +4,7 @@
 \alias{ec_screen_summarise}
 \title{Summarize posterior draws of screening}
 \usage{
-ec_dem_summarise(de,quantiles)
+ec_screen_summarise(sc, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{sc}{tibble containing screening draws in .screendraws}

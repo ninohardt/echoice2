@@ -1,3 +1,7 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("Sampler runs", {
+  data(icecream)
+  icecream_est <- vd_est_vdm(icecream,R=200)
+  mycheck=sd(icecream_est$thetaDraw[1,1,])>0
+  
+  expect_true(mycheck)
 })

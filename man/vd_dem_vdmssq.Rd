@@ -4,7 +4,7 @@
 \alias{vd_dem_vdmssq}
 \title{Demand Prediction (Volumetric demand, accounting for set-size variation (2nd order), EV1 errors)}
 \usage{
-vd_dem_vdmssq(vd, est, epsilon_not=NULL, cores=NULL)
+vd_dem_vdmssq(vd, est, cores = NULL)
 }
 \arguments{
 \item{vd}{data}
@@ -12,8 +12,6 @@ vd_dem_vdmssq(vd, est, epsilon_not=NULL, cores=NULL)
 \item{est}{ec-model draws}
 
 \item{cores}{(optional) cores}
-
-\item{epsilon_not}{(optional) error realizations}
 }
 \value{
 Draws of expected demand

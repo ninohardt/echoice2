@@ -4,10 +4,12 @@
 \alias{ec_trace_MU}
 \title{Generate MU_theta traceplot}
 \usage{
-ec_trace_MU(draws)
+ec_trace_MU(draws, burnin = 100)
 }
 \arguments{
 \item{draws}{ec-draws, output from any ec-model}
+
+\item{burnin}{burn-in to remove}
 }
 \description{
 Generate MU_theta traceplot

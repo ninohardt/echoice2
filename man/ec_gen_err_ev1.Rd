@@ -4,7 +4,7 @@
 \alias{ec_gen_err_ev1}
 \title{Simulate error realization from EV1 distribution}
 \usage{
-ec_gen_err_ev1(ec_dem, seed)
+ec_gen_err_ev1(ec_dem, draws, seed = NULL)
 }
 \arguments{
 \item{ec_dem}{discrete or volumetric choice data, with or without x}

@@ -4,10 +4,12 @@
 \alias{vd_prepare_nox}
 \title{Prepare choice data for analysis (without x being present)}
 \usage{
-vd_prepare_nox(dt, Af=NULL)
+vd_prepare_nox(dt, Af = NULL)
 }
 \arguments{
 \item{dt}{is tidy choice data (columns: id, task, alt, x, p, attributes)}
+
+\item{Af}{Af}
 }
 \value{
 list containing information for estimation functions

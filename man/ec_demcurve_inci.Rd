@@ -4,7 +4,14 @@
 \alias{ec_demcurve_inci}
 \title{Create demand-incidence curves}
 \usage{
-ec_demcurve_inci(de,groupby)
+ec_demcurve_inci(
+  ec_long,
+  focal_product,
+  rel_pricerange,
+  dem_fun,
+  draws,
+  epsilon_not = NULL
+)
 }
 \arguments{
 \item{ec_long}{choice scenario (discrete or volumetric)}

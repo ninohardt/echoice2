@@ -4,7 +4,13 @@
 \alias{vd_est_vdmn}
 \title{Estimate volumetric demand model (Normal Error)}
 \usage{
-vd_est_vdmn(vd, R=100000, keep=10)
+vd_est_vdmn(
+  vd,
+  R = 1e+05,
+  keep = 10,
+  cores = NULL,
+  control = list(include_data = TRUE)
+)
 }
 \arguments{
 \item{vd}{volumetric demand data (long format)}

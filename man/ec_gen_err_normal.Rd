@@ -4,7 +4,7 @@
 \alias{ec_gen_err_normal}
 \title{Simulate error realization from Normal distribution}
 \usage{
-ec_gen_err_normal(ec_dem, seed)
+ec_gen_err_normal(ec_dem, draws, seed = NULL)
 }
 \arguments{
 \item{ec_dem}{discrete or volumetric choice data, with or without x}

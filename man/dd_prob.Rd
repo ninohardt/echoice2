@@ -4,7 +4,7 @@
 \alias{dd_prob}
 \title{Discrete Choice Probabilities (HMNL)}
 \usage{
-dd_dem(dd, est, cores)
+dd_prob(dd, est, cores = NULL)
 }
 \arguments{
 \item{dd}{data}

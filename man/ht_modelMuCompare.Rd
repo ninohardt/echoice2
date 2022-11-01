@@ -6,6 +6,9 @@
 \usage{
 ht_modelMuCompare(model_list)
 }
+\arguments{
+\item{model_list}{model_list}
+}
 \description{
 This requires huxtable package
 Pass a list of dd or vd models in a named list to this function, and it will generate a huxtable.

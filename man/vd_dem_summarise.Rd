@@ -4,7 +4,7 @@
 \alias{vd_dem_summarise}
 \title{Summarize posterior draws of demand (volumetric models only)}
 \usage{
-ec_dem_summarise(de,quantiles)
+vd_dem_summarise(de, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{de}{demand draws}

@@ -4,7 +4,7 @@
 \alias{ec_estimates_MU}
 \title{Obtain upper level model estimates}
 \usage{
-ec_estimates_MU(est, quantiles=c(.05,.95))
+ec_estimates_MU(est, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{est}{is an echoice draw object (list)}

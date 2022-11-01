@@ -4,7 +4,7 @@
 \alias{vd_thin_draw}
 \title{Thin echoice-vd draw objects}
 \usage{
-vd_thin_draw(M, keepf=NULL)
+vd_thin_draw(M, burnin_perc = 0.5, total_draws = NULL)
 }
 \arguments{
 \item{M}{is an echoice draw object (list)}

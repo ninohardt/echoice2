@@ -4,7 +4,7 @@
 \alias{ec_screenprprob_sr}
 \title{Screening probabilities of choice alternatives (w/ price)}
 \usage{
-ec_screenprob_sr(xd, est, cores=NULL)
+ec_screenprprob_sr(xd, est, cores = NULL)
 }
 \arguments{
 \item{xd}{data}

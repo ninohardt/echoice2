@@ -4,7 +4,7 @@
 \alias{ec_dem_eval}
 \title{Evaluate (hold-out) demand predictions}
 \usage{
-ec_dem_eval(de, true_dem)
+ec_dem_eval(de)
 }
 \arguments{
 \item{de}{demand draws (output from vd_dem_x function)}

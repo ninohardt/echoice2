@@ -4,7 +4,7 @@
 \alias{dd_est_hmnl_screen}
 \title{Estimate discrete choice model (HMNL, attribute-based screening (not including price))}
 \usage{
-dd_est_hmnl_screen(dd, R=100000, keep=10)
+dd_est_hmnl_screen(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 }
 \arguments{
 \item{dd}{discrete choice data (long format)}
