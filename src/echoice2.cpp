@@ -4968,7 +4968,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
    double k = 0;
    double z = a/b;
    
-   while( (z<=rho[k]) | (z>rho[k+1]) ){
+   while( (z<=rho[k]) || (z>rho[k+1]) ){
      a=a+arma::as_scalar(prices_ord[k]);
      b=b+arma::as_scalar(psi_ord[k]);
      z=a/b;

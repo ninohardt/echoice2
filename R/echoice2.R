@@ -36,6 +36,12 @@ NULL
 #' @importFrom dplyr mutate_if
 NULL
 
+#' @importFrom dplyr mutate_all
+NULL
+
+#' @importFrom dplyr transmute
+NULL
+
 
 #' @importFrom dplyr n_distinct
 NULL
@@ -53,6 +59,9 @@ NULL
 NULL
 
 #' @importFrom dplyr summarise_if
+NULL
+
+#' @importFrom dplyr across
 NULL
 
 
@@ -74,12 +83,29 @@ NULL
 #' @importFrom dplyr relocate
 NULL
 
+#' @importFrom dplyr rename_all
+NULL
+
+#' @importFrom dplyr group_split
+NULL
+
+#' @importFrom dplyr group_keys
+NULL
+
+#' @importFrom dplyr ntile
+NULL
+
+#' @importFrom dplyr rename
+NULL
+
 
 
 
 #' @importFrom tidyr pivot_longer
 NULL
 
+#' @importFrom tidyr pivot_wider
+NULL
 
 
 
@@ -101,6 +127,16 @@ NULL
 #' @importFrom purrr map_dfr
 NULL
 
+#' @importFrom purrr imap_dfr
+NULL
+
+#' @importFrom purrr map2
+NULL
+
+#' @importFrom purrr map_dbl
+NULL
+
+
 
 #' @importFrom tidyselect any_of
 NULL
@@ -114,6 +150,8 @@ NULL
 #' @importFrom tidyselect last_col
 NULL
 
+#' @importFrom tidyselect everything
+NULL
 
 
 
@@ -127,255 +165,71 @@ NULL
 #' @importFrom tibble add_row
 NULL
 
+#' @importFrom tibble add_column
+NULL
+
 #' @importFrom tibble rowid_to_column
 NULL
+
+#' @importFrom tibble enframe
+NULL
+
+#' @importFrom stats cov2cor
+NULL
+
+#' @importFrom stats model.matrix.lm
+NULL
+
+#' @importFrom stats quantile
+NULL
+
+#' @importFrom stats rnorm
+NULL
+
+#' @importFrom stats sd
+NULL
+
+#' @importFrom graphics par
+NULL
+
+
+
+#' @importFrom ggplot2 ggplot
+NULL
+
+#' @importFrom ggplot2 geom_boxplot
+NULL
+
+#' @importFrom ggplot2 geom_line
+NULL
+
+#' @importFrom ggplot2 coord_flip
+NULL
+
+#' @importFrom ggplot2 facet_wrap
+NULL
+
+#' @importFrom ggplot2 aes
+NULL
+
+#' @importFrom ggplot2 guides
+NULL
+
+
+
+
+
+utils::globalVariables(c(".", ".MAE", ".MSE", ".bias", ".demdraws", ".hp", ".hpall",
+                         "lvl","id","reference", "reference_lvl",
+                         "rowid", "x",
+                         ".isfocal", ".prodid", ".s", "alt", "attr_level",
+                         "attribute", "draw", "n", "task", "value", "xp", "part",
+                         "p", "MAE", ".screendraws"))
+
 
 
 # Utilities ---------------------------------------------------------------
 
-
-#' Generate huxtable for model comparison
-#'
-#' This requires huxtable package
-#' Pass a list of dd or vd models in a named list to this function, and it will generate a huxtable.
-#' This will include posterior mean and standard deviations of the upper-level parameters
-#' The table can easily by converted to latex using huxtable functions.
-#'
-#' @param model_list model_list
-#'
-#' @usage ht_modelMuCompare(model_list)
-#
-#' @export
-ht_modelMuCompare=function(model_list){
-  
-  n_models=length(model_list)
-  
-  paras=
-    model_list %>%
-    map_dfr(ec_estimates_MU, .id = 'model') %>% select(attribute,parameter,mean,sd,sig,model) %>% 
-    pivot_wider(names_from = model,values_from = all_of(c('mean','sd','sig')))
-  
-  #arrangement
-  paras_order=names(paras) %>% enframe %>%  mutate(modelname=str_remove(str_remove(str_remove(value,'mean_'),'sd_'),'sig_')) %>% filter(value!='attribute') %>% filter(value!='parameter') %>% mutate(mean=str_detect(value,'mean'),sd=str_detect(value,'sd'),sig=str_detect(value,'sig')) %>% filter(sig==F) %>% arrange(modelname) %>%pull(name)
-  paras_order=c(1,2,paras_order)
-  
-  #significant paras
-  paras_order_sig=names(paras) %>% enframe %>%  mutate(modelname=str_remove(str_remove(str_remove(value,'mean_'),'sd_'),'sig_')) %>% filter(value!='attribute') %>% filter(value!='parameter') %>% mutate(mean=str_detect(value,'mean'),sd=str_detect(value,'sd'),sig=str_detect(value,'sig')) %>% filter(sig==T) %>% arrange(modelname) %>%pull(name)
-  paras2=paras[,paras_order]
-  paras2_sig=paras[,paras_order_sig]
-  
-  #a few steps to build
-  
-  #add row identifier
-  prep_1 = paras2 %>% rowid_to_column()
-  
-  #don't repeat the grouping attribute name
-  prep_2=
-    prep_1  %>% split(.$attribute) %>% 
-    map((function(x){x$attribute=NA;x})) %>% map(add_row,.before=1) %>%   
-    imap_dfr((function(x,y){x$attribute[1]=y;x}))
-  
-  #clean up
-  mpar=prep_2[NA,][1,]
-  mpar[1,2]='model'
-  
-  #put together
-  prep_3=
-    bind_rows(
-      prep_1[1,],
-      prep_2,
-      mpar,
-      prep_1[base::setdiff(prep_1$rowid,prep_2$rowid),][-1,]) %>% select(-rowid)
-  
-  #some arrangement
-  prep_4=prep_3[,seq(1,2+n_models*2)]
-  
-  #generate huxtable
-  ht=prep_4 %>% 
-    huxtable::huxtable() %>%
-    set_all_padding(0) %>%
-    set_row_height(everywhere,0)%>% set_align(everywhere,2:ncol(ht),'right')
-  
-  
-  #bold-face significant paras
-  pickrows= (ht[,1]=="") %>% replace_na(T)
-  huxtable::bold(ht)[pickrows,2+seq(1,n_models*2,by=2)] <- (paras2_sig %>% as.matrix %>% replace_na(F))
-  
-  #number format
-  huxtable::number_format(ht)[-1,-(1:2)]= "%.2f"
-  
-  #merging attribute-name cells row-wise for compact look
-  mergerows=which(!is.na(ht$attribute))[-1]
-  for(i in seq_along(mergerows)){
-    ht=merge_across(ht,mergerows[i],seq_len(ncol(ht)))
-  }
-  ht[1,1]=""
-  
-  #attr column in bold
-  huxtable::bold(ht)[,1]=TRUE
-  
-  #modelname headers
-  modelnames=sort(names(model_list))
-  ht=ht %>% insert_row(c("","",rep(modelnames,each=2)))
-  headers=seq(1,n_models*2,by=2)+2
-  
-  ht[2,-(1:2)]=rep(c('',''),n_models)
-  
-  for(i in seq_len(n_models)) {
-    ht=ht %>% merge_cells(c(1,1),c(headers[i],headers[i]+1)) %>% set_align(1,headers[i],'centre')
-  }
-  
-  #standard devs in parentheses
-  huxtable::number_format(ht)[-(1:2),headers+1]= "(%.2f)"
-  
-  #
-  ht[2,2]=""
-  ht=ht[-2,]
-  
-  #padding  
-  bottom_padding(ht)=1
-  top_padding(ht)=1
-  right_padding(ht)[,2+seq(1,n_models*2,by=2)]=1
-  right_padding(ht)[,2+seq(2,n_models*2,by=2)]=10
-  left_padding(ht)[,2+seq(2,n_models*2,by=2)]=1
-  
-  #borders
-  for(i in seq_len(n_models)) {
-    bottom_border(ht)[1,seq(headers[i],headers[i]+1)] = brdr(0.4, "solid", "black")
-  }
-  top_border(ht)[1,] = brdr(1, "solid", "black")
-  bottom_border(ht)[nrow(ht),] = brdr(1, "solid", "black")
-  
-  return(ht)
-}
-
-
-#' Generate huxtable for model comparison - screening vs no screening
-#'
-#' This requires huxtable package
-#' Pass a list of dd or vd models in a named list to this function, and it will generate a huxtable.
-#' This will include posterior mean and standard deviations of the upper-level parameters
-#' The table can easily by converted to latex using huxtable functions.
-#'
-#' @param vdm vdm object
-#' @param vdmsrpr vdmsrpr object
-#
-#' @export
-ht_screenCompare=
-  function(vdm,vdmsrpr){
-    
-    paras = vdmsrpr %>% ec_estimates_MU() %>%transmute(attribute,lvl,par,mean,sd,sig,para='theta',model='vdsr') %>%
-      bind_rows(vdmsrpr %>% ec_estimates_screen()%>%transmute(attribute,lvl,par,mean,sd,sig=NA,para='delta',model='vdsr')) %>%
-      bind_rows(vdm %>% ec_estimates_MU() %>%transmute(attribute,lvl,par,mean,sd,sig,para='theta',model='vd'))%>%
-      pivot_wider(names_from = c(model,para), id_cols = 1:3, values_from = c(mean,sd, sig)) %>% arrange(par!='int',(attribute))%>% relocate(contains('vdsr'),.after=last_col()) %>% relocate(contains('sig_'),.after = last_col()) %>% `[`(
-        c("attribute", "lvl", "par", 
-          "mean_vd_theta", "sd_vd_theta", 
-          "mean_vdsr_theta", "sd_vdsr_theta", "mean_vdsr_delta", "sd_vdsr_delta", 
-          "sig_vd_theta", "sig_vdsr_theta", "sig_vdsr_delta"))
-    
-    paras=
-      rbind(
-        paras, 
-        c(NA, NA, 'MU_delta_p', rep(NA,4), mean(vdmsrpr$prscreenMuSigDraw[,1]), sd(vdmsrpr$prscreenMuSigDraw[,1]), NA, NA, NA),
-        c(NA, NA, 'SIG_delta_p', rep(NA,4), mean(vdmsrpr$prscreenMuSigDraw[,2]), sd(vdmsrpr$prscreenMuSigDraw[,2]), NA, NA, NA))
-    
-    
-    #arrangement
-    paras2=paras %>% select(-contains('sig_'))
-    paras2_sig= paras %>% select(contains('sig_')) %>% mutate_all(as.logical)
-    
-    #add row identifier
-    prep_1 = paras2 %>% rowid_to_column()
-    prep_1$par[!is.na(prep_1$attribute)]=prep_1$lvl[!is.na(prep_1$attribute)]
-    
-    
-    #don't repeat the grouping attribute name
-    prep_2=
-      prep_1  %>% split(.$attribute) %>%
-      map((function(x){x$attribute=NA;x})) %>% map(add_row,.before=1) %>%
-      imap_dfr((function(x,y){x$attribute[1]=y;x}))
-    
-    
-    prep_2$par[is.na(prep_2$rowid)]= prep_2$attribute %>% unique() %>% na.omit()
-    
-    
-    #clean up
-    mpar=prep_2[NA,][1,]
-    mpar[1,2]='model'
-    
-    
-    #put together
-    prep_3=
-      bind_rows(
-        prep_1[1,],
-        prep_2,
-        prep_1[base::setdiff(prep_1$rowid,prep_2$rowid),][-1,]) %>% select(-rowid)
-    
-    
-    prep_3$par[!is.na(prep_3$lvl)] = paste0("~",prep_3$par[!is.na(prep_3$lvl)])
-    
-    #some arrangement
-    prep_4=prep_3[,-(1:2)]
-    
-    
-    #generate huxtable
-    ht=prep_4 %>% huxtable::huxtable() %>%  
-      set_all_padding(0) %>%
-      set_row_height(everywhere,0)
-    
-    
-    #bold-face significant paras
-    #pickrows= (ht[,1]=="") %>% replace_na(T)
-    
-    pickrows=c(FALSE,drop(!is.na(prep_4[-c(nrow(prep_4)-1,nrow(prep_4)),2])))
-    
-    
-    huxtable::bold(ht[-c(nrow(ht)-1,nrow(ht)),])[pickrows,  c(2,4) ] <- (paras2_sig[,1:2] %>% as.matrix %>%na.omit() %>% set_attrs("na.action"=NULL) )
-    
-    #number format
-    huxtable::number_format(ht)[-1,-(1)]= "%.2f"
-    
-    #attributes bold
-    #huxtable::bold(ht)[drop(is.na(ht[,2])&is.na(ht[,6])),1]=T
-    huxtable::italic(ht)[drop(is.na(ht[,2])&is.na(ht[,6])),1]=T
-    
-    
-    
-    ht[1,1]=""
-    
-    
-    ht = ht %>% set_align(everywhere,2:ncol(ht),'right')
-    
-    ht=ht %>% 
-      insert_row(c("",rep('theta',each=2), rep('theta',each=2), rep('delta',each=2)   )) %>%
-      insert_row(c("",rep('vd',each=2), rep('vd-sr',each=4)   ))
-    
-    
-    ht[3,-(1)]=rep(c('mean','sd'),3)
-    ht=ht %>% merge_cells(c(1,1),c(2,3)) %>% set_align(1,2:3,'centre')
-    ht=ht %>% merge_cells(c(1,1),c(4,7)) %>% set_align(1,4:7,'centre')
-    
-    ht=ht %>% merge_cells(c(2,2),c(2,3)) %>% set_align(2,2:3,'centre')
-    ht=ht %>% merge_cells(c(2,2),c(4,5)) %>% set_align(2,4:5,'centre')
-    ht=ht %>% merge_cells(c(2,2),c(6,7)) %>% set_align(2,6:7,'centre')
-    
-    ht=ht[-3,]
-    
-    
-    #standard devs in parentheses
-    huxtable::number_format(ht)[-(1:2),c(3,5,7)]= "(%.2f)"
-    
-    
-    ht=
-      ht %>% 
-      set_right_padding(everywhere,3,3) %>% set_right_padding(everywhere,3,2) %>%  set_right_padding(everywhere,5,2) %>%
-      set_bottom_border(1,2:3,1) %>% set_bottom_border(1,4:7,1) %>%
-      set_bottom_border(2,2:3,1) %>% set_bottom_border(2,4:5,1) %>% set_bottom_border(2,6:7,1) 
-    
-    
-    
-    return(ht)
-  }
 
 
 
@@ -400,10 +254,10 @@ vd_janitor=function(vd, maxquant=999){
   `%!in%` <- Negate(`%in%`)
   
   #remove too high volumes
-  fid_toomuch   = vd %>% filter(x>maxquant) %>% pull(id) %>% unique
+  fid_toomuch   = vd %>% dplyr::filter(x>maxquant) %>% dplyr::pull(id) %>% unique
   
   #remove all0s
-  fid_toolittle = vd %>% group_by(id) %>% summarise(.s=sum(x)) %>% filter(.s==0) %>% pull(id)
+  fid_toolittle = vd %>% group_by(id) %>% summarise(.s=sum(x)) %>% dplyr::filter(.s==0) %>% pull(id)
   
   #combine filter
   fid_all = base::intersect(fid_toolittle, fid_toomuch)
@@ -416,7 +270,7 @@ vd_janitor=function(vd, maxquant=999){
   
   
   #filter and return
-  vd = vd %>% filter(id %!in% fid_all) 
+  vd = vd %>% dplyr::filter(id %!in% fid_all) 
   
   print("Filter summary:")
   print(filter_summary)
@@ -520,12 +374,12 @@ dummify=function(dat, sel){
 get_attr_lvl=function(tdc){
   tdc %>%
     select(-any_of(c('id','task','alt','p','x')))%>% 
-    names %>% enframe %>% 
-    mutate(attribute=str_extract(value,"^.*?(?=\\:)")) %>%
-    mutate(lvl=str_remove(value,attribute)) %>%
-    mutate(lvl=str_remove(lvl,"^(:)")) %>%
-    group_by(attribute) %>%
-    mutate(reference_lvl=first(lvl)) %>%
+    names %>% tibble::enframe() %>% 
+    mutate(attribute=stringr::str_extract(.$value,"^.*?(?=\\:)")) %>%
+    mutate(lvl=stringr::str_remove(.$value, .$attribute)) %>%
+    mutate(lvl=stringr::str_remove(.$lvl,"^(:)")) %>%
+    group_by(across("attribute")) %>%
+    mutate(reference_lvl=dplyr::first(.$lvl)) %>%
     mutate(reference=ifelse(lvl==reference_lvl,1,0))%>%
     mutate(lvl_abbrv=abbreviate(lvl))%>%
     rename(attr_level=value)
@@ -550,7 +404,7 @@ vd_long_tidy<-function(longdata){
     longdata %>% 
     dummify(catvars) 
   attrs=dummified %>%get_attr_lvl
-  refcats=attrs %>% filter(reference==1) %>% pull(attr_level)
+  refcats=attrs %>% dplyr::filter(reference==1) %>% pull(attr_level)
   
   out<-dummified %>% select(-any_of(refcats)) %>% add_column(int=1,.after='p')
   
@@ -658,7 +512,7 @@ vd_prepare <- function(dt, Af=NULL){
       foo_check<-foo %>% select(-id,-task,-alt,-x) %>% is.na %>% sum
       
       if(foo_check==0){
-        tauconst=1-(foo %>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+        tauconst=1-(foo %>% dplyr::filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
       }else{
         stop("Could not match full attribute tibble with choice data")
       }
@@ -667,7 +521,7 @@ vd_prepare <- function(dt, Af=NULL){
     }else{
       message("Af does not contain id, task, alt columns. Assuming that attribute columns are properly sorted...")
       out$AAf=Af%>% as.matrix()
-      tauconst=1-(dt %>% select(id,task,alt,x) %>%bind_cols(Af)%>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+      tauconst=1-(dt %>% select(id,task,alt,x) %>%bind_cols(Af)%>% dplyr::filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
     }
     
     out$tauconst=tauconst
@@ -749,7 +603,7 @@ vd_prepare_nox <- function(dt, Af=NULL){
       foo_check<-foo %>% select(-id,-task,-alt,-x) %>% is.na %>% sum
       
       if(foo_check==0){
-        tauconst=1-(foo %>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+        tauconst=1-(foo %>% dplyr::filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
       }else{
         stop("Could not match full attribute tibble with choice data")
       }
@@ -758,7 +612,7 @@ vd_prepare_nox <- function(dt, Af=NULL){
     }else{
       message("Af does not contain id, task, alt columns. Assuming that attribute columns are properly sorted...")
       out$AAf=Af%>% as.matrix()
-      tauconst=1-(dt %>% select(id,task,alt,x) %>%bind_cols(Af)%>% filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
+      tauconst=1-(dt %>% select(id,task,alt,x) %>%bind_cols(Af)%>% dplyr::filter(x>0) %>%group_by(id) %>% summarise_all(max) %>% select(-id,-task,-alt,-x))
     }
     
     out$tauconst=tauconst
@@ -795,7 +649,7 @@ vd_prepare_nox <- function(dt, Af=NULL){
 #' @export
 logMargDenNR=function(ll) 
 {
-  med = median(ll)
+  med = stats::median(ll)
   return(med - log(mean(exp(-ll + med))))
 }
 
@@ -855,7 +709,7 @@ ec_summarize_attrlvls<-function(data_in){
   return(
   data_in %>% select(-any_of(c('id','task','alt','p','x'))) %>% map(table) %>% 
     map(names) %>% map(paste,collapse=', ') %>% as_tibble() %>% 
-    pivot_longer(everything()) %>% set_names(c('attribute','levels')) )
+    pivot_longer(everything()) %>% rlang::set_names(c('attribute','levels')) )
 }
 
 
@@ -884,7 +738,7 @@ ec_estimates_MU=function(est, quantiles=c(.05,.95)){
   estimates=  
     est$MUDraw %>% 
     as_tibble() %>% 
-    set_names(parnames) %>%
+    rlang::set_names(parnames) %>%
     pivot_longer(everything(),names_to='par') %>%
     mutate(par=factor(par,levels=parnames)) %>%
     group_by(par) %>%
@@ -958,6 +812,7 @@ ec_estimates_SIGMA=function(est){
 #' @param est is an echoice draw object (list)
 #' @param quantiles quantile for CI
 #' @return tibble with screening summaries
+#' @importFrom rlang :=
 #' @export
 ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   
@@ -965,7 +820,7 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   
   out<-
     est$deltaDraw %>% as_tibble %>%
-    set_names(colnames(attributes(est)$Af)) %>% 
+    rlang::set_names(colnames(attributes(est)$Af)) %>% 
     pivot_longer(cols = everything(), names_to = 'par') %>%
     group_by(par) %>% 
     summarise(mean=mean(value), 
@@ -1035,8 +890,8 @@ vd_est_vdm=
     if(!vd_check_long(vd)) stop("Check data")
     
     #integer variables
-    vd<-vd %>% mutate(task=as.integer(task),
-                      alt =as.integer(alt))
+    vd<-vd %>% mutate(task=as.integer(.$task),
+                      alt =as.integer(.$alt))
     
     #Multicore settings
     if(is.null(cores)){
@@ -1147,8 +1002,8 @@ vd_est_vdmn = function(vd,
   if(!vd_check_long(vd)) stop("Check data")
   
   #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),
-                    alt =as.integer(alt))
+  vd<-vd %>% mutate(task=as.integer(.$task),
+                    alt =as.integer(.$alt))
   
   #Multicore settings
   if(is.null(cores)){
@@ -1258,7 +1113,8 @@ vd_est_vdm_screen = function(vd,
   if(!vd_check_long(vd)) stop("Check data")
   
   #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),alt=as.integer(alt))
+  vd<-vd %>% mutate(task=as.integer(.$task),
+                    alt=as.integer(.$alt))
   
   #Multicore settings
   if(is.null(cores)){
@@ -1276,11 +1132,12 @@ vd_est_vdm_screen = function(vd,
   
   dat$tauconst=
       1-(vd %>% 
-        select(id,task,alt,x) %>% 
+        select(all_of(c('id','task','alt','x'))) %>% 
         bind_cols(dat$Af%>%as_tibble)  %>%
         mutate_if(is.double,function(col){vd$x*col})%>%
-        group_by(id) %>% summarise_if(is.double,max) %>%
-        arrange(as.numeric(id)) %>%
+        group_by(across("id")) %>% 
+          summarise_if(is.double,max) %>%
+        arrange(as.numeric(.$id)) %>%
         select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
   
   
@@ -1376,7 +1233,8 @@ vd_est_vdm_screenpr = function(vd,
   if(!vd_check_long(vd)) stop("Check data")
   
   #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),alt=as.integer(alt))
+  vd<-vd %>% mutate(task=as.integer(.$task),
+                    alt=as.integer(.$alt))
   
   #Multicore settings
   if(is.null(cores)){
@@ -1395,11 +1253,11 @@ vd_est_vdm_screenpr = function(vd,
   
   dat$tauconst=
     1-(vd %>% 
-         select(id,task,alt,x) %>% 
+         select(all_of(c('id','task','alt','x'))) %>% 
          bind_cols(dat$Af%>%as_tibble)  %>%
          mutate_if(is.double,function(col){vd$x*col})%>%
-         group_by(id) %>% summarise_if(is.double,max) %>%
-         arrange(as.numeric(id)) %>%
+         group_by(across("id")) %>% summarise_if(is.double,max) %>%
+         arrange(as.numeric(.$id)) %>%
          select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
   
   
@@ -1503,7 +1361,7 @@ vd_est_vdm_ss = function(vd,
   if(!vd_check_long(vd)) stop("Check data")
   
   #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),alt=as.integer(alt))
+  vd<-vd %>% mutate(task=as.integer(.$task),alt=as.integer(.$alt))
   
   #Multicore settings
   if(is.null(cores)){
@@ -1612,7 +1470,8 @@ vd_est_vdm_ssq = function(vd,
   if(!vd_check_long(vd)) stop("Check data")
   
   #integer variables
-  vd<-vd %>% mutate(task=as.integer(task),alt=as.integer(alt))
+  vd<-vd %>% mutate(task=as.integer(.$task),
+                    alt=as.integer(.$alt))
   
   #Multicore settings
   if(is.null(cores)){
@@ -2437,7 +2296,7 @@ dd_est_hmnl = function(dd,
   if(!dd_check_long(dd)) stop("Check data")
   
   #integer variables
-  dd<-dd %>% mutate(task=as.integer(task),alt=as.integer(alt))
+  dd<-dd %>% mutate(dplyr::across(all_of(c("task","alt")),as.integer))
   
   #Multicore settings
   if(is.null(cores)){
@@ -2446,14 +2305,17 @@ dd_est_hmnl = function(dd,
   message(paste0("Using ",cores," cores"))
   
   #outside good present or not?
-  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
+  outside_good_check <- 
+    dd %>% 
+      group_by(dplyr::across(all_of(c("id","task")))) %>% 
+      summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
   
   #re-arrange data
   if(outside_good_check==1){
     #no outside
     dat <- 
       dd %>% 
-      vd_long_tidy %>% select(-int) %>% vd_prepare
+      vd_long_tidy %>% select(-all_of("int")) %>% vd_prepare
   }else{
     #outside good
     dat <- 
@@ -2556,12 +2418,13 @@ dd_est_hmnl_screen = function(dd,
   
   #integer variables, double variables
   dd<-dd %>% 
-    mutate(task=as.integer(task),
-           alt=as.integer(alt),
-           x=as.double(x))
-  
+    mutate(dplyr::across(all_of(c("task","alt")),as.integer)) %>%
+    mutate(dplyr::across(all_of(c("x")),as.double))
+
   #sorting
-  dd<-dd%>%arrange(as.numeric(id),task,alt)
+  dd<-dd %>% 
+    mutate(dplyr::across(all_of(c("id")),as.numeric)) %>%
+    arrange(dplyr::across("id"),dplyr::across("task"),dplyr::across("alt"))
   
   #Multicore settings
   if(is.null(cores)){
@@ -2570,14 +2433,16 @@ dd_est_hmnl_screen = function(dd,
   message(paste0("Using ",cores," cores"))
   
   #outside good present or not?
-  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
+  outside_good_check <- dd %>% 
+    group_by(dplyr::across(all_of(c("id","task")))) %>% 
+    summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
   
   #re-arrange data
   if(outside_good_check==1){
     #no outside
     dat <- 
       dd %>% 
-      vd_long_tidy %>% select(-int) %>% vd_prepare
+      vd_long_tidy %>% select(-all_of("int")) %>% vd_prepare
   }else{
     #outside good
     dat <- 
@@ -2592,11 +2457,11 @@ dd_est_hmnl_screen = function(dd,
   dat$tauconst=
     1-(
   dd %>% 
-    select(id,task,alt,x) %>% 
+    select(all_of(c("id","task","alt","x")))%>%
     bind_cols(dat$Af%>%as_tibble)  %>%
     mutate_if(is.double,function(col){dd$x*col})%>%
-    group_by(id) %>% summarise_if(is.double,max) %>%
-    arrange(as.numeric(id)) %>%
+    group_by(dplyr::across("id")) %>% summarise_if(is.double,max) %>%
+    arrange(dplyr::across("id")) %>%
     select(-any_of(c('id','x'))) %>% as.matrix)
   
 
@@ -2701,12 +2566,13 @@ dd_est_hmnl_screenpr = function(dd,
   
   #integer variables, double variables
   dd<-dd %>% 
-    mutate(task=as.integer(task),
-           alt=as.integer(alt),
-           x=as.double(x))
+    mutate(dplyr::across(all_of(c("task","alt")),as.integer)) %>%
+    mutate(dplyr::across(all_of(c("x")),as.double))
   
   #sorting
-  dd<-dd%>%arrange(as.numeric(id),task,alt)
+  dd<-dd %>% 
+    mutate(dplyr::across(all_of(c("id")),as.numeric)) %>%
+    arrange(dplyr::across("id"),dplyr::across("task"),dplyr::across("alt"))
   
   #Multicore settings
   if(is.null(cores)){
@@ -2715,14 +2581,16 @@ dd_est_hmnl_screenpr = function(dd,
   message(paste0("Using ",cores," cores"))
   
   #outside good present or not?
-  outside_good_check <- dd %>% group_by(id,task) %>% summarise(x=sum(x)) %>% pull(x) %>% mean
+  outside_good_check <- dd %>% 
+    group_by(dplyr::across(all_of(c("id","task")))) %>% 
+    summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
   
   #re-arrange data
   if(outside_good_check==1){
     #no outside
     dat <- 
       dd %>% 
-      vd_long_tidy %>% select(-int) %>% vd_prepare
+      vd_long_tidy %>% select(-all_of("int")) %>% vd_prepare
   }else{
     #outside good
     dat <- 
@@ -2737,11 +2605,11 @@ dd_est_hmnl_screenpr = function(dd,
   dat$tauconst=
     1-(
       dd %>% 
-        select(id,task,alt,x) %>% 
+        select(all_of(c("id","task","alt","x")))%>%
         bind_cols(dat$Af%>%as_tibble)  %>%
         mutate_if(is.double,function(col){dd$x*col})%>%
-        group_by(id) %>% summarise_if(is.double,max) %>%
-        arrange(as.numeric(id)) %>%
+        group_by(dplyr::across("id")) %>% summarise_if(is.double,max) %>%
+        arrange(dplyr::across("id")) %>%
         select(-any_of(c('id','x'))) %>% as.matrix)
   
   
@@ -3242,7 +3110,7 @@ dd_prob_srpr=function(dd,
   dd$.demdraws<-map(out,drop)  
   
   #add attributes
-  attributes(dd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(dd)$ec_model   <- attributes(est)$ec_model
   
   return(dd)
@@ -3313,8 +3181,8 @@ ec_named_group_split <- function(.tbl, ...) {
 ec_dem_aggregate = function(de, groupby){
   return(
   de %>% 
-    group_by(!!!syms(groupby)) %>% 
-    summarise(.demdraws=list(reduce(.demdraws,`+`))) )
+    group_by(!!!rlang::syms(groupby)) %>% 
+    summarise(.demdraws=list(purrr::reduce(.demdraws,`+`))) )
 }
 
 
@@ -3330,7 +3198,7 @@ ec_dem_aggregate = function(de, groupby){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' 
 #' @return Summary of demand predictions
-#' 
+#' @importFrom rlang :=
 #' @export
 ec_dem_summarise = function(de, quantiles=c(.05,.95)){
   quantiles_name=paste0("CI-", quantiles*100, "%")
@@ -3358,7 +3226,7 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' 
 #' @return Summary of screening probabilities
-#' 
+#' @importFrom rlang :=
 #' @export
 ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
   quantiles_name=paste0("screening-CI-", quantiles*100, "%")
@@ -3384,7 +3252,7 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' 
 #' @return Summary of demand predictions
-#' 
+#' @importFrom rlang :=
 #' @export
 vd_dem_summarise = function(de, quantiles=c(.05,.95)){
   quantiles_name=paste0("CI-", quantiles*100, "%")
@@ -3425,7 +3293,7 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
 ec_dem_eval = function(de){
   `%!in%` = Negate(`%in%`)
   
-  is_this_discrete=attributes(de)$ec_model$model_name_full %>% str_detect('discrete')
+  is_this_discrete=attributes(de)$ec_model$model_name_full %>% stringr::str_detect('discrete')
   
   if(is_this_discrete){
     out <- de %>%
@@ -3434,78 +3302,27 @@ ec_dem_eval = function(de){
              .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
              .R=abs(x-mean(x)),
              .hp=map_dbl(map2(.demdraws,x,function(draws,x)(draws==x) ),mean)) %>%
-      summarise(MSE=mean(.MSE),
-                MAE=mean(.MAE),
-                bias=mean(.bias),
-                RAE=MAE/mean(.R),
-                hitrate=mean(.hp))
+      summarise(MSE=mean(.$.MSE),
+                MAE=mean(.$.MAE),
+                bias=mean(.$.bias),
+                RAE=MAE/mean(.$.R),
+                hitrate=mean(.$.hp))
   }else{
     out <- de %>%
-      mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
-             .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
-             .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
+      mutate(.MSE=purrr::map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
+             .MAE=purrr::map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
+             .bias=purrr::map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
              .R=abs(x-mean(x))) %>%
-      summarise(MSE=mean(.MSE),
-                MAE=mean(.MAE),
-                bias=mean(.bias),
-                RAE=MAE/mean(.R))
+      summarise(MSE=mean(.$.MSE),
+                MAE=mean(.$.MAE),
+                bias=mean(.$.bias),
+                RAE=MAE/mean(.$.R))
   }
   
   return(out)
 }
 
 
-#' Evaluate (hold-out) demand predictions based on posterior mean predictions
-#'
-#' This function obtains proper posterior fit statistics. 
-#' 
-#'
-#' @param de demand draws (output from vd_dem_x function)
-#' 
-#' @return Predictive fit statistics (MAE, MSE, RAE, bias, hit-probability)
-#' 
-#' @export
-ec_dem_eval_pm=
-  function(de){
-    `%!in%` = Negate(`%in%`)
-    
-    is_this_discrete=attributes(de)$ec_model$model_name_full %>% str_detect('discrete')
-    
-    if(is_this_discrete){
-      out <- 
-        de %>% ec_dem_summarise() %>%
-        mutate(.MSE=(`E(demand)`-x)^2,
-               .MAE=abs(`E(demand)`-x),
-               .bias=(`E(demand)`-x),
-               .R=abs(x-mean(x)),
-               .hr=as.numeric(`E(demand)`==x),
-               .hp=ifelse(x==1,`E(demand)`,NA)) %>%
-        group_by(id,task) %>% 
-        mutate(.outside=1-sum(x),.outsideprob=1-sum(`E(demand)`)) %>%
-        ungroup() %>%
-        mutate(.hpoutside=ifelse(.outside==1,.outsideprob,NA)) %>%
-        mutate(.hpall=ifelse(!is.na(.hp),.hp,.hpoutside))%>%
-        summarise(MSE=mean(.MSE),
-                  MAE=mean(.MAE),
-                  bias=mean(.bias),
-                  RAE=MAE/mean(.R),
-                  hitrate=mean(.hr),
-                  hitprob=mean(.hpall,na.rm=T))
-    }else{
-      out <- 
-        de %>% ec_dem_summarise() %>%
-        mutate(.MSE=(`E(demand)`-x)^2,
-               .MAE=abs(`E(demand)`-x),
-               .bias=(`E(demand)`-x),
-               .R=abs(x-mean(x)))%>%
-        summarise(MSE=mean(.MSE),
-                  MAE=mean(.MAE),
-                  bias=mean(.bias),
-                  RAE=MAE/mean(.R))
-    }
-    
-    return(out)
-  }
 
 
 
@@ -3705,7 +3522,7 @@ ec_demcurve_cond_dem=function(ec_long,
       testmarket_temp %>%
         demfun(est=draws) %>%
         add_column(.isfocal=focal_product) %>%
-        filter(.isfocal)%>% select(-.isfocal) 
+        dplyr::filter(.isfocal)%>% select(-.isfocal) 
       
       demm_split=
         dem_temp%>%
@@ -3720,7 +3537,7 @@ ec_demcurve_cond_dem=function(ec_long,
         summarise_all(mean)
         
       out[[kk]]=bind_cols(demm_split %>% map(.%>%select(attr_names)%>%unique),
-                res %>% set_names('condem')) %>%
+                res %>% rlang::set_names('condem')) %>%
         bind_cols( scenario=rel_pricerange[kk]) 
 
         
@@ -3742,7 +3559,7 @@ ec_demcurve_cond_dem=function(ec_long,
         testmarket_temp %>%
         demfun(est=draws) %>%
         add_column(.isfocal=focal_product) %>%
-        filter(.isfocal)%>% select(-.isfocal) 
+        dplyr::filter(.isfocal)%>% select(-.isfocal) 
       
       demm_split=
         dem_temp%>%
@@ -3757,7 +3574,7 @@ ec_demcurve_cond_dem=function(ec_long,
         summarise_all(mean)
       
       out[[kk]]=bind_cols(demm_split %>% map(.%>%select(attr_names)%>%unique),
-                    res %>% set_names('condem')) %>%
+                    res %>% rlang::set_names('condem')) %>%
         bind_cols( scenario=rel_pricerange[kk]) 
       
       
@@ -3970,7 +3787,7 @@ ec_screenprprob_sr=function(xd,
 ec_draws_MU <- function(draws){
   
   draws$MUDraw %>% as_tibble %>%
-    set_names(draws$parnames) %>% 
+    rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'attribute_level') 
@@ -3993,7 +3810,7 @@ ec_draws_MU <- function(draws){
 ec_draws_screen <- function(draws){
   
   draws$deltaDraw %>% as_tibble %>%
-    set_names(colnames(attributes(draws)$Af)) %>% 
+    rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'attribute_level') 
@@ -4013,7 +3830,7 @@ ec_draws_screen <- function(draws){
 ec_trace_MU <- function(draws, burnin=100){
   
   draws$MUDraw %>% data.frame %>% as_tibble %>%
-    set_names(draws$parnames) %>% 
+    rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'par') %>%
@@ -4021,7 +3838,7 @@ ec_trace_MU <- function(draws, burnin=100){
                 select(attr_level,attribute,lvl,reference_lvl), 
               by=c('par'='attr_level')) %>%
     ggplot(aes(x=draw, y=value)) +
-    geom_line() +guides(color='none')+facet_wrap(~par,scale='free_y')
+    geom_line() +guides(color='none')+facet_wrap(~par,scales='free_y')
 }
 
 
@@ -4041,16 +3858,16 @@ ec_trace_MU <- function(draws, burnin=100){
 ec_trace_screen <- function(draws, burnin=100){
   
   draws$deltaDraw %>% as_tibble %>%
-    set_names(colnames(attributes(draws)$Af)) %>% 
+    rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'attribute_level') %>%
     left_join(attributes(draws)$ec_data$attributes %>%
                 select(attr_level,attribute,lvl,reference_lvl), 
               by=c('attribute_level'='attr_level')) %>%
-    filter(draw>burnin) %>%
+    dplyr::filter(draw>burnin) %>%
     ggplot(aes(x=draw, y=value)) +
-    geom_line() +guides(color='none')+facet_wrap(~attribute_level,scale='free_y')
+    geom_line() +guides(color='none')+facet_wrap(~attribute_level,scales='free_y')
   
 }
 
@@ -4068,17 +3885,17 @@ ec_trace_screen <- function(draws, burnin=100){
 ec_boxplot_MU <- function(draws, burnin=100){
   
   draws$MUDraw %>% as_tibble %>%
-    set_names(draws$parnames) %>% 
+    rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'par') %>%
     left_join(attributes(draws)$ec_data$attributes %>%
-                select(attr_level,attribute,lvl,reference_lvl), 
-              by=c('par'='attr_level')) %>%
-    mutate(par=str_replace_all(par,paste0(attribute,":"),"")) %>%
-    select(draw,par,value,attribute) %>%
-    filter(draw>burnin) %>%
-    ggplot(aes(x=par,y=value)) + geom_boxplot() + coord_flip() +
+                dplyr::select(all_of(c('attr_level','attribute','lvl','reference_lvl')), 
+              by=c('par'='attr_level'))) %>%
+    mutate(par=stringr::str_replace_all(par,paste0(.$attribute,":"),"")) %>%
+    select(all_of(c('draw','par','value','attribute'))) %>%
+    dplyr::filter(.$draw>burnin) %>%
+    ggplot2::ggplot(aes(x=par,y=value)) + geom_boxplot() + coord_flip() +
     facet_wrap(~attribute, scales='free')
   
 }
@@ -4100,14 +3917,14 @@ ec_boxplot_MU <- function(draws, burnin=100){
 ec_boxplot_screen <- function(draws, burnin=100){
   
   draws$deltaDraw %>% as_tibble %>%
-    set_names(colnames(attributes(draws)$Af)) %>% 
+    rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'attribute_level') %>%
     left_join(attributes(draws)$ec_data$attributes %>%
-                select(attr_level,attribute,lvl,reference_lvl), 
+                select(all_of(c('attr_level','attribute','lvl','reference_lvl'))), 
               by=c('attribute_level'='attr_level')) %>%
-    filter(draw>burnin) %>%
+    dplyr::filter(.$draw>burnin) %>%
     ggplot(aes(x=lvl,y=value)) + geom_boxplot() + coord_flip() +
     facet_wrap(~attribute, scales='free_y')
   
