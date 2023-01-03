@@ -16,7 +16,6 @@ LMD (double)
 Log Marginal Density (Newton-Raftery)
 }
 \examples{
-\dontrun{
-logMargDenNR(ll)dd_dem_sr
-}
+logll_values <- c(-4000, -4001, -4002)
+logMargDenNR(logll_values)
 }

@@ -4,7 +4,7 @@
 \alias{vd_dem_vdm}
 \title{Demand Prediction (Volumetric demand, EV1 errors)}
 \usage{
-vd_dem_vdm(vd, tidy = T, est, epsilon_not = NULL, cores = NULL)
+vd_dem_vdm(vd, tidy = TRUE, est, epsilon_not = NULL, cores = NULL)
 }
 \arguments{
 \item{vd}{data}

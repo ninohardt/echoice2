@@ -6,7 +6,7 @@
 \usage{
 vd_est_vdm(
   vd,
-  tidy = T,
+  tidy = TRUE,
   R = 1e+05,
   keep = 10,
   cores = NULL,

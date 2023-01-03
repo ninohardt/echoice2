@@ -11,6 +11,9 @@ ec_boxplot_MU(draws, burnin = 100)
 
 \item{burnin}{burn-in to remove}
 }
+\value{
+ggplot object
+}
 \description{
 Generate MU_theta boxplot
 }

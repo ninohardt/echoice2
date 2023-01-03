@@ -231,16 +231,18 @@ utils::globalVariables(c(".", ".MAE", ".MSE", ".bias", ".demdraws", ".hp", ".hpa
 # Utilities ---------------------------------------------------------------
 
 
-
-
-
-#' Attribute pipe
+#' Get the attribute of an object
 #'
-#' Read attributes of an object, pipe-style
+#' @param obj The object to get the attribute from.
+#' @param attrname The name of the attribute to get.
 #'
-#' @param obj object
-#' @param attrname Attribute to pull
-#
+#' @return The attribute of the object.
+#'
+#' @examples
+#' obj <- list(a = 1, b = 2)
+#' attributes(obj)$test="hello"
+#' `%.%`(obj, "test")
+#'
 #' @export
 `%.%` <- function(obj,attrname) (attributes(obj))[[attrname]]
 
@@ -271,13 +273,7 @@ vd_janitor=function(vd, maxquant=999){
   
   #filter and return
   vd = vd %>% dplyr::filter(id %!in% fid_all) 
-  
-  print("Filter summary:")
-  print(filter_summary)
-  
-  print("Data:")
   attributes(vd)$filter=filter_summary
-  
   return(vd)
 }
 
@@ -297,15 +293,17 @@ vd_lol_tidyelement=function(da){
 }
 
 
-#' Convert list-of-lists choice format to stacked tidy data
-#'
-#'
-#' @param datalist is a list of lists (one list per unit) with elements A, X, P
-#'
-#' @return tibble/data.frame in stacked format
+
+#' @title Tidies Volumetric Data into Long Format
+#' @description Takes a list of dataframes and tidies each element into a long format.
+#' @param datalist A list of dataframes.
+#' @return A dataframe in long format.
 #' Columns of output data.frame:
 #' id; task: ask/choice occasion number; alt: alternative/product number; x: quantity; p: price; attributes
-#'
+
+#' @examples
+#' data_list <- list(data1, data2, data3)
+#' vd_lol_tidy(data_list)
 #' @export
 vd_lol_tidy=function(datalist){
   out = mutate(
@@ -325,12 +323,13 @@ vd_lol_tidy=function(datalist){
 #'
 #'
 #' @param data one column of categorical data to be dummy-coded
-#'
 #' @return tibble with dummy variables
-#'
+#' @examples
+#' mytest=data.frame(attribute=factor(c('a','a','b','c','c')))
+#' dummyvar(mytest)
 #' @export
 dummyvar<-function(data){
-  #retains missing values as NA
+  #note: retains missing values as NA
   out = model.matrix.lm(~.-1,
                         data=data, 
                         na.action = "na.pass") 
@@ -339,13 +338,15 @@ dummyvar<-function(data){
 }
 
 
-#' Dummy-code select variables in a tibble
+#' Create dummy variables within a tibble
 #'
 #'
-#' @param dat tibble
-#' @param sel vector of strings, variables to be replaced by dummy coding
-#'
+#' @param dat A \code{tibble} with the data.
+#' @param sel A character vector with the name(s) of the variables to be dummied.
 #' @return tibble with dummy variables
+#' @examples
+#' mytest=data.frame(A=factor(c('a','a','b','c','c')), B=1:5)
+#' dummify(mytest,"A")
 #'
 #' @export
 dummify=function(dat, sel){
@@ -355,20 +356,23 @@ dummify=function(dat, sel){
     dummidata <- dat %>% select(all_of(selv)) %>% dummyvar()
     dat<- dat %>% add_column(dummidata, .before = selv) %>% 
       select(-all_of(selv)) %>% 
-      rename_all(gsub, pattern = paste0("^(",selv,")"), replacement = paste0(selv,":"))
+      rename_all(gsub, 
+                 pattern = paste0("^(",selv,")"), 
+                 replacement = paste0(selv,":"))
   }
-  
   return(dat)
 }
 
 
-
-#' Obtain attributes and levels from tidy choice data
+#' Obtain attributes and levels from tidy choice data with dummies
 #'
 #'
-#' @param tdc tibble
-#'
+#' @param tdc A tibble with choice data
 #' @return tibble
+#' @examples
+#' mytest=data.frame(A=factor(c('a','a','b','c','c')), B=1:5)
+#' dummied_data = dummify(mytest,"A")
+#' get_attr_lvl(dummied_data)
 #'
 #' @export
 get_attr_lvl=function(tdc){
@@ -387,26 +391,34 @@ get_attr_lvl=function(tdc){
 
 
 
-
-#' vd_tidy_choice data from long-format choice data
+#' Generate tidy choice data with dummies from long-format choice data
 #'
 #'
 #' @param longdata tibble
-#'
 #' @return tibble
-#' 
+#' @examples 
+#' vd_long_tidy(mytest)
 #'
 #' @export
 vd_long_tidy<-function(longdata){
 
-  catvars = longdata %>% select_if(is.factor) %>% names
-  dummified =
+  #find categorical variables
+  catvars <-
+    longdata %>% select_if(is.factor) %>% names
+  #dummify categorical variables
+  dummified <-
     longdata %>% 
     dummify(catvars) 
-  attrs=dummified %>%get_attr_lvl
-  refcats=attrs %>% dplyr::filter(reference==1) %>% pull(attr_level)
+  #get list of attribute levels
+  attrs <-
+    dummified %>% get_attr_lvl
+  #find reference categories in dummy coding
+  refcats <-
+    attrs %>% dplyr::filter(reference==1) %>% pull(attr_level)
   
-  out<-dummified %>% select(-any_of(refcats)) %>% add_column(int=1,.after='p')
+  #generate output, then add attributes
+  out <- 
+    dummified %>% select(-any_of(refcats)) %>% add_column(int=1,.after='p')
   
   attributes(out)$ec_data = list(choice_type='volumetric',
                                  data_type='vd_tidy_choice',
@@ -425,10 +437,13 @@ vd_long_tidy<-function(longdata){
 
 #' Prepare choice data for analysis
 #'
-#' Pre-computing task-wise total expenditures `sumpsx` and indices `xfr`,`xto`,`lfr`,`lto` speeds up computation
+#' This utility function prepares tidy choice data for fast MCMC samplers.
 #'
+#' Note: This function is only exported because it makes it easier to tinker with this package.
+#' This function re-arranges choice data for fast access in highly-optimized MCMC samplers.
+#' It Pre-computes task-wise total expenditures `sumpsx` and generates indices `xfr`,`xto`,`lfr`,`lto` for fast data access.
 #'
-#' @param dt is tidy choice data (columns: id, task, alt, x, p, attributes)
+#' @param dt tidy choice data (columns: id, task, alt, x, p, attributes)
 #' @param Af (optional) contains a full design matrix (for attribute-based screening), or, more generally, a design matrix used for attribute-based screening
 #'
 #' @return list containing information for estimation functions
@@ -438,7 +453,7 @@ vd_long_tidy<-function(longdata){
 #' #Minimal example:
 #' #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
 #'Af=
-#'  rbinom(12,2,.5) %>% factor %>% fct_relabel(~paste0('attr',.x)) %>% 
+#'  rbinom(12,2,.5) %>% factor %>% forcats::fct_relabel(~paste0('attr',.x)) %>% 
 #'  enframe %>% add_column(val=1) %>% 
 #'  pivot_wider(names_from = value, values_from=val) %>% map_df(replace_na,0) %>%
 #'  select(-name) %>%
@@ -539,14 +554,40 @@ vd_prepare <- function(dt, Af=NULL){
 
 
 #' Prepare choice data for analysis (without x being present)
+#'
+#' This utility function prepares tidy choice data (without x) for fast data access.
+#'
+#' Note: This function is only exported because it makes it easier to tinker with this package.
+#' This function re-arranges choice data for fast access, mainly for demand prediction.
+#'
+#' @param dt tidy choice data (columns: id, task, alt, p, attributes)
+#' @param Af (optional) contains a full design matrix (for attribute-based screening), or, more generally, a design matrix used for attribute-based screening
+#'
+#' @return list containing information for prediction functions
+#'
+#' @examples
+#' \dontrun{
+#' #Minimal example:
+#' #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
+#'Af=
+#'  rbinom(12,2,.5) %>% factor %>% forcats::fct_relabel(~paste0('attr',.x)) %>% 
+#'  enframe %>% add_column(val=1) %>% 
+#'  pivot_wider(names_from = value, values_from=val) %>% map_df(replace_na,0) %>%
+#'  select(-name) %>%
+#'  add_column(  id=c(rep(1L,6),rep(2L,6)),
+#'               task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
+#'               alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L), .before = 1)
+#'
+#Choice data
+#'dt=tibble( id=c(rep(1L,6),rep(2L,6)),
+#'           task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
+#'           alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L),
+#'           x=c(1,0,2, 1,0,1, 2,3,1, 1,0,1),
+#'           p=c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1),
+#'           Af%>%select(attr2:attr1))
 #' 
-#' This is mostly for internal use
-#'
-#'
-#' @param dt is tidy choice data (columns: id, task, alt, x, p, attributes)
-#' @param Af Af
-#'
-#' @return list containing information for estimation functions
+#' dt %>% dplyr::select(-all_of("x")) %>% vd_prepare_nox 
+#' }
 #' @export
 vd_prepare_nox <- function(dt, Af=NULL){
   
@@ -635,17 +676,20 @@ vd_prepare_nox <- function(dt, Af=NULL){
 
 
 #' Log Marginal Density (Newton-Raftery)
+#' 
+#' This function uses the quick-and-dirty Newton-Raftery approximation for log-marginal-density.
 #'
+#' Approximation of LMD based on Newton-Raftery.
+#' It is not the most accurate, but a very fast method.
 #'
-#' @param ll vector of likelihood draws
+#' @param ll A vector of log-likelihood values (i.e., draws)
 #'
-#' @return LMD (double)
+#' @return A single numeric value representing the log marginal density
 #'
 #'
 #' @examples
-#' \dontrun{
-#' logMargDenNR(ll)dd_dem_sr
-#' }
+#' logll_values <- c(-4000, -4001, -4002)
+#' logMargDenNR(logll_values)
 #' @export
 logMargDenNR=function(ll) 
 {
@@ -654,29 +698,33 @@ logMargDenNR=function(ll)
 }
 
 
-#' Log Marginal Density (Newton-Raftery)
+#' Obtain Log Marginal Density from draw objects
 #' 
-#' Very rough approximation of LMD based on Newton-Raftery.
-#' It is not the most accurate, but a very fast method.
+#' This is a helper function to quickly obtain log marginal density from a draw object
+#' 
 #' Draws are split in 4 equal parts from start to finish, and LMD
 #' is computed for each part. This helps to double-check convergence.
 #'
 #'
-#' @param M echoice draw object
-#'
+#' @param est 'echoice2' draw object
 #' @return tibble with LMDs (first 25% of draws, next 25% of draws, ...) 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #obtain LMD by quartile of draws
+#' ec_lmd_NR(icecream_est)
 #'
 #' @export
-ec_lmd_NR=function(M){
+ec_lmd_NR=function(est){
   return(
-    drop(M$loglike) %>% 
+    drop(est$loglike) %>% 
       enframe(name = 'draw') %>% 
       mutate(part=ntile(draw,4)) %>% 
       group_by(part) %>% summarise(lmd=logMargDenNR(value), .groups='drop') %>% 
       mutate(part=part/4)
   )
 }
-
 
 
 #utility function
@@ -694,41 +742,47 @@ dd_check_long=function(dat){
 
 
 
-#' Summarise attributes and levels
+#' Summarize attributes and levels
+#' 
+#' Summarize attributes and levels in tidy choice data containing categorical attributes (before dummy-coding)
 #' 
 #' This functions looks for categorical attributes and summaries their levels
 #' This is helpful when evaluating a new choice data file.
 #'
 #'
-#' @param data_in long-format choice data
-#'
-#' @return tibble with summary
+#' @param data_in A tibble, containing long-format choice data
+#' @return A tibble with one row per attribute, and a list of the levels
+#' @examples
+#' ec_summarize_attrlvls(icecream)
+#' 
 #'
 #' @export
 ec_summarize_attrlvls<-function(data_in){
   return(
-  data_in %>% select(-any_of(c('id','task','alt','p','x'))) %>% map(table) %>% 
-    map(names) %>% map(paste,collapse=', ') %>% as_tibble() %>% 
-    pivot_longer(everything()) %>% rlang::set_names(c('attribute','levels')) )
+    data_in %>% select(-any_of(c('id','task','alt','p','x'))) %>% 
+      map(table) %>% 
+      map(names) %>% 
+      map(paste,collapse=', ') %>% 
+      as_tibble() %>% 
+      pivot_longer(everything()) %>% rlang::set_names(c('attribute','levels')) )
 }
 
 
-# Estimates ---------------------------------------------------------------
+# Working with estimates and draw objects ---------------------------------
 
 
 #' Obtain upper level model estimates
 #'
 #'
-#' @param est is an echoice draw object (list)
+#' @param est is an 'echoice2' draw object (list)
 #' @param quantiles quantile for CI
 #' @return tibble with MU (upper level) summaries
 #' @examples
-#' \dontrun{
-#' est %>% ec_estimates_MU
-#' est %>% ec_estimates_MU %>% 
-#' ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+
-#' facet_wrap(~attribute,scales = 'free') + coord_flip()
-#' }
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #Upper-level summary
+#' icecream_est %>% ec_estimates_MU
 #' @export
 ec_estimates_MU=function(est, quantiles=c(.05,.95)){
   
@@ -737,7 +791,7 @@ ec_estimates_MU=function(est, quantiles=c(.05,.95)){
   
   estimates=  
     est$MUDraw %>% 
-    as_tibble() %>% 
+    as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)) %>% 
     rlang::set_names(parnames) %>%
     pivot_longer(everything(),names_to='par') %>%
     mutate(par=factor(par,levels=parnames)) %>%
@@ -774,16 +828,13 @@ ec_estimates_MU=function(est, quantiles=c(.05,.95)){
 #' Obtain posterior mean estimates of upper level correlations
 #'
 #'
-#' @param est is an echoice draw object (list)
+#' @param est is an 'echoice2' draw object (list)
 #' @return estimates of upper level correlations
 #' @examples
-#' \dontrun{
-#' #obtain correlations and visualize using corrr package
-#' est %>% ec_estimates_SIGMA_corr %>% 
-#' corrr::as_cordf() %>% 
-#' corrr::rplot(print_cor = TRUE, legend = FALSE)+ 
-#'   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-#' }
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' icecream_est %>% ec_estimates_SIGMA_corr %>% round(2)
 #' @export
 ec_estimates_SIGMA_corr=function(est){
   parnames=est$parnames
@@ -792,11 +843,18 @@ ec_estimates_SIGMA_corr=function(est){
   return(est$SIGMADraw %>% apply(1:2,mean) %>% cov2cor)
 }
 
+
+
 #' Obtain posterior mean estimates of upper level covariance
 #'
 #'
-#' @param est is an echoice draw object (list)
+#' @param est is an 'echoice2' draw object (list)
 #' @return estimates of upper level covariance
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' icecream_est %>% ec_estimates_SIGMA %>% round(2)
 #' @export
 ec_estimates_SIGMA=function(est){
   parnames=est$parnames
@@ -808,11 +866,20 @@ ec_estimates_SIGMA=function(est){
 
 #' Summarize attribute-based screening parameters
 #'
+#' Summarize attribute-based screening parameters from an attribute-based screening model in 'echoice2'
+#' 
 #'
-#' @param est is an echoice draw object (list)
+#' @param est is an 'echoice2' draw object (list) from a model with attribute-based screening
 #' @param quantiles quantile for CI
 #' @return tibble with screening summaries
 #' @importFrom rlang :=
+#' @examples
+#' #run MCMC sampler (use way more than 100 draws for actual use)
+#' est_scr_icecream <- vd_est_vdm_screenpr(icecream, R=100)
+#' #summarise draws of screening probabilities
+#' ec_estimates_screen(est_scr_icecream)
+#' #Note: There is no variance in this illustrative example - more draws are needed
+#' 
 #' @export
 ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   
@@ -854,6 +921,8 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 
 
 
+
+
 # Volumetric Demand Estimation --------------------------------------------
 
 
@@ -861,26 +930,25 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 #' Estimate volumetric demand model, EV1 errors
 #'
 #'
-#' @param vd volumetric demand data (long format)
-#' @param tidy apply echoice tidier
-#' @param R draws
-#' @param keep thinning
-#' @param cores no of CPU cores to use (default: auto-detect)
-#' @param control list containing additional settings
+#' @param vd A tibble, containing volumetric demand data (long format)
+#' @param tidy A logical, whether to apply 'echoice2' tidier function (default: TRUE)
+#' @param R A numeric, no of draws
+#' @param keep A numeric, thinning factor
+#' @param cores An integer, no of CPU cores to use (default: auto-detect)
+#' @param control A list containing additional settings
 #' 
-#' @return est ec-draw object (List)
+#' @return An 'echoice2' draw object, in the form of a list
 #' 
 #' @seealso [vd_dem_vdm()] to generate demand predictions based on this model
 #' 
 #' @examples
-#' \dontrun{
 #' data(icecream)
-#' icecream_est <- icecream %>% vd_est_vdm(R=50000)
-#' }
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
 #' @export
 vd_est_vdm=
   function(vd,
-           tidy=T,
+           tidy=TRUE,
            R=100000, 
            keep=10,
            cores=NULL,
@@ -976,21 +1044,21 @@ vd_est_vdm=
 
 
 
-#' Estimate volumetric demand model (Normal Error)
+#' Estimate volumetric demand model, Normal errors
 #'
 #'
-#' @param vd volumetric demand data (long format)
-#' @param R draws
-#' @param keep thinning
-#' @param cores no of CPU cores to use (default: auto-detect)
-#' @param control list containing additional settings
-#' 
-#' @return est ec-draw object (List)
+#' @param vd A tibble, containing volumetric demand data (long format)
+#' @param tidy A logical, whether to apply 'echoice2' tidier function (default: TRUE)
+#' @param R A numeric, no of draws
+#' @param keep A numeric, thinning factor
+#' @param cores An integer, no of CPU cores to use (default: auto-detect)
+#' @param control A list containing additional settings
+#' @return An 'echoice2' draw object, in the form of a list
 #' 
 #' @examples
-#' \dontrun{
-#' icecream_est <- icecream %>% vd_est_vdmn(R=50000)
-#' }
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdmn(R=50)
 #' @export
 vd_est_vdmn = function(vd,
                        R=100000, 
@@ -1133,7 +1201,7 @@ vd_est_vdm_screen = function(vd,
   dat$tauconst=
       1-(vd %>% 
         select(all_of(c('id','task','alt','x'))) %>% 
-        bind_cols(dat$Af%>%as_tibble)  %>%
+        bind_cols(dat$Af%>%as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)))  %>%
         mutate_if(is.double,function(col){vd$x*col})%>%
         group_by(across("id")) %>% 
           summarise_if(is.double,max) %>%
@@ -1254,7 +1322,7 @@ vd_est_vdm_screenpr = function(vd,
   dat$tauconst=
     1-(vd %>% 
          select(all_of(c('id','task','alt','x'))) %>% 
-         bind_cols(dat$Af%>%as_tibble)  %>%
+         bind_cols(dat$Af%>%as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)))  %>%
          mutate_if(is.double,function(col){vd$x*col})%>%
          group_by(across("id")) %>% summarise_if(is.double,max) %>%
          arrange(as.numeric(.$id)) %>%
@@ -1556,18 +1624,16 @@ vd_est_vdm_ssq = function(vd,
 # Log-Likelihoods for entire datasets -------------------------------------
 
 
-#logll
-
-
 #' Log-Likelihood for compensatory volumetric demand model
 #' 
 #' @usage vd_LL_vdm(draw, vd, fromdraw=1)
 #' 
-#' @param draw draws
-#' @param vd vd object
-#' @param fromdraw from which draw (excl. burnin)
+#' @param draw A list, 'echoice2' draws object
+#' @param vd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @examples
 #' 
-#' @return Log-Likelihood
 #' 
 #' @export
 vd_LL_vdm <- function(draw, vd, fromdraw=1){
@@ -1594,14 +1660,17 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
+
+
 #' Log-Likelihood for volumetric demand model with set-size variation
 #' 
 #' 
-#' @param draw draws
-#' @param vd vd object
-#' @param fromdraw from which draw (excl. burnin)
-#' 
-#' @return Log-Likelihood
+#' @param draw A list, 'echoice2' draws object
+#' @param vd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @examples
+#' #analogous to vd_LL_vdm
 #' 
 #' @export
 vd_LL_vdmss <- function(draw, vd, fromdraw=1){
@@ -1628,14 +1697,18 @@ vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   return(out) 
 }
 
+
+
 #' Log-Likelihood for conjunctive-screening volumetric demand model
 #' 
 #' 
-#' @param draw draws
-#' @param vd vd object
-#' @param fromdraw from which draw (excl. burnin)
+#' @param draw A list, 'echoice2' draws object
+#' @param vd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @examples
+#' #analogous to vd_LL_vdm
 #' 
-#' @return Log-Likelihood
 #' 
 #' @export
 vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
@@ -1670,11 +1743,12 @@ vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
 #' Log-Likelihood for conjunctive-screening (with price) volumetric demand model
 #' 
 #' 
-#' @param draw draws
-#' @param vd vd object
-#' @param fromdraw from which draw (excl. burnin)
-#' 
-#' @return Log-Likelihood
+#' @param draw A list, 'echoice2' draws object
+#' @param vd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @examples
+#' #analogous to vd_LL_vdm
 #' 
 #' @export
 vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
@@ -1764,7 +1838,7 @@ prep_newprediction <- function(data_new,data_old){
 #'
 #'
 #' @param vd data
-#' @param tidy apply echoice tidier
+#' @param tidy apply 'echoice2' tidier
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
 #' @param cores (optional) cores
@@ -1778,9 +1852,9 @@ prep_newprediction <- function(data_new,data_old){
 #' 
 #' @export
 vd_dem_vdm=function(vd,
-                    tidy=T,
                     est,
                     epsilon_not=NULL,
+                    tidy=TRUE,
                     cores=NULL){
   
   #cores  
@@ -3768,17 +3842,18 @@ ec_screenprprob_sr=function(xd,
 
 
 
-
 # Inspect Draws --------------------------------------------------------------
 
 #' Obtain MU_theta draws
 #'
 #'
-#' @usage ec_draws_MU(draws)
-#'
-#' @param draws ec-draws, output from any ec-model
-#' 
-#' @return  draws
+#' @param draws A list, 'echoice2' draws object
+#' @return  A tibble, long format, draws of MU
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' ec_draws_MU(icecream_est)
 #' 
 #' @seealso [ec_draws_screen()] to obtain screening parameter draws (where applicable),
 #' [ec_trace_MU()] to generate a traceplot of MU_theta draws
@@ -3794,14 +3869,17 @@ ec_draws_MU <- function(draws){
   
 }
 
+
 #' Obtain Screening probability draws
 #'
 #'
-#' @usage ec_draws_screen(draws)
-#'
-#' @param draws ec-draws, output from any ec-model with screening
-#' 
-#' @return  draws
+#' @param draws A list, 'echoice2' draws object
+#' @return  A tibble, long format, draws of MU
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' ec_draws_screen(icecream_scr_est)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,
 #' [ec_trace_screen()] to generate a traceplot of screening draws
@@ -3817,18 +3895,25 @@ ec_draws_screen <- function(draws){
   
 }
 
+
 #' Generate MU_theta traceplot
 #'
 #'
-#'
-#' @param draws ec-draws, output from any ec-model
+#' @param draws A list, 'echoice2' draws object
 #' @param burnin burn-in to remove
+#' @return A ggplot2 plot containing traceplots of draws
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' ec_trace_MU(icecream_est)
 #' 
 #' @seealso [ec_boxplot_MU()] to obtain boxplot
 #' 
 #' @export
 ec_trace_MU <- function(draws, burnin=100){
   
+  myplot<-
   draws$MUDraw %>% data.frame %>% as_tibble %>%
     rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
@@ -3839,17 +3924,23 @@ ec_trace_MU <- function(draws, burnin=100){
               by=c('par'='attr_level')) %>%
     ggplot(aes(x=draw, y=value)) +
     geom_line() +guides(color='none')+facet_wrap(~par,scales='free_y')
+  myplot
 }
 
 
-#' Generate Screening probability traceplot
+
+#' Generate Screening probability traceplots
 #'
 #'
-#'
-#' @param draws ec-draws, output from any ec-model with screening
+#' @param draws A list, 'echoice2' draws object, from a model with attribute-based screening
 #' @param burnin burn-in to remove
+#' @return A ggplot2 plot containing traceplots of draws
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' ec_trace_screen(icecream_scr_est, burnin=1)
 #' 
-#' @return  draws
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,
 #' [ec_boxplot_screen()] to generate boxplot
@@ -3857,7 +3948,9 @@ ec_trace_MU <- function(draws, burnin=100){
 #' @export
 ec_trace_screen <- function(draws, burnin=100){
   
-  draws$deltaDraw %>% as_tibble %>%
+  myplot<-
+  draws$deltaDraw %>% 
+    as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)) %>%
     rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
@@ -3869,34 +3962,46 @@ ec_trace_screen <- function(draws, burnin=100){
     ggplot(aes(x=draw, y=value)) +
     geom_line() +guides(color='none')+facet_wrap(~attribute_level,scales='free_y')
   
+  myplot
+  
 }
+
 
 
 #' Generate MU_theta boxplot
 #'
 #'
-#'
-#' @param draws ec-draws, output from any ec-model
+#' @param draws A list, 'echoice2' draws object
 #' @param burnin burn-in to remove
+#' @return A ggplot2 plot containing traceplots of draws
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' ec_boxplot_MU(icecream_est, burnin=1)
 #' 
 #' @seealso [ec_trace_MU()] to obtain traceplot
 #' 
 #' @export
 ec_boxplot_MU <- function(draws, burnin=100){
   
-  draws$MUDraw %>% as_tibble %>%
+  myplot<-
+  draws$MUDraw %>% 
+    as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)) %>%
     rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
                  names_to = 'par') %>%
-    left_join(attributes(draws)$ec_data$attributes %>%
-                dplyr::select(all_of(c('attr_level','attribute','lvl','reference_lvl')), 
-              by=c('par'='attr_level'))) %>%
+    left_join(x=.,
+              y = attributes(draws)$ec_data$attributes %>%
+                dplyr::select(all_of(c('attr_level','attribute','lvl','reference_lvl'))), 
+              by=c("par"="attr_level")) %>%
     mutate(par=stringr::str_replace_all(par,paste0(.$attribute,":"),"")) %>%
     select(all_of(c('draw','par','value','attribute'))) %>%
     dplyr::filter(.$draw>burnin) %>%
     ggplot2::ggplot(aes(x=par,y=value)) + geom_boxplot() + coord_flip() +
     facet_wrap(~attribute, scales='free')
+  myplot
   
 }
 
@@ -3904,11 +4009,15 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' Generate Screening probability boxplot
 #'
 #'
-#'
-#' @param draws ec-draws, output from any ec-model with screening
+#' @param draws A list, 'echoice2' draws object, from a model with attribute-based screening
 #' @param burnin burn-in to remove
-#' 
-#' @return  draws
+#' @return A ggplot2 plot containing traceplots of draws
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' #run MCMC sampler (use way more than 50 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' ec_boxplot_screen(icecream_scr_est, burnin = 1)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,
 #' [ec_trace_screen()] to generate traceplot
@@ -3916,6 +4025,7 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' @export
 ec_boxplot_screen <- function(draws, burnin=100){
   
+  myplot<-
   draws$deltaDraw %>% as_tibble %>%
     rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
@@ -3928,34 +4038,49 @@ ec_boxplot_screen <- function(draws, burnin=100){
     ggplot(aes(x=lvl,y=value)) + geom_boxplot() + coord_flip() +
     facet_wrap(~attribute, scales='free_y')
   
+  myplot
 }
 
 
 
 
-#' Thin echoice-vd draw objects
+#' Thin 'echoice2'-vd draw objects
 #'
 #'
-#' @param M is an echoice draw object (list)
+#' @param est is an 'echoice2' draw object (list)
 #' @param burnin_perc how much burn-in to remove
 #' @param total_draws how many draws to keep after thinning
-#'
-#' @return thinned echoice draw object (list)
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50, keep = 1)
+#' #without thinning, yields R=50 draWs
+#' dim(icecream_est$MUDraw)
+#' icecream_est_thinned <- vd_thin_draw(icecream_est,.5)
+#' #26 draws left after thinning about half
+#' dim(icecream_est_thinned$MUDraw)
+#' 
+#' @return thinned 'echoice2' draw object (list)
 #'
 #' @export
-vd_thin_draw=function(M, 
+vd_thin_draw=function(est, 
                       burnin_perc=.5, 
                       total_draws=NULL){
   
-  R = dim(M$thetaDraw)[3]
+  R = dim(est$thetaDraw)[3]
   
   #burnin
   first_draw=floor(burnin_perc*R)
   usableR   =length(first_draw:R)
-  message("Draws post burnin: ",usableR)
+  message("Draws post burnin: ", usableR)
+  
+  check_replicate = F
+  if(!is.null(total_draws)){
+    check_replicate <- usableR<total_draws
+  }
   
   
-  if(usableR<total_draws){
+  if(check_replicate){
     message("More desired draws than original draws")
     total_draws=usableR
     keepdraws=sample(first_draw:R, size = total_draws, replace = TRUE)
@@ -3965,8 +4090,13 @@ vd_thin_draw=function(M,
     #try to thin as much as possible
     chosen_draws = unique(round(seq.int(first_draw, R, length.out=total_draws),0))
     
+    check_truncate =F
+    if(!is.null(total_draws)){
+      check_truncate <- length(chosen_draws)<total_draws
+    }
+    
     #if missing some draws, randomly grab them from remaining draws
-    if(length(chosen_draws)<total_draws){
+    if(check_truncate){
       message("draws in quence: ",length(chosen_draws), " adding more")
       
       added_draws=sample(all_draws[all_draws%in%chosen_draws],total_draws-length(chosen_draws))
@@ -3974,27 +4104,30 @@ vd_thin_draw=function(M,
     } else{
       keepdraws=chosen_draws
     }
-    
+  
   }
   
-  if(is.null(M$tauDraw)){
-    M$thetaDraw=  M$thetaDraw[,,keepdraws]
-    M$MUDraw=     M$MUDraw[keepdraws,]
-    M$SIGMADraw=  M$SIGMADraw[,,keepdraws]
-    M$loglike=    M$loglike[keepdraws,,drop=F]
-    M$logpost=    M$logpost[keepdraws,,drop=F]
-    M$reject=     M$reject[keepdraws,,drop=F]
+  if(is.null(est$tauDraw)){
+    est$thetaDraw=  est$thetaDraw[,,keepdraws]
+    est$MUDraw=     est$MUDraw[keepdraws,]
+    est$SIGMADraw=  est$SIGMADraw[,,keepdraws]
+    est$loglike=    est$loglike[keepdraws,,drop=FALSE]
+    est$logpost=    est$logpost[keepdraws,,drop=FALSE]
+    est$reject=     est$reject[keepdraws,,drop=FALSE]
     
   }else{
-    M$thetaDraw=  M$thetaDraw[,,keepdraws]
-    M$MUDraw=     M$MUDraw[keepdraws,]
-    M$SIGMADraw=  M$SIGMADraw[,,keepdraws]
-    M$tauDraw=    M$tauDraw[,,keepdraws]
-    M$deltaDraw=  M$deltaDraw[keepdraws,]
-    M$loglike=    M$loglike[keepdraws,,drop=F]
-    M$logpost=    M$logpost[keepdraws,,drop=F]
-    M$reject=     M$reject[keepdraws,,drop=F]
+    est$thetaDraw=  est$thetaDraw[,,keepdraws]
+    est$MUDraw=     est$MUDraw[keepdraws,]
+    est$SIGMADraw=  est$SIGMADraw[,,keepdraws]
+    est$tauDraw=    est$tauDraw[,,keepdraws]
+    est$deltaDraw=  est$deltaDraw[keepdraws,]
+    est$loglike=    est$loglike[keepdraws,,drop=FALSE]
+    est$logpost=    est$logpost[keepdraws,,drop=FALSE]
+    est$reject=     est$reject[keepdraws,,drop=FALSE]
   }
   
-  return(M)
+  return(est)
 }
+
+
+

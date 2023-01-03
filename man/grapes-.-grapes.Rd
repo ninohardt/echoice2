@@ -2,15 +2,24 @@
 % Please edit documentation in R/echoice2.R
 \name{\%.\%}
 \alias{\%.\%}
-\title{Attribute pipe}
+\title{Get the attribute of an object}
 \usage{
 obj \%.\% attrname
 }
 \arguments{
-\item{obj}{object}
+\item{obj}{The object to get the attribute from.}
 
-\item{attrname}{Attribute to pull}
+\item{attrname}{The name of the attribute to get.}
+}
+\value{
+The attribute of the object.
 }
 \description{
-Read attributes of an object, pipe-style
+Get the attribute of an object
+}
+\examples{
+obj <- list(a = 1, b = 2)
+attributes(obj)$test="hello"
+`\%.\%`(obj, "test")
+
 }

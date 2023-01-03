@@ -12,7 +12,7 @@ ec_boxplot_screen(draws, burnin = 100)
 \item{burnin}{burn-in to remove}
 }
 \value{
-draws
+ggplot object
 }
 \description{
 Generate Screening probability boxplot

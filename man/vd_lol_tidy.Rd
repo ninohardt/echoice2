@@ -2,18 +2,18 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_lol_tidy}
 \alias{vd_lol_tidy}
-\title{Convert list-of-lists choice format to stacked tidy data}
+\title{Tidies Volumetric Data into Long Format}
 \usage{
 vd_lol_tidy(datalist)
 }
 \arguments{
-\item{datalist}{is a list of lists (one list per unit) with elements A, X, P}
+\item{datalist}{A list of dataframes.}
 }
 \value{
-tibble/data.frame in stacked format
+A dataframe in long format.
 Columns of output data.frame:
 id; task: ask/choice occasion number; alt: alternative/product number; x: quantity; p: price; attributes
 }
 \description{
-Convert list-of-lists choice format to stacked tidy data
+Takes a list of dataframes and tidies each element into a long format.
 }
