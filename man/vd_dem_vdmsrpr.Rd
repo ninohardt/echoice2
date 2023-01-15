@@ -4,7 +4,7 @@
 \alias{vd_dem_vdmsrpr}
 \title{Demand Prediction (Volumetric demand, attribute-based screening including price, Normal)}
 \usage{
-vd_dem_vdmsrpr(vd, est, epsilon_not=NULL, cores=NULL)
+vd_dem_vdmsrpr(vd, est, epsilon_not = NULL, cores = NULL)
 }
 \arguments{
 \item{vd}{data}
@@ -27,5 +27,5 @@ Eerror realisations can be pre-supplied to the \code{epsilon_not}. This helps cr
 \seealso{
 \code{\link[=prep_newprediction]{prep_newprediction()}} to match \code{vd}'s factor levels,
 \code{\link[=ec_gen_err_normal]{ec_gen_err_normal()}} for pre-generating error realizations and
-\code{\link[=vd_est_vdm_screenpr]{vd_est_vdm_screenpr()}} for estimating the corresponding model
+\code{\link[=vd_est_vdm_screen]{vd_est_vdm_screen()}} for estimating the corresponding model
 }

@@ -7,7 +7,7 @@
 vd_prepare(dt, Af = NULL)
 }
 \arguments{
-\item{dt}{is tidy choice data (columns: id, task, alt, x, p, attributes)}
+\item{dt}{tidy choice data (columns: id, task, alt, x, p, attributes)}
 
 \item{Af}{(optional) contains a full design matrix (for attribute-based screening), or, more generally, a design matrix used for attribute-based screening}
 }
@@ -15,14 +15,19 @@ vd_prepare(dt, Af = NULL)
 list containing information for estimation functions
 }
 \description{
-Pre-computing task-wise total expenditures \code{sumpsx} and indices \code{xfr},\code{xto},\code{lfr},\code{lto} speeds up computation
+This utility function prepares tidy choice data for fast MCMC samplers.
+}
+\details{
+Note: This function is only exported because it makes it easier to tinker with this package.
+This function re-arranges choice data for fast access in highly-optimized MCMC samplers.
+It Pre-computes task-wise total expenditures \code{sumpsx} and generates indices \code{xfr},\code{xto},\code{lfr},\code{lto} for fast data access.
 }
 \examples{
 \dontrun{
 #Minimal example:
 #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
 Af=
- rbinom(12,2,.5) \%>\% factor \%>\% fct_relabel(~paste0('attr',.x)) \%>\% 
+ rbinom(12,2,.5) \%>\% factor \%>\% forcats::fct_relabel(~paste0('attr',.x)) \%>\% 
  enframe \%>\% add_column(val=1) \%>\% 
  pivot_wider(names_from = value, values_from=val) \%>\% map_df(replace_na,0) \%>\%
  select(-name) \%>\%

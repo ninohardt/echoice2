@@ -7,15 +7,23 @@
 ec_boxplot_screen(draws, burnin = 100)
 }
 \arguments{
-\item{draws}{ec-draws, output from any ec-model with screening}
+\item{draws}{A list, 'echoice2' draws object, from a model with attribute-based screening}
 
 \item{burnin}{burn-in to remove}
 }
 \value{
-ggplot object
+A ggplot2 plot containing traceplots of draws
 }
 \description{
 Generate Screening probability boxplot
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use
+#run MCMC sampler (use way more than 50 draws for actual use
+icecream_scr_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm_screen(R=100)
+ec_boxplot_screen(icecream_scr_est, burnin = 1)
+
 }
 \seealso{
 \code{\link[=ec_draws_MU]{ec_draws_MU()}} to obtain MU_theta draws,

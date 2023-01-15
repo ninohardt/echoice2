@@ -7,7 +7,7 @@
 ec_estimates_SIGMA_corr(est)
 }
 \arguments{
-\item{est}{is an echoice draw object (list)}
+\item{est}{is an 'echoice2' draw object (list)}
 }
 \value{
 estimates of upper level correlations
@@ -16,11 +16,8 @@ estimates of upper level correlations
 Obtain posterior mean estimates of upper level correlations
 }
 \examples{
-\dontrun{
-#obtain correlations and visualize using corrr package
-est \%>\% ec_estimates_SIGMA_corr \%>\% 
-corrr::as_cordf() \%>\% 
-corrr::rplot(print_cor = TRUE, legend = FALSE)+ 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-}
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+icecream_est \%>\% ec_estimates_SIGMA_corr \%>\% round(2)
 }

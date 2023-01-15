@@ -4,7 +4,7 @@
 \alias{vd_dem_vdmsr}
 \title{Demand Prediction (Volumetric demand, attribute-based screening, Normal)}
 \usage{
-vd_dem_vdmsr(vd, est, epsilon_not=NULL, cores=NULL)
+vd_dem_vdmsr(vd, est, epsilon_not = NULL, cores = NULL)
 }
 \arguments{
 \item{vd}{data}

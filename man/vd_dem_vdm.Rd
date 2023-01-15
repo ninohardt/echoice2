@@ -4,16 +4,25 @@
 \alias{vd_dem_vdm}
 \title{Demand Prediction (Volumetric demand, EV1 errors)}
 \usage{
-vd_dem_vdm(vd, tidy = TRUE, est, epsilon_not = NULL, cores = NULL)
+vd_dem_vdm(
+  vd,
+  est,
+  epsilon_not = NULL,
+  error_dist = "EV1",
+  tidy = TRUE,
+  cores = NULL
+)
 }
 \arguments{
 \item{vd}{data}
 
-\item{tidy}{apply echoice tidier}
-
 \item{est}{ec-model draws}
 
 \item{epsilon_not}{(optional) error realizations}
+
+\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal'}
+
+\item{tidy}{apply 'echoice2' tidier}
 
 \item{cores}{(optional) cores}
 }

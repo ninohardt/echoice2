@@ -15,3 +15,7 @@ tibble with dummy variables
 \description{
 Dummy-code a categorical variable
 }
+\examples{
+mytest=data.frame(attribute=factor(c('a','a','b','c','c')))
+dummyvar(mytest)
+}

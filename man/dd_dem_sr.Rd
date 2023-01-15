@@ -4,7 +4,7 @@
 \alias{dd_dem_sr}
 \title{Discrete Choice Predictions (HMNL with attribute-based screening)}
 \usage{
-dd_dem_sr(dd, est, cores)
+dd_dem_sr(dd, est, cores = NULL)
 }
 \arguments{
 \item{dd}{data}

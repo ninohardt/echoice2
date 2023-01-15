@@ -4,7 +4,7 @@
 \alias{dd_prob_sr}
 \title{Discrete Choice Probabilities (HMNL with attribute-based screening)}
 \usage{
-dd_prob_sr(dd, est, cores)
+dd_prob_sr(dd, est, cores = NULL)
 }
 \arguments{
 \item{dd}{data}

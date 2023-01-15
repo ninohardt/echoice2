@@ -7,15 +7,22 @@
 ec_boxplot_MU(draws, burnin = 100)
 }
 \arguments{
-\item{draws}{ec-draws, output from any ec-model}
+\item{draws}{A list, 'echoice2' draws object}
 
 \item{burnin}{burn-in to remove}
 }
 \value{
-ggplot object
+A ggplot2 plot containing traceplots of draws
 }
 \description{
 Generate MU_theta boxplot
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+ec_boxplot_MU(icecream_est, burnin=1)
+
 }
 \seealso{
 \code{\link[=ec_trace_MU]{ec_trace_MU()}} to obtain traceplot

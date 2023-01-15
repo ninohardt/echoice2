@@ -2,20 +2,31 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_thin_draw}
 \alias{vd_thin_draw}
-\title{Thin echoice-vd draw objects}
+\title{Thin 'echoice2'-vd draw objects}
 \usage{
-vd_thin_draw(M, burnin_perc = 0.5, total_draws = NULL)
+vd_thin_draw(est, burnin_perc = 0.5, total_draws = NULL)
 }
 \arguments{
-\item{M}{is an echoice draw object (list)}
+\item{est}{is an 'echoice2' draw object (list)}
 
 \item{burnin_perc}{how much burn-in to remove}
 
 \item{total_draws}{how many draws to keep after thinning}
 }
 \value{
-thinned echoice draw object (list)
+thinned 'echoice2' draw object (list)
 }
 \description{
-Thin echoice-vd draw objects
+Thin 'echoice2'-vd draw objects
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50, keep = 1)
+#without thinning, yields R=50 draWs
+dim(icecream_est$MUDraw)
+icecream_est_thinned <- vd_thin_draw(icecream_est,.5)
+#26 draws left after thinning about half
+dim(icecream_est_thinned$MUDraw)
+
 }

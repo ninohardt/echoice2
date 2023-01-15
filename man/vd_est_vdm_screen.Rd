@@ -9,6 +9,8 @@ vd_est_vdm_screen(
   R = 1e+05,
   keep = 10,
   cores = NULL,
+  error_dist = "EV1",
+  price_screen = TRUE,
   control = list(include_data = TRUE)
 )
 }
@@ -21,6 +23,10 @@ vd_est_vdm_screen(
 
 \item{cores}{no of CPU cores to use (default: auto-detect)}
 
+\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal'}
+
+\item{price_screen}{A logical, indicating whether price tag screening should be estimated}
+
 \item{control}{list containing additional settings}
 }
 \value{
@@ -30,7 +36,6 @@ est ec-draw object (List)
 See https://dx.doi.org/10.2139/ssrn.2770025 for more details
 }
 \examples{
-\dontrun{
-icecream_est <- icecream \%>\% vd_est_vdm_screen(R=50000)
-}
+data(icecream)
+icecream_est <- icecream \%>\% vd_est_vdm_screen(R=150)
 }

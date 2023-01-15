@@ -6,6 +6,7 @@
 \usage{
 vd_est_vdm_ss(
   vd,
+  order = 1,
   R = 1e+05,
   keep = 10,
   cores = NULL,
@@ -14,6 +15,8 @@ vd_est_vdm_ss(
 }
 \arguments{
 \item{vd}{volumetric demand data (long format) with set size variation}
+
+\item{order}{integer, either 1 or 2 (for now), indicating linear or quadratic set-size effect}
 
 \item{R}{draws}
 
@@ -29,4 +32,10 @@ est ec-draw object (List)
 \description{
 For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
 This model REQUIRES variation in choice-set size
+}
+\examples{
+data(icecream)
+#note that for this example dataset, the model is not identified
+#because the data lacks variation in set size
+icecream_est <- icecream \%>\% vd_est_vdm_ss(R=50)
 }

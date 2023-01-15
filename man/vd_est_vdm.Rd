@@ -2,7 +2,7 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_est_vdm}
 \alias{vd_est_vdm}
-\title{Estimate volumetric demand model, EV1 errors}
+\title{Estimate volumetric demand model}
 \usage{
 vd_est_vdm(
   vd,
@@ -10,34 +10,38 @@ vd_est_vdm(
   R = 1e+05,
   keep = 10,
   cores = NULL,
+  error_dist = "EV1",
   control = list(include_data = TRUE)
 )
 }
 \arguments{
-\item{vd}{volumetric demand data (long format)}
+\item{vd}{A tibble, containing volumetric demand data (long format)}
 
-\item{tidy}{apply echoice tidier}
+\item{tidy}{A logical, whether to apply 'echoice2' tidier function (default: TRUE)}
 
-\item{R}{draws}
+\item{R}{A numeric, no of draws}
 
-\item{keep}{thinning}
+\item{keep}{A numeric, thinning factor}
 
-\item{cores}{no of CPU cores to use (default: auto-detect)}
+\item{cores}{An integer, no of CPU cores to use (default: auto-detect)}
 
-\item{control}{list containing additional settings}
+\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal'}
+
+\item{control}{A list containing additional settings}
 }
 \value{
-est ec-draw object (List)
+An 'echoice2' draw object, in the form of a list
 }
 \description{
-Estimate volumetric demand model, EV1 errors
+Estimate volumetric demand model
 }
 \examples{
-\dontrun{
 data(icecream)
-icecream_est <- icecream \%>\% vd_est_vdm(R=50000)
-}
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
 }
 \seealso{
 \code{\link[=vd_dem_vdm]{vd_dem_vdm()}} to generate demand predictions based on this model
+
+\code{\link[=vd_est_vdm_screen]{vd_est_vdm_screen()}} to estimate a volumetric demand model with screening
 }

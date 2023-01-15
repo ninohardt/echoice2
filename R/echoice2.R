@@ -247,12 +247,61 @@ utils::globalVariables(c(".", ".MAE", ".MSE", ".bias", ".demdraws", ".hp", ".hpa
 `%.%` <- function(obj,attrname) (attributes(obj))[[attrname]]
 
 
+#' Log Marginal Density (Newton-Raftery)
+#' 
+#' This function uses the quick-and-dirty Newton-Raftery approximation for log-marginal-density.
+#'
+#' Approximation of LMD based on Newton-Raftery.
+#' It is not the most accurate, but a very fast method.
+#'
+#' @param ll A vector of log-likelihood values (i.e., draws)
+#' @return A single numeric value representing the log marginal density
+#'
+#'
+#' @examples
+#' logll_values <- c(-4000, -4001, -4002)
+#' logMargDenNRu(logll_values)
+#' @export
+logMargDenNRu=function(ll) 
+{
+  med = stats::median(ll)
+  return(med - log(mean(exp(-ll + med))))
+}
 
-# data manipulation -------------------------------------------------------
+#' Obtain Log Marginal Density from draw objects
+#' 
+#' This is a helper function to quickly obtain log marginal density from a draw object
+#' 
+#' Draws are split in 4 equal parts from start to finish, and LMD
+#' is computed for each part. This helps to double-check convergence.
+#'
+#'
+#' @param est 'echoice2' draw object
+#' @return tibble with LMDs (first 25% of draws, next 25% of draws, ...) 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #obtain LMD by quartile of draws
+#' ec_lmd_NR(icecream_est)
+#'
+#' @export
+ec_lmd_NR=function(est){
+  return(
+    drop(est$loglike) %>% 
+      enframe(name = 'draw') %>% 
+      mutate(part=ntile(draw,4)) %>% 
+      group_by(part) %>% summarise(lmd=logMargDenNRu(value), .groups='drop') %>% 
+      mutate(part=part/4)
+  )
+}
+
+# Data manipulation -------------------------------------------------------
 
 
 #clean data
-vd_janitor=function(vd, maxquant=999){
+vd_janitor=function(vd, 
+                    maxquant=999){
   `%!in%` <- Negate(`%in%`)
   
   #remove too high volumes
@@ -276,47 +325,6 @@ vd_janitor=function(vd, maxquant=999){
   attributes(vd)$filter=filter_summary
   return(vd)
 }
-
-
-#utility function
-#tidying a single element of a list-of-lists choice dataset
-vd_lol_tidyelement=function(da){
-  return(
-    bind_cols(
-      tibble(
-      task=rep(1:nrow(da$X),each=ncol(da$X)),
-      alt=rep(1:ncol(da$X),nrow(da$X)),
-      x=as.vector(t(da$X)),
-      p=as.vector(t(da$P))),
-    as_tibble(da$A))
-  )
-}
-
-
-
-#' @title Tidies Volumetric Data into Long Format
-#' @description Takes a list of dataframes and tidies each element into a long format.
-#' @param datalist A list of dataframes.
-#' @return A dataframe in long format.
-#' Columns of output data.frame:
-#' id; task: ask/choice occasion number; alt: alternative/product number; x: quantity; p: price; attributes
-
-#' @examples
-#' data_list <- list(data1, data2, data3)
-#' vd_lol_tidy(data_list)
-#' @export
-vd_lol_tidy=function(datalist){
-  out = mutate(
-    map_dfr(datalist,vd_lol_tidyelement, .id = 'id'),
-    id=as.integer(id))
-  
-  attributes(out)$ec_data = list(choice_type='volumetric',
-                                 screening='none',
-                                 data_type='vd_tidy_choice')
-  return(out)
-}
-
-
 
 
 #' Dummy-code a categorical variable
@@ -379,14 +387,14 @@ get_attr_lvl=function(tdc){
   tdc %>%
     select(-any_of(c('id','task','alt','p','x')))%>% 
     names %>% tibble::enframe() %>% 
-    mutate(attribute=stringr::str_extract(.$value,"^.*?(?=\\:)")) %>%
-    mutate(lvl=stringr::str_remove(.$value, .$attribute)) %>%
-    mutate(lvl=stringr::str_remove(.$lvl,"^(:)")) %>%
-    group_by(across("attribute")) %>%
-    mutate(reference_lvl=dplyr::first(.$lvl)) %>%
-    mutate(reference=ifelse(lvl==reference_lvl,1,0))%>%
-    mutate(lvl_abbrv=abbreviate(lvl))%>%
-    rename(attr_level=value)
+      mutate(attribute=stringr::str_extract(.$value,"^.*?(?=\\:)")) %>%
+      mutate(lvl=stringr::str_remove(.$value, .$attribute)) %>%
+      mutate(lvl=stringr::str_remove(.$lvl,"^(:)")) %>%
+      group_by(across("attribute")) %>%
+      mutate(reference_lvl=dplyr::first(lvl)) %>%
+      mutate(reference=ifelse(lvl==reference_lvl,1,0))%>%
+      mutate(lvl_abbrv=abbreviate(lvl))%>%
+      rename(attr_level=value)
 }
 
 
@@ -397,21 +405,25 @@ get_attr_lvl=function(tdc){
 #' @param longdata tibble
 #' @return tibble
 #' @examples 
-#' vd_long_tidy(mytest)
+#' data(icecream)
+#' vd_long_tidy(icecream)
 #'
 #' @export
 vd_long_tidy<-function(longdata){
 
   #find categorical variables
   catvars <-
-    longdata %>% select_if(is.factor) %>% names
+    longdata %>% select(tidyselect::where(is.factor)) %>% names
+  
   #dummify categorical variables
   dummified <-
     longdata %>% 
-    dummify(catvars) 
+      dummify(catvars) 
+  
   #get list of attribute levels
   attrs <-
     dummified %>% get_attr_lvl
+  
   #find reference categories in dummy coding
   refcats <-
     attrs %>% dplyr::filter(reference==1) %>% pull(attr_level)
@@ -675,56 +687,10 @@ vd_prepare_nox <- function(dt, Af=NULL){
 }
 
 
-#' Log Marginal Density (Newton-Raftery)
-#' 
-#' This function uses the quick-and-dirty Newton-Raftery approximation for log-marginal-density.
-#'
-#' Approximation of LMD based on Newton-Raftery.
-#' It is not the most accurate, but a very fast method.
-#'
-#' @param ll A vector of log-likelihood values (i.e., draws)
-#'
-#' @return A single numeric value representing the log marginal density
-#'
-#'
-#' @examples
-#' logll_values <- c(-4000, -4001, -4002)
-#' logMargDenNR(logll_values)
-#' @export
-logMargDenNR=function(ll) 
-{
-  med = stats::median(ll)
-  return(med - log(mean(exp(-ll + med))))
-}
 
 
-#' Obtain Log Marginal Density from draw objects
-#' 
-#' This is a helper function to quickly obtain log marginal density from a draw object
-#' 
-#' Draws are split in 4 equal parts from start to finish, and LMD
-#' is computed for each part. This helps to double-check convergence.
-#'
-#'
-#' @param est 'echoice2' draw object
-#' @return tibble with LMDs (first 25% of draws, next 25% of draws, ...) 
-#' @examples
-#' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
-#' #obtain LMD by quartile of draws
-#' ec_lmd_NR(icecream_est)
-#'
-#' @export
-ec_lmd_NR=function(est){
-  return(
-    drop(est$loglike) %>% 
-      enframe(name = 'draw') %>% 
-      mutate(part=ntile(draw,4)) %>% 
-      group_by(part) %>% summarise(lmd=logMargDenNR(value), .groups='drop') %>% 
-      mutate(part=part/4)
-  )
-}
+
+
 
 
 #utility function
@@ -753,8 +719,8 @@ dd_check_long=function(dat){
 #' @param data_in A tibble, containing long-format choice data
 #' @return A tibble with one row per attribute, and a list of the levels
 #' @examples
+#' data(icecream)
 #' ec_summarize_attrlvls(icecream)
-#' 
 #'
 #' @export
 ec_summarize_attrlvls<-function(data_in){
@@ -875,7 +841,8 @@ ec_estimates_SIGMA=function(est){
 #' @importFrom rlang :=
 #' @examples
 #' #run MCMC sampler (use way more than 100 draws for actual use)
-#' est_scr_icecream <- vd_est_vdm_screenpr(icecream, R=100)
+#' data(icecream)
+#' est_scr_icecream <- vd_est_vdm_screen(icecream, R=100)
 #' #summarise draws of screening probabilities
 #' ec_estimates_screen(est_scr_icecream)
 #' #Note: There is no variance in this illustrative example - more draws are needed
@@ -921,13 +888,27 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 
 
 
+# The Models --------------------------------------------------------------
+
+# vd_ functions are specific to volumetric demand models
+# dd_ functions are specific to discrete choice models
+# _est_ are estimation functions, i.e. they run the corresponding MCMC sampler
+# _LL_ obtain the log lilelihood
+# _dem_ generates demand prediction
+
+# Key model variants
+# - vdm: standard volumetric demand model
+# - vdm_screen: attribute-based screening
+# - vdm_screenpr: including price
+# - vdm_ss: set size variation
+
 
 
 # Volumetric Demand Estimation --------------------------------------------
 
 
 
-#' Estimate volumetric demand model, EV1 errors
+#' Estimate volumetric demand model
 #'
 #'
 #' @param vd A tibble, containing volumetric demand data (long format)
@@ -935,11 +916,13 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 #' @param R A numeric, no of draws
 #' @param keep A numeric, thinning factor
 #' @param cores An integer, no of CPU cores to use (default: auto-detect)
+#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal'
 #' @param control A list containing additional settings
 #' 
 #' @return An 'echoice2' draw object, in the form of a list
 #' 
 #' @seealso [vd_dem_vdm()] to generate demand predictions based on this model
+#' @seealso [vd_est_vdm_screen()] to estimate a volumetric demand model with screening
 #' 
 #' @examples
 #' data(icecream)
@@ -952,10 +935,16 @@ vd_est_vdm=
            R=100000, 
            keep=10,
            cores=NULL,
+           error_dist="EV1",
            control=list(include_data=TRUE)){
     
     #check input data
     if(!vd_check_long(vd)) stop("Check data")
+    
+    #error dist: either Normal or EV1
+    if(!(error_dist=="Normal")){
+      error_dist="EV1"
+    }
     
     #integer variables
     vd<-vd %>% mutate(task=as.integer(.$task),
@@ -985,6 +974,7 @@ vd_est_vdm=
     Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
     
     #Run model
+    if(error_dist=="EV1"){
     out=
       loop_vd2_RWMH( dat$XX, 
                      dat$PP,
@@ -1006,6 +996,29 @@ vd_est_vdm=
                      V=V, 
                      tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
                      progressinterval=100, cores=cores)
+    }else{
+      out=
+        loop_vdn_RWMH( dat$XX, 
+                       dat$PP,
+                       dat$AA,
+                       dat$nalts,
+                       dat$sumpxs,  
+                       dat$ntasks,  
+                       dat$xfr-1,  
+                       dat$xto-1,  
+                       dat$lfr-1,  
+                       dat$lto-1,
+                       p=ncol(dat$AA)+3, 
+                       N=length(dat$xfr),
+                       R=R, 
+                       keep=keep, 
+                       Bbar=Bbar, 
+                       A=A, 
+                       nu=nu,  
+                       V=V, 
+                       tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                       progressinterval=100, cores=cores)
+    }
     
     #Add data information
     out$A_names<-colnames(dat$AA)
@@ -1016,7 +1029,7 @@ vd_est_vdm=
     
     #Add model information
     out$ec_type="volumetric-compensatory"
-    out$error_specification="EV1"
+    out$error_specification=error_dist
     out$ec_type_short="VD-comp"
     out$Prior=Prior
     
@@ -1024,9 +1037,9 @@ vd_est_vdm=
     attributes(out)$ec_data<-attributes(dat)$ec_data
     
     
-    ec_model = list(model_name_full="volumetric-compensatory-EV1",
+    ec_model = list(model_name_full=paste0("volumetric-compensatory-", error_dist),
                     model_name_short="VD-comp",
-                    error_specification="EV1",
+                    error_specification=error_dist,
                     model_parnames=c('sigma','gamma','E'),
                     Prior=Prior)
     
@@ -1043,113 +1056,8 @@ vd_est_vdm=
 
 
 
-
-#' Estimate volumetric demand model, Normal errors
-#'
-#'
-#' @param vd A tibble, containing volumetric demand data (long format)
-#' @param tidy A logical, whether to apply 'echoice2' tidier function (default: TRUE)
-#' @param R A numeric, no of draws
-#' @param keep A numeric, thinning factor
-#' @param cores An integer, no of CPU cores to use (default: auto-detect)
-#' @param control A list containing additional settings
-#' @return An 'echoice2' draw object, in the form of a list
-#' 
-#' @examples
-#' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdmn(R=50)
-#' @export
-vd_est_vdmn = function(vd,
-                       R=100000, 
-                       keep=10,
-                       cores=NULL,
-                       control=list(include_data=TRUE)){
-  
-  #check input data
-  if(!vd_check_long(vd)) stop("Check data")
-  
-  #integer variables
-  vd<-vd %>% mutate(task=as.integer(.$task),
-                    alt =as.integer(.$alt))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+3), ncol=ncol(dat$AA)+3)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  #Run model
-  out=
-    loop_vdn_RWMH( dat$XX, 
-                   dat$PP,
-                   dat$AA,
-                   dat$nalts,
-                   dat$sumpxs,  
-                   dat$ntasks,  
-                   dat$xfr-1,  
-                   dat$xto-1,  
-                   dat$lfr-1,  
-                   dat$lto-1,
-                   p=ncol(dat$AA)+3, 
-                   N=length(dat$xfr),
-                   R=R, 
-                   keep=keep, 
-                   Bbar=Bbar, 
-                   A=A, 
-                   nu=nu,  
-                   V=V, 
-                   tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                   progressinterval=100, cores=cores)
-  
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
-  #Add model information
-  out$ec_type="volumetric-compensatory"
-  out$error_specification="Normal"
-  out$ec_type_short="VD-comp-norm"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="volumetric-compensatory-Normal",
-                  model_name_short="VD-comp-norm",
-                  error_specification="Normal",
-                  model_parnames=c('sigma','gamma','E'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
-
-
+# note on message suppression
+# invisible(capture.output(icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50, error_dist="Normal"), type = "message"))
 
 
 #' Estimate volumetric demand model with attribute-based conjunctive screening
@@ -1161,20 +1069,23 @@ vd_est_vdmn = function(vd,
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
+#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal'
+#' @param price_screen A logical, indicating whether price tag screening should be estimated
 #' @param control list containing additional settings
 #' 
 #' 
 #' @return est ec-draw object (List)
 #' 
 #' @examples
-#' \dontrun{
-#' icecream_est <- icecream %>% vd_est_vdm_screen(R=50000)
-#' }
+#' data(icecream)
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150)
 #' @export
 vd_est_vdm_screen = function(vd,
                       R=100000, 
                       keep=10,
                       cores=NULL,
+                      error_dist="EV1",
+                      price_screen=TRUE,
                       control=list(include_data=TRUE)){
   
   #check input data
@@ -1199,14 +1110,18 @@ vd_est_vdm_screen = function(vd,
   dat$Af <- vd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
   
   dat$tauconst=
-      1-(vd %>% 
-        select(all_of(c('id','task','alt','x'))) %>% 
+    1-(
+      vd %>% 
+        mutate(x=sign(x)) %>%
+        select(all_of(c("id","x")))%>%
         bind_cols(dat$Af%>%as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)))  %>%
-        mutate_if(is.double,function(col){vd$x*col})%>%
-        group_by(across("id")) %>% 
-          summarise_if(is.double,max) %>%
-        arrange(as.numeric(.$id)) %>%
-        select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
+        mutate(across(-any_of(c('id','x')),
+                      ~.*x)) %>%
+        select(-any_of("x")) %>%
+        group_by(across("id")) %>%
+        summarise(across(everything(), max)) %>%
+        select(-any_of("id")) %>%
+        as.matrix())
   
   
   #Prior
@@ -1217,6 +1132,7 @@ vd_est_vdm_screen = function(vd,
   Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
   
   #Run model
+  if(!price_screen){
   out=
     loop_vdrs2_RWMH( dat$XX, 
                      dat$PP,
@@ -1236,131 +1152,30 @@ vd_est_vdm_screen = function(vd,
                      nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
                      tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
                      progressinterval=100, cores=cores)
-  
-  
-  
-
-  
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
-  #Add model information
-  out$ec_type="volumetric-conjunctive"
-  out$error_specification="Normal"
-  out$ec_type_short="VD-conj"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="volumetric-conjunctive-Normal",
-                  model_name_short="VD-conj",
-                  error_specification="Normal",
-                  model_parnames=c('sigma','gamma','E'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
-
-
-#' Estimate volumetric demand model with attribute-based conjunctive screening (w/ price)
-#'
-#' See https://dx.doi.org/10.2139/ssrn.2770025 for more details
-#'
-#'
-#' @param vd volumetric demand data (long format)
-#' @param R draws
-#' @param keep thinning
-#' @param cores no of CPU cores to use (default: auto-detect)
-#' @param control list containing additional settings
-#' 
-#' 
-#' @return est ec-draw object (List)
-#' 
-#' @export
-vd_est_vdm_screenpr = function(vd,
-                             R=100000, 
-                             keep=10,
-                             cores=NULL,
-                             control=list(include_data=TRUE)){
-  
-  #check input data
-  if(!vd_check_long(vd)) stop("Check data")
-  
-  #integer variables
-  vd<-vd %>% mutate(task=as.integer(.$task),
-                    alt=as.integer(.$alt))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  #screening-relevant data
-  dat$Af <- vd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  
-  dat$tauconst=
-    1-(vd %>% 
-         select(all_of(c('id','task','alt','x'))) %>% 
-         bind_cols(dat$Af%>%as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)))  %>%
-         mutate_if(is.double,function(col){vd$x*col})%>%
-         group_by(across("id")) %>% summarise_if(is.double,max) %>%
-         arrange(as.numeric(.$id)) %>%
-         select(-any_of(c('id','x'))) %>% as.matrix %>% sign)
-  
-  
-  
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+3), ncol=ncol(dat$AA)+3)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  #Run model
+  }else{
   out=
     loop_vdrspr_RWMH( dat$XX, 
-                     dat$PP,
-                     dat$AA,
-                     dat$Af,
-                     t(dat$tauconst),
-                     dat$nalts,
-                     dat$sumpxs,  
-                     dat$ntasks,  
-                     dat$xfr-1,  
-                     dat$xto-1,  
-                     dat$lfr-1,  
-                     dat$lto-1,
-                     p=ncol(dat$AA)+3, N=length(dat$xfr),
-                     R=R, keep=keep, 
-                     Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
-                     nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
-                     tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                     progressinterval=100, cores=cores)
+                      dat$PP,
+                      dat$AA,
+                      dat$Af,
+                      t(dat$tauconst),
+                      dat$nalts,
+                      dat$sumpxs,  
+                      dat$ntasks,  
+                      dat$xfr-1,  
+                      dat$xto-1,  
+                      dat$lfr-1,  
+                      dat$lto-1,
+                      p=ncol(dat$AA)+3, N=length(dat$xfr),
+                      R=R, keep=keep, 
+                      Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
+                      nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
+                      tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                      progressinterval=100, cores=cores)
+  }
   
   
-  
-  
+
   
   #Add data information
   out$A_names<-colnames(dat$AA)
@@ -1395,8 +1210,6 @@ vd_est_vdm_screenpr = function(vd,
   
   return(out)
 }
-
-
 
 
 
@@ -1409,21 +1222,32 @@ vd_est_vdm_screenpr = function(vd,
 #' 
 #'
 #' @param vd volumetric demand data (long format) with set size variation
+#' @param order integer, either 1 or 2 (for now), indicating linear or quadratic set-size effect
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
 #' @param control list containing additional settings
-#' 
+#' @examples
+#' data(icecream)
+#' #note that for this example dataset, the model is not identified
+#' #because the data lacks variation in set size
+#' icecream_est <- icecream %>% vd_est_vdm_ss(R=50)
 #' @return est ec-draw object (List)
 #' 
 #' 
 #' 
 #' @export
 vd_est_vdm_ss = function(vd,
-                          R=100000, 
-                          keep=10,
-                          cores=NULL,
-                          control=list(include_data=TRUE)){
+                         order=1,
+                         R=100000, 
+                         keep=10,
+                         cores=NULL,
+                         control=list(include_data=TRUE)){
+  
+  #only supporting 1st and 2nd order
+  if(!order==2){
+    order=1
+  }
   
   #check input data
   if(!vd_check_long(vd)) stop("Check data")
@@ -1444,15 +1268,16 @@ vd_est_vdm_ss = function(vd,
   
   
   #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+4), ncol=ncol(dat$AA)+4)
+  Bbar=matrix(rep(0,ncol(dat$AA)+3+order), ncol=ncol(dat$AA)+3+order)
   Bbar[,ncol(dat$AA)+1]=-3
   
   A=0.01*diag(1)
   nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+4)
+  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3+order)
   Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
   
   #Run model
+  if(order==1){
   out=
     loop_vd_ss_RWMH(dat$XX, 
                    dat$PP,
@@ -1474,10 +1299,35 @@ vd_est_vdm_ss = function(vd,
                    V=V, 
                    tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
                    progressinterval=100, cores=cores)
+  }else{
+    out=
+      loop_vd_ssQ_RWMH(dat$XX, 
+                       dat$PP,
+                       dat$AA,
+                       dat$nalts,
+                       dat$sumpxs,  
+                       dat$ntasks,  
+                       dat$xfr-1,  
+                       dat$xto-1,  
+                       dat$lfr-1,  
+                       dat$lto-1,
+                       p=ncol(dat$AA)+5, 
+                       N=length(dat$xfr),
+                       R=R, 
+                       keep=keep, 
+                       Bbar=Bbar, 
+                       A=A, 
+                       nu=nu,  
+                       V=V, 
+                       tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                       progressinterval=100, cores=cores)    
+  }
   
   #Add data information
   out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'xi','sigma','gamma','E')
+  if(order==1)  out$parnames=c(colnames(dat$AA),'xi','sigma','gamma','E')
+  if(order==2)  out$parnames=c(colnames(dat$AA),'tau','xi','sigma','gamma','E')
+  
   if(!is.null(dat$attributes_levels)){
     out$attributes_levels=dat$attributes_levels
   }
@@ -1485,18 +1335,28 @@ vd_est_vdm_ss = function(vd,
   #Add model information
   out$ec_type="volumetric-compensatory-setsize_linear"
   out$error_specification="EV1"
-  out$ec_type_short="VD-comp-ssl"
+  if(order==1) out$ec_type_short="VD-comp-ssl"
+  if(order==2) out$ec_type_short="VD-comp-ssq"
+  
   out$Prior=Prior
   
   attributes(out)$Af<-attributes(dat)$Af
   attributes(out)$ec_data<-attributes(dat)$ec_data
   
-  
+  if(order==1){
   ec_model = list(model_name_full="volumetric-compensatory-EV1-setsize_linear",
                   model_name_short="VD-comp-ssl",
                   error_specification="EV1",
                   model_parnames=c('xi','sigma','gamma','E'),
                   Prior=Prior)
+  }
+  if(order==2){
+    ec_model = list(model_name_full="volumetric-compensatory-EV1-setsize_linear",
+                    model_name_short="VD-comp-ssq",
+                    error_specification="EV1",
+                    model_parnames=c('tau','xi','sigma','gamma','E'),
+                    Prior=Prior)
+  }
   
   attributes(out)$ec_model=ec_model
   
@@ -1508,115 +1368,6 @@ vd_est_vdm_ss = function(vd,
   
   return(out)
 }
-
-
-
-
-
-#' Estimate volumetric demand model accounting for set size variation (2nd order)
-#' 
-#' For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
-#' This model REQUIRES variation in choice-set size
-#' 
-#'
-#' @param vd volumetric demand data (long format)
-#' @param R draws
-#' @param keep thinning
-#' @param cores no of CPU cores to use (default: auto-detect)
-#' @param control list containing additional settings
-#' 
-#' @return est ec-draw object (List)
-#' 
-#' @export
-vd_est_vdm_ssq = function(vd,
-                         R=100000, 
-                         keep=10,
-                         cores=NULL,
-                         control=list(include_data=TRUE)){
-  
-  #check input data
-  if(!vd_check_long(vd)) stop("Check data")
-  
-  #integer variables
-  vd<-vd %>% mutate(task=as.integer(.$task),
-                    alt=as.integer(.$alt))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+5), ncol=ncol(dat$AA)+5)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+5)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  #Run model
-  out=
-    loop_vd_ssQ_RWMH(dat$XX, 
-                    dat$PP,
-                    dat$AA,
-                    dat$nalts,
-                    dat$sumpxs,  
-                    dat$ntasks,  
-                    dat$xfr-1,  
-                    dat$xto-1,  
-                    dat$lfr-1,  
-                    dat$lto-1,
-                    p=ncol(dat$AA)+5, 
-                    N=length(dat$xfr),
-                    R=R, 
-                    keep=keep, 
-                    Bbar=Bbar, 
-                    A=A, 
-                    nu=nu,  
-                    V=V, 
-                    tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                    progressinterval=100, cores=cores)
-  
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'tau','xi','sigma','gamma','E')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
-  #Add model information
-  out$ec_type="volumetric-compensatory-setsize_linear"
-  out$error_specification="EV1"
-  out$ec_type_short="VD-comp-ssq"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="volumetric-compensatory-EV1-setsize_linear",
-                  model_name_short="VD-comp-ssq",
-                  error_specification="EV1",
-                  model_parnames=c('tau','xi','sigma','gamma','E'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
-
 
 
 
@@ -1626,15 +1377,11 @@ vd_est_vdm_ssq = function(vd,
 
 #' Log-Likelihood for compensatory volumetric demand model
 #' 
-#' @usage vd_LL_vdm(draw, vd, fromdraw=1)
 #' 
 #' @param draw A list, 'echoice2' draws object
 #' @param vd A tibble, tidy choice data (before dummy-coding)
 #' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
 #' @return N x Draws Matrix of log-Likelihood values
-#' @examples
-#' 
-#' 
 #' @export
 vd_LL_vdm <- function(draw, vd, fromdraw=1){
   
@@ -1793,7 +1540,6 @@ vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
 #' Makes sure the factor levels in `data_new` are aligned with `data_old`
 #' This is helpful for demand simulations.
 #'
-#' @usage prep_newprediction(data_new,data_old)
 #'
 #' @param data_new New long-format choice data 
 #' @param data_old Old long-format choice data
@@ -1841,6 +1587,7 @@ prep_newprediction <- function(data_new,data_old){
 #' @param tidy apply 'echoice2' tidier
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
+#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal'
 #' @param cores (optional) cores
 #' 
 #' @return Draws of expected demand
@@ -1854,8 +1601,14 @@ prep_newprediction <- function(data_new,data_old){
 vd_dem_vdm=function(vd,
                     est,
                     epsilon_not=NULL,
+                    error_dist="EV1",
                     tidy=TRUE,
                     cores=NULL){
+  
+  #error dist: either Normal or EV1
+  if(!(error_dist=="Normal")){
+    error_dist="EV1"
+  }
   
   #cores  
   if(is.null(cores)){
@@ -1875,6 +1628,21 @@ vd_dem_vdm=function(vd,
   
   #demand sim
   if(is.null(epsilon_not)){
+    
+    if(error_dist=="Normal"){
+    out=
+      des_dem_vdmn(dat$PP,
+                   dat$AA,
+                   dat$nalts,
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,
+                   dat$lto-1,
+                   dat$tlens,
+                   est$thetaDraw,
+                   cores=cores)      
+    }else{
     out=
       des_dem_vdm( dat$PP,
                    dat$AA,
@@ -1887,6 +1655,9 @@ vd_dem_vdm=function(vd,
                    dat$tlens,
                    est$thetaDraw,
                    cores=cores)
+    }
+    
+    
   }else{
     out=
       der_dem_vdm( dat$PP,
@@ -1919,89 +1690,6 @@ vd_dem_vdm=function(vd,
 
 
 
-
-#' Demand Prediction (Volumetric demand, Normal errors)
-#'
-#' Generating demand predictions for volumetric demand model. 
-#' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
-#' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-#' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
-#'
-#'
-#' @param vd data
-#' @param est ec-model draws 
-#' @param epsilon_not (optional) error realizations
-#' @param cores (optional) cores
-#' 
-#' @return Draws of expected demand
-#' 
-#' 
-#' @seealso [prep_newprediction()] to match `vd`'s factor levels,
-#'   [ec_gen_err_normal()] for pre-generating error realizations and
-#'   [vd_est_vdmn()] for estimating the corresponding model
-#' 
-#' @export
-vd_dem_vdmn=function(vd,
-                    est,
-                    epsilon_not=NULL,
-                    cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #demand sim
-  if(is.null(epsilon_not)){
-    out=
-      des_dem_vdmn( dat$PP,
-                   dat$AA,
-                   dat$nalts,
-                   dat$ntasks,  
-                   dat$xfr-1,
-                   dat$xto-1,  
-                   dat$lfr-1,
-                   dat$lto-1,
-                   dat$tlens,
-                   est$thetaDraw,
-                   cores=cores)
-  }else{
-    out=
-      der_dem_vdm( dat$PP,
-                    dat$AA,
-                    dat$nalts,
-                    dat$ntasks,  
-                    dat$xfr-1,
-                    dat$xto-1,  
-                    dat$lfr-1,
-                    dat$lto-1,
-                    dat$tlens,
-                    est$thetaDraw,
-                    epsilon_not,
-                    cores=cores)
-  }
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  vd=as_tibble(vd)
-  vd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
-  return(vd)
-}
-
-
-
-
 #' Demand Prediction (Volumetric demand, attribute-based screening, Normal)
 #'
 #' Generating demand predictions for volumetric demand model with attribute-based screening. 
@@ -2009,7 +1697,6 @@ vd_dem_vdmn=function(vd,
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdmsr(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param est ec-model draws 
@@ -2099,7 +1786,6 @@ vd_dem_vdmsr=function(vd,
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdmsrpr(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param est ec-model draws 
@@ -2111,7 +1797,7 @@ vd_dem_vdmsr=function(vd,
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
 #'   [ec_gen_err_normal()] for pre-generating error realizations and
-#'   [vd_est_vdm_screenpr()] for estimating the corresponding model
+#'   [vd_est_vdm_screen()] for estimating the corresponding model
 #' 
 #' @export
 vd_dem_vdmsrpr=function(vd,
@@ -2191,7 +1877,6 @@ vd_dem_vdmsrpr=function(vd,
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
 #' Eerror realizations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
-#' @usage vd_dem_vdmss(vd, est, epsilon_not=NULL, cores=NULL)
 #'
 #' @param vd data
 #' @param est ec-model draws 
@@ -2287,7 +1972,7 @@ vd_dem_vdmss=function(vd,
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
 #'   [ec_gen_err_ev1()] for pre-generating error realizations and
-#'   [vd_est_vdm_ssq()] for estimating the corresponding model
+#'   [vd_est_vdm_ss()] for estimating the corresponding model
 #' 
 #' @export
 vd_dem_vdmssq=function(vd,
@@ -2347,13 +2032,15 @@ vd_dem_vdmssq=function(vd,
 
 #' Estimate discrete choice model (HMNL)
 #'
-#' @usage dd_est_hmnl(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 #'
 #' @param dd discrete choice data (long format)
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
 #' @param control list containing additional settings
+#' @examples 
+#' data(icecream_discrete)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=150)
 #' 
 #' @return est ec-draw object (List)
 #' 
@@ -2380,7 +2067,8 @@ dd_est_hmnl = function(dd,
   
   #outside good present or not?
   outside_good_check <- 
-    dd %>% 
+    dd  %>% 
+      mutate(x=sign(x)) %>%
       group_by(dplyr::across(all_of(c("id","task")))) %>% 
       summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
   
@@ -2468,301 +2156,203 @@ dd_est_hmnl = function(dd,
 
 #' Estimate discrete choice model (HMNL, attribute-based screening (not including price))
 #'
-#' @usage dd_est_hmnl_screen(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
 #'
 #' @param dd discrete choice data (long format)
+#' @param price_screen A logical, indicating whether price tag screening should be estimated
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
 #' @param control list containing additional settings
-#' 
+#' @examples 
+#' data(icecream_discrete)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl_screen(R=150)
 #' @return est ec-draw object (List)
 #' 
 #' @seealso [dd_dem_sr()] to generate demand predictions based on this model
 #' 
 #' @export
 dd_est_hmnl_screen = function(dd,
-                     R=100000,
-                     keep=10,
-                     cores=NULL,
-                     control=list(include_data=TRUE)){
+                       price_screen=TRUE,
+                       R=100000,
+                       keep=10,
+                       cores=NULL,
+                       control=list(include_data=TRUE)){
+    
+    #check input data
+    if(!dd_check_long(dd)) stop("Check data")
+    
+    #integer variables, double variables
+    dd<-dd %>% 
+      mutate(dplyr::across(all_of(c("task","alt")) ,as.integer)) %>%
+      mutate(dplyr::across(all_of(c("x")),as.double))
   
-  #check input data
-  if(!dd_check_long(dd)) stop("Check data")
-  
-  #integer variables, double variables
-  dd<-dd %>% 
-    mutate(dplyr::across(all_of(c("task","alt")),as.integer)) %>%
-    mutate(dplyr::across(all_of(c("x")),as.double))
-
-  #sorting
-  dd<-dd %>% 
-    mutate(dplyr::across(all_of(c("id")),as.numeric)) %>%
-    arrange(dplyr::across("id"),dplyr::across("task"),dplyr::across("alt"))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #outside good present or not?
-  outside_good_check <- dd %>% 
-    group_by(dplyr::across(all_of(c("id","task")))) %>% 
-    summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
-  
-  #re-arrange data
-  if(outside_good_check==1){
-    #no outside
-    dat <- 
+    #sorting
+    dd<-dd %>% 
+      mutate(dplyr::across(all_of(c("id")), as.numeric)) %>%
+      arrange(dplyr::across("id"), dplyr::across("task"), dplyr::across("alt"))
+    
+    #Multicore settings
+    if(is.null(cores)){
+      cores=parallel::detectCores(logical=FALSE)
+    }
+    message(paste0("Using ",cores," cores"))
+    
+    #outside good present or not?
+    outside_good_check <- 
       dd %>% 
-      vd_long_tidy %>% select(-all_of("int")) %>% vd_prepare
-  }else{
-    #outside good
-    dat <- 
-      dd %>% 
-      vd_long_tidy %>% vd_prepare
+      mutate(x=sign(x)) %>%
+      group_by(dplyr::across(all_of(c("id","task")))) %>% 
+      summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
+    
+    #re-arrange data
+    if(outside_good_check==1){
+      #no outside
+      dat <- 
+        dd %>% 
+        vd_long_tidy %>% 
+          #remove intercept
+          select(-all_of("int")) %>% vd_prepare
+    }else{
+      #outside good
+      dat <- 
+        dd %>% 
+        vd_long_tidy %>% vd_prepare
+    }
+    
+    dat$Af <- dd %>% vd_long_tidy %>% 
+      attributes() %>% `[[`('Af') %>% as.matrix()
+  
+    #boundaries for screning
+    dat$tauconst=
+      1-(
+        dd %>% 
+          mutate(x=sign(x)) %>%
+          select(all_of(c("id","x")))%>%
+          bind_cols(dat$Af%>%as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)))  %>%
+          mutate(across(-any_of(c('id','x')),
+                        ~.*x)) %>%
+          select(-any_of("x")) %>%
+          group_by(across("id")) %>%
+          summarise(across(everything(), max)) %>%
+          select(-any_of("id")) %>%
+          as.matrix())
+        
+    
+    #Prior
+    Bbar=matrix(rep(0,ncol(dat$AA)+1), ncol=ncol(dat$AA)+1)
+    A=0.01*diag(1)
+    nu=ncol(dat$AA)+9
+    V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+1)
+    Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
+    
+    
+    #Run model
+    if(!price_screen){
+    out=
+      loop_ddrs_RWMH(dat$XX, 
+                    dat$PP,
+                    dat$AA,
+                    dat$Af,
+                    t(dat$tauconst),
+                    dat$nalts,
+                    dat$ntasks,  
+                    dat$xfr-1,  
+                    dat$xto-1,  
+                    dat$lfr-1,  
+                    dat$lto-1,
+                    p=ncol(dat$AA)+1, 
+                    N=length(dat$xfr),
+                    R=R, 
+                    keep=keep, 
+                    Bbar=Bbar, 
+                    A=A, 
+                    nu=nu,  
+                    V=V, 
+                    tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                    progressinterval=100, cores=cores)
+    }else{
+      out=
+        loop_ddrspr_RWMH(dat$XX, 
+                         dat$PP,
+                         dat$AA,
+                         dat$Af,
+                         t(dat$tauconst),
+                         dat$nalts,
+                         dat$ntasks,  
+                         dat$xfr-1,  
+                         dat$xto-1,  
+                         dat$lfr-1,  
+                         dat$lto-1,
+                         p=ncol(dat$AA)+1, 
+                         N=length(dat$xfr),
+                         R=R, 
+                         keep=keep, 
+                         Bbar=Bbar, 
+                         A=A, 
+                         nu=nu,  
+                         V=V, 
+                         tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                         progressinterval=100, cores=cores) 
+    }
+    
+  
+    #Add data information
+    out$A_names<-colnames(dat$AA)
+    out$Af_names<-colnames(dat$AAf)
+    
+    out$parnames=c(colnames(dat$AA),'ln_beta_p')
+    
+    if(!is.null(dat$attributes_levels)){
+      out$attributes_levels=dat$attributes_levels
+    }
+    
+    colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
+    
+    #Add model information
+    out$ec_type="discrete-conjunctive"
+    out$error_specification="EV1"
+    out$ec_type_short="hmnl-conj"
+    out$Prior=Prior
+    
+    attributes(out)$Af<-attributes(dat)$Af
+    attributes(out)$ec_data<-attributes(dat)$ec_data
+    
+    
+    ec_model = list(model_name_full="discrete-conjunctive",
+                    model_name_short="hmnl-conj",
+                    error_specification="EV1",
+                    model_parnames=c('ln_beta_p'),
+                    Prior=Prior)
+    
+    attributes(out)$ec_model=ec_model
+    
+    if(price_screen){
+      out$ec_type="discrete-conjunctive-price"
+      out$ec_type_short="hmnl-conjpr"
+      ec_model = list(model_name_full="discrete-conjunctive-price",
+                      model_name_short="hmnl-conjpr",
+                      error_specification="EV1",
+                      model_parnames=c('ln_beta_p'),
+                      Prior=Prior)
+    }
+    
+    
+    #Add training data
+    if(control$include_data){
+      out$dat=dat
+    }
+    
+    return(out)
   }
-  
-  dat$Af <- dd %>% vd_long_tidy %>% 
-    attributes() %>% `[[`('Af') %>% as.matrix()
-
-
-  dat$tauconst=
-    1-(
-  dd %>% 
-    select(all_of(c("id","task","alt","x")))%>%
-    bind_cols(dat$Af%>%as_tibble)  %>%
-    mutate_if(is.double,function(col){dd$x*col})%>%
-    group_by(dplyr::across("id")) %>% summarise_if(is.double,max) %>%
-    arrange(dplyr::across("id")) %>%
-    select(-any_of(c('id','x'))) %>% as.matrix)
-  
-
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+1), ncol=ncol(dat$AA)+1)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+1)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  
-  #Run model
-  out=
-    loop_ddrs_RWMH(dat$XX, 
-                  dat$PP,
-                  dat$AA,
-                  dat$Af,
-                  t(dat$tauconst),
-                  dat$nalts,
-                  dat$ntasks,  
-                  dat$xfr-1,  
-                  dat$xto-1,  
-                  dat$lfr-1,  
-                  dat$lto-1,
-                  p=ncol(dat$AA)+1, 
-                  N=length(dat$xfr),
-                  R=R, 
-                  keep=keep, 
-                  Bbar=Bbar, 
-                  A=A, 
-                  nu=nu,  
-                  V=V, 
-                  tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                  progressinterval=100, cores=cores)
-  
-  
-
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$Af_names<-colnames(dat$AAf)
-  
-  out$parnames=c(colnames(dat$AA),'ln_beta_p')
-  
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
-  colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
-  
-  #Add model information
-  out$ec_type="discrete-conjunctive"
-  out$error_specification="EV1"
-  out$ec_type_short="hmnl-conj"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="discrete-conjunctive",
-                  model_name_short="hmnl-conj",
-                  error_specification="EV1",
-                  model_parnames=c('ln_beta_p'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
 
 
 
 
-#' Estimate discrete choice model (HMNL, attribute-based screening (including price))
-#'
-#'
-#' @param dd discrete choice data (long format)
-#' @param R draws
-#' @param keep thinning
-#' @param cores no of CPU cores to use (default: auto-detect)
-#' @param control list containing additional settings
-#' 
-#' @return est ec-draw object (List)
-#' 
-#' @seealso [dd_dem_sr()] to generate demand predictions based on this model
-#' 
-#' @export
-dd_est_hmnl_screenpr = function(dd,
-                                R=100000,
-                                keep=10,
-                                cores=NULL,
-                                control=list(include_data=TRUE)){
-  
-  #check input data
-  if(!dd_check_long(dd)) stop("Check data")
-  
-  #integer variables, double variables
-  dd<-dd %>% 
-    mutate(dplyr::across(all_of(c("task","alt")),as.integer)) %>%
-    mutate(dplyr::across(all_of(c("x")),as.double))
-  
-  #sorting
-  dd<-dd %>% 
-    mutate(dplyr::across(all_of(c("id")),as.numeric)) %>%
-    arrange(dplyr::across("id"),dplyr::across("task"),dplyr::across("alt"))
-  
-  #Multicore settings
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  #outside good present or not?
-  outside_good_check <- dd %>% 
-    group_by(dplyr::across(all_of(c("id","task")))) %>% 
-    summarise(dplyr::across(all_of(c("x")), sum)) %>% pull(all_of("x")) %>% mean
-  
-  #re-arrange data
-  if(outside_good_check==1){
-    #no outside
-    dat <- 
-      dd %>% 
-      vd_long_tidy %>% select(-all_of("int")) %>% vd_prepare
-  }else{
-    #outside good
-    dat <- 
-      dd %>% 
-      vd_long_tidy %>% vd_prepare
-  }
-  
-  dat$Af <- dd %>% vd_long_tidy %>% 
-    attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  
-  dat$tauconst=
-    1-(
-      dd %>% 
-        select(all_of(c("id","task","alt","x")))%>%
-        bind_cols(dat$Af%>%as_tibble)  %>%
-        mutate_if(is.double,function(col){dd$x*col})%>%
-        group_by(dplyr::across("id")) %>% summarise_if(is.double,max) %>%
-        arrange(dplyr::across("id")) %>%
-        select(-any_of(c('id','x'))) %>% as.matrix)
-  
-  
-  #Prior
-  Bbar=matrix(rep(0,ncol(dat$AA)+1), ncol=ncol(dat$AA)+1)
-  A=0.01*diag(1)
-  nu=ncol(dat$AA)+9
-  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+1)
-  Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
-  
-  
-  #Run model
-  out=
-    loop_ddrspr_RWMH(dat$XX, 
-                     dat$PP,
-                     dat$AA,
-                     dat$Af,
-                     t(dat$tauconst),
-                     dat$nalts,
-                     dat$ntasks,  
-                     dat$xfr-1,  
-                     dat$xto-1,  
-                     dat$lfr-1,  
-                     dat$lto-1,
-                     p=ncol(dat$AA)+1, 
-                     N=length(dat$xfr),
-                     R=R, 
-                     keep=keep, 
-                     Bbar=Bbar, 
-                     A=A, 
-                     nu=nu,  
-                     V=V, 
-                     tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                     progressinterval=100, cores=cores)
-  
-  
-  
-  #Add data information
-  out$A_names<-colnames(dat$AA)
-  out$Af_names<-colnames(dat$AAf)
-  
-  out$parnames=c(colnames(dat$AA),'ln_beta_p')
-  
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
-  colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
-  
-  #Add model information
-  out$ec_type="discrete-conjunctive-price"
-  out$error_specification="EV1"
-  out$ec_type_short="hmnl-conjpr"
-  out$Prior=Prior
-  
-  attributes(out)$Af<-attributes(dat)$Af
-  attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="discrete-conjunctive-price",
-                  model_name_short="hmnl-conjpr",
-                  error_specification="EV1",
-                  model_parnames=c('ln_beta_p'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
-  #Add training data
-  if(control$include_data){
-    out$dat=dat
-  }
-  
-  return(out)
-}
 
 
 
-#logll
+# Log-Likelihoods for entire datasets -------------------------------------
+
 dd_LL <- function(draw, dd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
@@ -2823,7 +2413,6 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
 
 #' Discrete Choice Predictions (HMNL)
 #'
-#' @usage dd_dem(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -2941,7 +2530,6 @@ dd_prob=function(dd,
 
 #' Discrete Choice Predictions (HMNL with attribute-based screening)
 #'
-#' @usage dd_dem_sr(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -3003,7 +2591,6 @@ dd_dem_sr=function(dd,
 
 #' Discrete Choice Probabilities (HMNL with attribute-based screening)
 #'
-#' @usage dd_prob_sr(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -3067,7 +2654,6 @@ dd_prob_sr=function(dd,
 
 #' Discrete Choice Predictions (HMNL with attribute-based screening w/price)
 #'
-#' @usage dd_dem_srpr(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -3130,7 +2716,6 @@ dd_dem_srpr=function(dd,
 
 #' Discrete Choice Probabilities (HMNL with attribute-based screening w/ price)
 #'
-#' @usage dd_prob_srpr(dd, est, cores)
 #'
 #' @param dd data
 #' @param est est
@@ -3203,7 +2788,6 @@ dd_prob_srpr=function(dd,
 #' 
 #' This adds a unique product identifier to  demand draw objects.
 #'
-#' @usage vd_add_prodid(de)
 #'
 #' @param de demand draws
 #' 
@@ -3878,7 +3462,7 @@ ec_draws_MU <- function(draws){
 #' @examples
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
 #' ec_draws_screen(icecream_scr_est)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,
@@ -3938,7 +3522,7 @@ ec_trace_MU <- function(draws, burnin=100){
 #' @examples
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
 #' ec_trace_screen(icecream_scr_est, burnin=1)
 #' 
 #' 
@@ -4016,7 +3600,7 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use
 #' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screenpr(R=100)
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
 #' ec_boxplot_screen(icecream_scr_est, burnin = 1)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,

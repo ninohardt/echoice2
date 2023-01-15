@@ -2,18 +2,23 @@
 % Please edit documentation in R/echoice2.R
 \name{dummify}
 \alias{dummify}
-\title{Dummy-code select variables in a tibble}
+\title{Create dummy variables within a tibble}
 \usage{
 dummify(dat, sel)
 }
 \arguments{
-\item{dat}{tibble}
+\item{dat}{A \code{tibble} with the data.}
 
-\item{sel}{vector of strings, variables to be replaced by dummy coding}
+\item{sel}{A character vector with the name(s) of the variables to be dummied.}
 }
 \value{
 tibble with dummy variables
 }
 \description{
-Dummy-code select variables in a tibble
+Create dummy variables within a tibble
+}
+\examples{
+mytest=data.frame(A=factor(c('a','a','b','c','c')), B=1:5)
+dummify(mytest,"A")
+
 }

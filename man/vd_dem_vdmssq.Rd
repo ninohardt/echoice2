@@ -25,5 +25,5 @@ Eerror realizations can be pre-supplied to the \code{epsilon_not}. This helps cr
 \seealso{
 \code{\link[=prep_newprediction]{prep_newprediction()}} to match \code{vd}'s factor levels,
 \code{\link[=ec_gen_err_ev1]{ec_gen_err_ev1()}} for pre-generating error realizations and
-\code{\link[=vd_est_vdm_ssq]{vd_est_vdm_ssq()}} for estimating the corresponding model
+\code{\link[=vd_est_vdm_ss]{vd_est_vdm_ss()}} for estimating the corresponding model
 }

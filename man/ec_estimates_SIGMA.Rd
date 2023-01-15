@@ -7,11 +7,17 @@
 ec_estimates_SIGMA(est)
 }
 \arguments{
-\item{est}{is an echoice draw object (list)}
+\item{est}{is an 'echoice2' draw object (list)}
 }
 \value{
 estimates of upper level covariance
 }
 \description{
 Obtain posterior mean estimates of upper level covariance
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+icecream_est \%>\% ec_estimates_SIGMA \%>\% round(2)
 }

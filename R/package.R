@@ -16,5 +16,12 @@ NULL
 #' @docType data
 #' @details Data from volumetric conjoint analysis in the ice cream category. 300 respondents total. 
 #' Volumetric demand in units of 4 ounces each. Attributes include brand name, flavor, and container size. 
-#' 8 brand intercepts, vector of 1s for baseline estimation.
+NULL
+#'
+#' icecream_discrete
+#'
+#' @name icecream_discrete
+#' @docType data
+#' @details Data from discrete choice conjoint analysis in the ice cream category. 300 respondents total. 
+#' Attributes include brand name, flavor, and container size. 
 NULL

@@ -7,7 +7,7 @@
 ec_estimates_MU(est, quantiles = c(0.05, 0.95))
 }
 \arguments{
-\item{est}{is an echoice draw object (list)}
+\item{est}{is an 'echoice2' draw object (list)}
 
 \item{quantiles}{quantile for CI}
 }
@@ -18,10 +18,9 @@ tibble with MU (upper level) summaries
 Obtain upper level model estimates
 }
 \examples{
-\dontrun{
-est \%>\% ec_estimates_MU
-est \%>\% ec_estimates_MU \%>\% 
-ggplot(aes(x=par,y=mean))+geom_bar(stat='identity')+
-facet_wrap(~attribute,scales = 'free') + coord_flip()
-}
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+#Upper-level summary
+icecream_est \%>\% ec_estimates_MU
 }

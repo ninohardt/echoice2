@@ -4,10 +4,19 @@
 \alias{dd_est_hmnl_screen}
 \title{Estimate discrete choice model (HMNL, attribute-based screening (not including price))}
 \usage{
-dd_est_hmnl_screen(dd, R=100000, keep=10, cores=NULL, control=list(include_data=TRUE))
+dd_est_hmnl_screen(
+  dd,
+  price_screen = TRUE,
+  R = 1e+05,
+  keep = 10,
+  cores = NULL,
+  control = list(include_data = TRUE)
+)
 }
 \arguments{
 \item{dd}{discrete choice data (long format)}
+
+\item{price_screen}{A logical, indicating whether price tag screening should be estimated}
 
 \item{R}{draws}
 
@@ -22,6 +31,10 @@ est ec-draw object (List)
 }
 \description{
 Estimate discrete choice model (HMNL, attribute-based screening (not including price))
+}
+\examples{
+data(icecream_discrete)
+icecream_est <- icecream_discrete \%>\% dd_est_hmnl_screen(R=150)
 }
 \seealso{
 \code{\link[=dd_dem_sr]{dd_dem_sr()}} to generate demand predictions based on this model

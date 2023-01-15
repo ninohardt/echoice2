@@ -4,17 +4,17 @@
 \alias{vd_LL_vdm}
 \title{Log-Likelihood for compensatory volumetric demand model}
 \usage{
-vd_LL_vdm(draw, vd, fromdraw=1)
+vd_LL_vdm(draw, vd, fromdraw = 1)
 }
 \arguments{
-\item{draw}{draws}
+\item{draw}{A list, 'echoice2' draws object}
 
-\item{vd}{vd object}
+\item{vd}{A tibble, tidy choice data (before dummy-coding)}
 
-\item{fromdraw}{from which draw (excl. burnin)}
+\item{fromdraw}{An integer, from which draw onwards to compute LL (i.e., excl. burnin)}
 }
 \value{
-Log-Likelihood
+N x Draws Matrix of log-Likelihood values
 }
 \description{
 Log-Likelihood for compensatory volumetric demand model

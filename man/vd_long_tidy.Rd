@@ -2,7 +2,7 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_long_tidy}
 \alias{vd_long_tidy}
-\title{vd_tidy_choice data from long-format choice data}
+\title{Generate tidy choice data with dummies from long-format choice data}
 \usage{
 vd_long_tidy(longdata)
 }
@@ -13,5 +13,10 @@ vd_long_tidy(longdata)
 tibble
 }
 \description{
-vd_tidy_choice data from long-format choice data
+Generate tidy choice data with dummies from long-format choice data
+}
+\examples{
+data(icecream)
+vd_long_tidy(icecream)
+
 }

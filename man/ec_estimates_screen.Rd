@@ -7,7 +7,7 @@
 ec_estimates_screen(est, quantiles = c(0.05, 0.95))
 }
 \arguments{
-\item{est}{is an echoice draw object (list)}
+\item{est}{is an 'echoice2' draw object (list) from a model with attribute-based screening}
 
 \item{quantiles}{quantile for CI}
 }
@@ -15,5 +15,14 @@ ec_estimates_screen(est, quantiles = c(0.05, 0.95))
 tibble with screening summaries
 }
 \description{
-Summarize attribute-based screening parameters
+Summarize attribute-based screening parameters from an attribute-based screening model in 'echoice2'
+}
+\examples{
+#run MCMC sampler (use way more than 100 draws for actual use)
+data(icecream)
+est_scr_icecream <- vd_est_vdm_screen(icecream, R=100)
+#summarise draws of screening probabilities
+ec_estimates_screen(est_scr_icecream)
+#Note: There is no variance in this illustrative example - more draws are needed
+
 }

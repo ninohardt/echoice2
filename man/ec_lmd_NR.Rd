@@ -2,19 +2,28 @@
 % Please edit documentation in R/echoice2.R
 \name{ec_lmd_NR}
 \alias{ec_lmd_NR}
-\title{Log Marginal Density (Newton-Raftery)}
+\title{Obtain Log Marginal Density from draw objects}
 \usage{
-ec_lmd_NR(M)
+ec_lmd_NR(est)
 }
 \arguments{
-\item{M}{echoice draw object}
+\item{est}{'echoice2' draw object}
 }
 \value{
 tibble with LMDs (first 25\% of draws, next 25\% of draws, ...)
 }
 \description{
-Very rough approximation of LMD based on Newton-Raftery.
-It is not the most accurate, but a very fast method.
+This is a helper function to quickly obtain log marginal density from a draw object
+}
+\details{
 Draws are split in 4 equal parts from start to finish, and LMD
 is computed for each part. This helps to double-check convergence.
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+#obtain LMD by quartile of draws
+ec_lmd_NR(icecream_est)
+
 }

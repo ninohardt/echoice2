@@ -14,6 +14,7 @@ time_t itime2;
 void startTimer() {
   itime2 = time(NULL);
   Rcout << " Computation in progress \n";
+  //REprintf("Computation in progress \n");
 }
 
 void infoTimer(int rep, int R) {
@@ -43,7 +44,7 @@ void startMcmcTimer() {
 
 void endMcmcTimer() {
   time_t ctime = time(NULL);
-  REprintf("\n MCMC complete\n");
+  Rprintf("MCMC complete\n");
   Rprintf(" Total Time Elapsed: %.2f minutes\n", difftime(ctime, itime) / 60.0);     
   itime = 0;
 }
@@ -91,7 +92,9 @@ static double const log2pi = std::log(2.0 * M_PI);
 
 
  // [[Rcpp::export]]
- vec revd(int n=100, double loc=0, double scale=1){
+ vec revd(int    n=100, 
+          double loc=0, 
+          double scale=1){
    return(loc-scale*log(-log(runif(n))));
  }
 
@@ -106,7 +109,6 @@ vec revdx(vec locs,
   
   return(out);
 }
-
 
 
  // [[Rcpp::export]]
@@ -1456,17 +1458,17 @@ void draw_dd_taupr( vec& ll_olds,
                          mat const& Bbar, mat const& A, double nu, mat const& V, //Prior
                          int tuneinterval = 30, double steptunestart=.5, int tunelength=10000, int tunestart=500, //algo settings
                          int progressinterval=100, int cores=1){ //report interval
+
    
    //initialize i-parameters
    arma::mat theta_temp(p,N); // container of current betas for all i
    theta_temp.fill(0);
-   
-   
+
    vec maxpaids(N);
    for(int n=0; n<N; n++){
      maxpaids(n) = max(sign(XX(span(xfr(n),xto(n)))%PP(span(xfr(n),xto(n)))));
    }
-   
+
    //no covariates (Z) for now
    mat Z(N,1);
    Z.fill(1);
@@ -1486,7 +1488,7 @@ void draw_dd_taupr( vec& ll_olds,
    vec tau_prs = maxpaids*1.1;
    double pr_mean = mean(tau_prs);
    double pr_sd = 1;
-   
+
    // tuning ..................
    arma::vec stay(N);
    arma::vec stay_total(N);
@@ -1498,12 +1500,12 @@ void draw_dd_taupr( vec& ll_olds,
    arma::vec pricetunes(N);
    pricetunes.fill(.1);
    
-   
+
    int tunecounter = 1;
    vec tunes = ones<vec>(N)*steptunestart;
    double currentRR=0;
    vec currentRRs(N);
-   
+
    // initial log likelihood ..................
    vec ll_olds(N);
    for(int n=0; n<N; n++){
@@ -1519,12 +1521,12 @@ void draw_dd_taupr( vec& ll_olds,
                AAf(span(xfr(n),xto(n)),span::all), 
                ntasks(n), p );
    }
-   
+
    vec lp_olds(N);
    for(int n=0; n<N; n++){
      lp_olds(n)=lndMvnc(theta_temp.col(n),vectorise(MU),Lprior);
    }
-   
+ 
    // draw storage ..................
    cube thetaDraw(p,N,Rk);
    cube SIGMADraw(p,p,Rk);
@@ -1539,7 +1541,7 @@ void draw_dd_taupr( vec& ll_olds,
    
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
-   
+
    omp_set_num_threads(cores);
    
    // loop ..................    
@@ -1555,7 +1557,7 @@ void draw_dd_taupr( vec& ll_olds,
            MU,               // outputs (MU, SIGMA, Lprior=chol(SIGMA))
            SIGMA,
            Lprior); 
-     
+ 
      // n loop  *********
      //theta
      draw_ddsr_RWMH(ll_olds,            // ll for current betas
@@ -1576,7 +1578,7 @@ void draw_dd_taupr( vec& ll_olds,
                     stay,               // tracking rejections
                     tunes,              // i-level tuning parameters
                     cores);       
-     
+
      if(ir>1000){
        //tau
        draw_dd_tauipr(ll_olds,
@@ -1596,8 +1598,7 @@ void draw_dd_taupr( vec& ll_olds,
                       cores);
        
        
-       
-       
+
        // delta_tau
        drawdelta(delta, tauis, K, N, cores);
        
@@ -1616,8 +1617,7 @@ void draw_dd_taupr( vec& ll_olds,
        //                   ntasks(n), p );
        // }
        
-       
-       
+
        draw_dd_taupr( ll_olds,
                       tauis,
                       theta_temp,
@@ -1642,7 +1642,7 @@ void draw_dd_taupr( vec& ll_olds,
        ULnormnorm(pr_mean, pr_sd,
                   tau_prs,
                   0.0, 0.01, 3.0, 3.0);  
-       
+
      }
      
      // tuning stuff ..................
@@ -1665,22 +1665,19 @@ void draw_dd_taupr( vec& ll_olds,
      }
      // end of loop
      
-     
      // save draws  ..................
      if((ir+1)%keep==0){
-       
+
        mkeep = (ir+1)/keep-1;
        thetaDraw.slice(mkeep)      = theta_temp;
        tauDraw.slice(mkeep)        = tauis;
-       
        MUDraw.row(mkeep)           = trans(vectorise(MU,0));
        deltaDraw.row(mkeep)        = trans(delta);
-       
        SIGMADraw.slice(mkeep)      = SIGMA;
        loglike(mkeep)              = sum(ll_olds);
        logpost(mkeep)              = sum(ll_olds)+sum(lp_olds);
        rrate(mkeep)                = currentRR;
-       tau_pr_draw.col(mkeep)        = tau_prs;
+       tau_pr_draw.col(mkeep)      = tau_prs;
        pricescreenPriorDraw(mkeep,0) = pr_mean;
        pricescreenPriorDraw(mkeep,1) = pr_sd;
      }
@@ -1732,7 +1729,8 @@ void draw_dd_taupr( vec& ll_olds,
                               ivec const& lfr,  
                               ivec const& lto,
                               cube const& thetaDraw,
-                              int cores=1){
+                              int cores=1,
+                              bool verbose=true){
    
    //dimensions
    int R=thetaDraw.n_slices;
@@ -1744,11 +1742,15 @@ void draw_dd_taupr( vec& ll_olds,
    arma::field<arma::vec>XdL(xdim);
    
    //start timer
-   startTimer();
+   if(verbose){
+    startTimer();
+   }
    
    //resp-level
    for(int n=0; n<N; n++){
-     infoTimer(n,N);
+     if(verbose){
+       infoTimer(n,N);
+      }
      
      int ntask = tlens(n);
      int xpick = xfr(n);
@@ -6634,297 +6636,5 @@ void draw_dd_taupr1( vec& ll_olds,
      }
      
    }
-   return(XdL);
- }
-
-
-
-
-/////////////////// Experimental ///////////////////
-
-
-// utility functions
-int mod1(int a, int n){
-  return(a - floor(a/n)*n);
-}  
-
-
-// from sequential id to permutation
-
-// [[Rcpp::export]]
-ivec index_id2alt(int id, ivec nalts) {
-  int p = nalts.n_elem;
-  ivec out(p);
-  
-  for(int k=0; k<p; k++){
-    out(k) = floor(mod1(id/(prod(nalts.head(k))),nalts(k)));
-  }
-  return(out);
-}
-
-
-
-//implementation isn't super-efficient with memory, but should be fast
-
-
- //[[Rcpp::export]]
- arma::field<arma::vec> ddprdemseq1(arma::field<arma::vec> PPfield,
-                                    arma::field<arma::mat> AAfield,
-                                    arma::field<arma::uvec> naltfield,
-                                    arma::field<arma::ivec> ntaskfield,
-                                    arma::field<arma::ivec> xfrfield,
-                                    arma::ivec pvecs,
-                                    arma::imat pfrto,
-                                    arma::field<arma::ivec> secpick,
-                                    cube const& thetaDraw,
-                                    mat const& tau_pr_Draw,
-                                    int cores=1){
-   
-   int nstage = PPfield.n_elem;
-   int xdim_all=0;
-   for(int k=0; k<nstage; k++){
-     xdim_all+=PPfield(k).n_rows;
-   }
-   
-   //dimensions
-   int R = thetaDraw.n_slices;
-   int N = ntaskfield(0).n_elem;
-   
-   //output init
-   arma::field<arma::vec>XdL(xdim_all);
-   
-   //start timer
-   startTimer();
-   
-   //resp-level
-   for(int n=0; n<N; n++){
-     // Rcpp::Rcout << n << std::endl;    
-     infoTimer(n,N);
-     
-     int ntask = ntaskfield(0)(n);
-     
-     mat prevstagespent(ntask, R, fill::zeros);
-     
-     //stage-level
-     for(int ss=0; ss<nstage; ss++){
-       
-       int xpick = xfrfield(ss)(n);
-       int p = pvecs(ss);
-       
-       //task-level - each task may have its own previous-stage-spent information
-       //              which we have to pick from stagespents
-       for(int tt=0; tt<ntask; tt++){
-         Rcpp::checkUserInterrupt();
-         
-         int nalt = naltfield(ss)(tt);
-         
-         //temp storage
-         mat demcontainer(nalt, R, fill::zeros);
-         ivec nalt_space = linspace<ivec>(0, nalt-1); 
-         arma::vec prcs = PPfield(ss).subvec(xpick,xpick+nalt-1);
-         
-         //draw-level
-         omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
-         for (int ir = 0; ir <R; ++ir){
-           
-           //paras - stage specific
-           arma::vec theta = thetaDraw.slice(ir).col(n).subvec(pfrto(ss,0),pfrto(ss,1));		
-           arma::vec beta  = theta(arma::span(0,p-2));
-           double beta_p   = exp(theta(p-1));
-           
-           //precomputes
-           arma::vec ab = (AAfield(ss)(span(xpick,xpick+nalt-1),span::all)) * beta - prcs*beta_p;
-           arma::vec pr = exp(ab)/(1+sum(exp(ab)));
-           
-           pr.elem(find(prcs>(exp(tau_pr_Draw(n,ir)) - prevstagespent(tt, ir) )  ))*=0;
-           
-           //multinomial draw
-           int pick_draw = rmuno2(pr);
-           
-           //if not outside good, choose inside good
-           if(pick_draw!=nalt){
-             demcontainer(pick_draw,ir)=1;
-           }
-           
-           //update spent on previous stages info for each draw of theta
-           prevstagespent(tt, ir)+=sum(demcontainer.col(ir) % prcs);
-           
-         }
-         for(int k=0; k<nalt; k++){
-           XdL( secpick(ss)(k+xpick) ) = trans( demcontainer.row(k) );
-         } 
-         xpick+=nalt;
-         
-       }//t loop
-       
-     }//stage loop
-     
-   }
-   
-   return(XdL);
- }
-
-
-
-
-
-//simultaneous choice with budget
-
-
-vec pick2demvec(int pick, 
-                int nalt){
-  vec out(nalt,fill::zeros);
-  
-  if(pick<nalt){
-    out(pick)=1;
-  }
-  return(out);
-}
-
-
-
-
- //[[Rcpp::export]]
- arma::field<arma::vec> ddprdemsimu1(arma::field<arma::vec>  PPfield,
-                                     arma::field<arma::mat>  AAfield,
-                                     arma::field<arma::uvec> naltfield,
-                                     arma::field<arma::ivec> ntaskfield,
-                                     arma::field<arma::ivec> xfrfield,
-                                     arma::ivec pvecs,
-                                     arma::imat pfrto,
-                                     arma::field<arma::ivec> secpick,
-                                     cube const& thetaDraw,
-                                     mat const& tau_pr_Draw,
-                                     int cores=1){
-   
-   int nstage = PPfield.n_elem;
-   int xdim_all=0;
-   for(int k=0; k<nstage; k++){
-     xdim_all+=PPfield(k).n_rows;
-   }
-   
-   //dimensions
-   int R = thetaDraw.n_slices;
-   int N = ntaskfield(0).n_elem;
-   
-   //output init
-   arma::field<arma::vec> XdL(xdim_all);
-   
-   //start timer
-   startTimer();
-   
-   //temp var tracking alternatives in each stage
-   ivec nalt_temp(nstage);
-   
-   //resp-level ------------------------------------------------------
-   for(int n=0; n<N; n++){
-     infoTimer(n,N);
-     
-     int ntask = ntaskfield(0)(n);
-     ivec xpicks(nstage);
-     for(int ss=0; ss<nstage; ss++){
-       xpicks(ss) = xfrfield(ss)(n);
-     }
-     
-     //task-level -----------------------------------------------------
-     for(int tt=0; tt<ntask; tt++){
-       Rcpp::checkUserInterrupt();
-       
-       for(int ss=0; ss<nstage; ss++){
-         nalt_temp(ss) = naltfield(ss)(tt);
-       }
-       
-       arma::field<arma::vec> xbL(nstage);
-       arma::field<arma::mat> demcontainers(nstage);
-       
-       //setup temp storage of draws
-       for(int ss=0; ss<nstage; ss++){
-         demcontainers(ss) = zeros(naltfield(ss)(tt),R);
-       }
-       
-       //draw-level ------------------------------------------------------
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
-       for (int ir = 0; ir <R; ++ir){
-         
-         //stage-level ------------------------------------------------------
-         for(int ss=0; ss<nstage; ss++){
-           
-           //temp storage
-           //ivec nalt_space = linspace<ivec>(0, nalt_temp(ss)-1); 
-           arma::vec prcs  = PPfield(ss).subvec(xpicks(ss),xpicks(ss)+nalt_temp(ss)-1);
-           
-           int p = pvecs(ss);
-           
-           //paras - stage specific
-           arma::vec theta = thetaDraw.slice(ir).col(n).subvec(pfrto(ss,0),pfrto(ss,1));		
-           arma::vec beta  = theta(arma::span(0,p-2));
-           double beta_p   = exp(theta(p-1));
-           
-           //precomputes
-           vec nulli(1);
-           nulli(0)=0;
-           xbL(ss)= join_cols( vectorise((AAfield(ss)(span(xpicks(ss),xpicks(ss)+nalt_temp(ss)-1),span::all)) * beta - prcs*beta_p), nulli);
-           
-         } //stage loop =====================================================
-         
-         int ncombs = prod(nalt_temp+1); //include outside option
-         vec logcombprops(ncombs, fill::zeros);
-         vec combprops(ncombs, fill::zeros);
-         
-         //combinations -----
-         for(int kk=0; kk<ncombs; kk++){
-           ivec tempid = index_id2alt(kk, nalt_temp+1);
-           double Etot=0;  //total cost for combination
-           
-           //combination probabilities
-           for(int ss=0; ss<nstage; ss++){
-             
-             if(tempid(ss)<=nalt_temp(ss)){
-               Etot+=PPfield(ss)(tempid(ss)); //0 cost osg
-             }
-             logcombprops(kk)+=xbL(ss)(tempid(ss));
-           }
-           
-           //remove combinations beyond budget
-           if(Etot<exp(tau_pr_Draw(n,ir))){
-             combprops(kk)=exp(logcombprops(kk));
-           }
-           
-         } // combinations  =====
-         
-         //probabilities of combinations          
-         if(sum(combprops)>0){
-           combprops = combprops / sum(combprops);
-         }
-         
-         //draw
-         int pick_draw = rmuno2(combprops);
-         ///
-         ivec tempid = index_id2alt(pick_draw, nalt_temp+1);
-         
-         for(int ss=0; ss<nstage; ss++){
-           // demcontainers(ss).col(ir)+=tempid(ss);// = pick2demvec( tempid(ss), nalt_temp(ss) );
-           Rcout << tempid(ss);
-           
-           demcontainers(ss).col(ir)+=pick2demvec( tempid(ss), nalt_temp(ss) );
-           
-         }
-         
-       } //draw-level =====================================================
-       
-       //each product has its own draw list
-       for(int ss=0; ss<nstage; ss++){
-         for(int k=0; k<nalt_temp(ss); k++){
-           XdL( secpick(ss)(k+xpicks(ss)) ) = trans(demcontainers(ss).row(k));
-         } 
-         xpicks(ss)+=nalt_temp(ss);
-       }
-       
-     } //t loop =====================================================
-     
-   } //n loop =====================================================
-   
    return(XdL);
  }

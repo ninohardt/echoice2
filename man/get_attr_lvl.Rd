@@ -2,16 +2,22 @@
 % Please edit documentation in R/echoice2.R
 \name{get_attr_lvl}
 \alias{get_attr_lvl}
-\title{Obtain attributes and levels from tidy choice data}
+\title{Obtain attributes and levels from tidy choice data with dummies}
 \usage{
 get_attr_lvl(tdc)
 }
 \arguments{
-\item{tdc}{tibble}
+\item{tdc}{A tibble with choice data}
 }
 \value{
 tibble
 }
 \description{
-Obtain attributes and levels from tidy choice data
+Obtain attributes and levels from tidy choice data with dummies
+}
+\examples{
+mytest=data.frame(A=factor(c('a','a','b','c','c')), B=1:5)
+dummied_data = dummify(mytest,"A")
+get_attr_lvl(dummied_data)
+
 }

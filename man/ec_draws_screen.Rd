@@ -7,13 +7,20 @@
 ec_draws_screen(draws)
 }
 \arguments{
-\item{draws}{ec-draws, output from any ec-model with screening}
+\item{draws}{A list, 'echoice2' draws object}
 }
 \value{
-draws
+A tibble, long format, draws of MU
 }
 \description{
 Obtain Screening probability draws
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use
+icecream_scr_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm_screen(R=100)
+ec_draws_screen(icecream_scr_est)
+
 }
 \seealso{
 \code{\link[=ec_draws_MU]{ec_draws_MU()}} to obtain MU_theta draws,

@@ -7,13 +7,40 @@
 vd_prepare_nox(dt, Af = NULL)
 }
 \arguments{
-\item{dt}{is tidy choice data (columns: id, task, alt, x, p, attributes)}
+\item{dt}{tidy choice data (columns: id, task, alt, p, attributes)}
 
-\item{Af}{Af}
+\item{Af}{(optional) contains a full design matrix (for attribute-based screening), or, more generally, a design matrix used for attribute-based screening}
 }
 \value{
-list containing information for estimation functions
+list containing information for prediction functions
 }
 \description{
-This is mostly for internal use
+This utility function prepares tidy choice data (without x) for fast data access.
+}
+\details{
+Note: This function is only exported because it makes it easier to tinker with this package.
+This function re-arranges choice data for fast access, mainly for demand prediction.
+}
+\examples{
+\dontrun{
+#Minimal example:
+#One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
+Af=
+ rbinom(12,2,.5) \%>\% factor \%>\% forcats::fct_relabel(~paste0('attr',.x)) \%>\% 
+ enframe \%>\% add_column(val=1) \%>\% 
+ pivot_wider(names_from = value, values_from=val) \%>\% map_df(replace_na,0) \%>\%
+ select(-name) \%>\%
+ add_column(  id=c(rep(1L,6),rep(2L,6)),
+              task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
+              alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L), .before = 1)
+
+dt=tibble( id=c(rep(1L,6),rep(2L,6)),
+          task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
+          alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L),
+          x=c(1,0,2, 1,0,1, 2,3,1, 1,0,1),
+          p=c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1),
+          Af\%>\%select(attr2:attr1))
+
+dt \%>\% dplyr::select(-all_of("x")) \%>\% vd_prepare_nox 
+}
 }

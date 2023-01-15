@@ -57,8 +57,8 @@ loop_ddrspr_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto,
     .Call('_echoice2_loop_ddrspr_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
 
-dddem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores = 1L) {
-    .Call('_echoice2_dddem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores)
+dddem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores = 1L, verbose = TRUE) {
+    .Call('_echoice2_dddem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, cores, verbose)
 }
 
 ddsrdem <- function(PP, AA, AAf, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tauDraw, cores = 1L) {
@@ -235,17 +235,5 @@ loop_ddpr_RWMH <- function(XX, PP, AA, nalts, ntasks, xfr, xto, lfr, lto, p, N, 
 
 ddprdem <- function(PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tau_pr_Draw, cores = 1L) {
     .Call('_echoice2_ddprdem', PACKAGE = 'echoice2', PP, AA, nalts, tlens, ntasks, xfr, xto, lfr, lto, thetaDraw, tau_pr_Draw, cores)
-}
-
-index_id2alt <- function(id, nalts) {
-    .Call('_echoice2_index_id2alt', PACKAGE = 'echoice2', id, nalts)
-}
-
-ddprdemseq1 <- function(PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores = 1L) {
-    .Call('_echoice2_ddprdemseq1', PACKAGE = 'echoice2', PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores)
-}
-
-ddprdemsimu1 <- function(PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores = 1L) {
-    .Call('_echoice2_ddprdemsimu1', PACKAGE = 'echoice2', PPfield, AAfield, naltfield, ntaskfield, xfrfield, pvecs, pfrto, secpick, thetaDraw, tau_pr_Draw, cores)
 }
 

@@ -7,13 +7,20 @@
 ec_draws_MU(draws)
 }
 \arguments{
-\item{draws}{ec-draws, output from any ec-model}
+\item{draws}{A list, 'echoice2' draws object}
 }
 \value{
-draws
+A tibble, long format, draws of MU
 }
 \description{
 Obtain MU_theta draws
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+ec_draws_MU(icecream_est)
+
 }
 \seealso{
 \code{\link[=ec_draws_screen]{ec_draws_screen()}} to obtain screening parameter draws (where applicable),

@@ -4,7 +4,7 @@
 \alias{prep_newprediction}
 \title{Match factor levels between two datasets}
 \usage{
-prep_newprediction(data_new,data_old)
+prep_newprediction(data_new, data_old)
 }
 \arguments{
 \item{data_new}{New long-format choice data}

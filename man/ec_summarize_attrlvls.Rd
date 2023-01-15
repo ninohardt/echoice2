@@ -2,17 +2,25 @@
 % Please edit documentation in R/echoice2.R
 \name{ec_summarize_attrlvls}
 \alias{ec_summarize_attrlvls}
-\title{Summarise attributes and levels}
+\title{Summarize attributes and levels}
 \usage{
 ec_summarize_attrlvls(data_in)
 }
 \arguments{
-\item{data_in}{long-format choice data}
+\item{data_in}{A tibble, containing long-format choice data}
 }
 \value{
-tibble with summary
+A tibble with one row per attribute, and a list of the levels
 }
 \description{
+Summarize attributes and levels in tidy choice data containing categorical attributes (before dummy-coding)
+}
+\details{
 This functions looks for categorical attributes and summaries their levels
 This is helpful when evaluating a new choice data file.
+}
+\examples{
+data(icecream)
+ec_summarize_attrlvls(icecream)
+
 }
