@@ -1023,9 +1023,7 @@ vd_est_vdm=
     #Add data information
     out$A_names<-colnames(dat$AA)
     out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
-    if(!is.null(dat$attributes_levels)){
-      out$attributes_levels=dat$attributes_levels
-    }
+    out$model_parnames=c('sigma','gamma','E')
     
     #Add model information
     out$ec_type="volumetric-compensatory"
@@ -1035,16 +1033,7 @@ vd_est_vdm=
     
     attributes(out)$Af<-attributes(dat)$Af
     attributes(out)$ec_data<-attributes(dat)$ec_data
-    
-    
-    ec_model = list(model_name_full=paste0("volumetric-compensatory-", error_dist),
-                    model_name_short="VD-comp",
-                    error_specification=error_dist,
-                    model_parnames=c('sigma','gamma','E'),
-                    Prior=Prior)
-    
-    attributes(out)$ec_model=ec_model
-    
+
     
     #Add training data
     if(control$include_data){
@@ -1069,8 +1058,8 @@ vd_est_vdm=
 #' @param R draws
 #' @param keep thinning
 #' @param cores no of CPU cores to use (default: auto-detect)
-#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal'
-#' @param price_screen A logical, indicating whether price tag screening should be estimated
+#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal' (default: 'EV1')
+#' @param price_screen A logical, indicating whether price tag screening should be estimated (default: TRUE)
 #' @param control list containing additional settings
 #' 
 #' 
@@ -1132,77 +1121,119 @@ vd_est_vdm_screen = function(vd,
   Prior=list(Bbar=Bbar,A=A,nu=nu,V=V)
   
   #Run model
-  if(!price_screen){
-  out=
-    loop_vdrs2_RWMH( dat$XX, 
-                     dat$PP,
-                     dat$AA,
-                     dat$Af,
-                     t(dat$tauconst),
-                     dat$nalts,
-                     dat$sumpxs,  
-                     dat$ntasks,  
-                     dat$xfr-1,  
-                     dat$xto-1,  
-                     dat$lfr-1,  
-                     dat$lto-1,
-                     p=ncol(dat$AA)+3, N=length(dat$xfr),
-                     R=R, keep=keep, 
-                     Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
-                     nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
-                     tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                     progressinterval=100, cores=cores)
-  }else{
-  out=
-    loop_vdrspr_RWMH( dat$XX, 
-                      dat$PP,
-                      dat$AA,
-                      dat$Af,
-                      t(dat$tauconst),
-                      dat$nalts,
-                      dat$sumpxs,  
-                      dat$ntasks,  
-                      dat$xfr-1,  
-                      dat$xto-1,  
-                      dat$lfr-1,  
-                      dat$lto-1,
-                      p=ncol(dat$AA)+3, N=length(dat$xfr),
-                      R=R, keep=keep, 
-                      Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
-                      nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
-                      tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
-                      progressinterval=100, cores=cores)
+  
+  if(error_dist!="Normal"){
+    if(!price_screen){
+      out=
+        loop_vdsr_e_RWMH( dat$XX, 
+                          dat$PP,
+                          dat$AA,
+                          dat$Af,
+                          t(dat$tauconst),
+                          dat$nalts,
+                          dat$sumpxs,  
+                          dat$ntasks,  
+                          dat$xfr-1,  
+                          dat$xto-1,  
+                          dat$lfr-1,  
+                          dat$lto-1,
+                          p=ncol(dat$AA)+3, N=length(dat$xfr),
+                          R=R, keep=keep, 
+                          Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
+                          nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
+                          tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                          progressinterval=100, cores=cores)
+    }else{
+      out=
+        loop_vdsrpr_e_RWMH( dat$XX, 
+                            dat$PP,
+                            dat$AA,
+                            dat$Af,
+                            t(dat$tauconst),
+                            dat$nalts,
+                            dat$sumpxs,  
+                            dat$ntasks,  
+                            dat$xfr-1,  
+                            dat$xto-1,  
+                            dat$lfr-1,  
+                            dat$lto-1,
+                            p=ncol(dat$AA)+3, N=length(dat$xfr),
+                            R=R, keep=keep, 
+                            Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
+                            nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
+                            tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                            progressinterval=100, cores=cores)
+    }
+  } else{
+  
+    if(!price_screen){
+    out=
+      loop_vdsr_n_RWMH( dat$XX, 
+                       dat$PP,
+                       dat$AA,
+                       dat$Af,
+                       t(dat$tauconst),
+                       dat$nalts,
+                       dat$sumpxs,  
+                       dat$ntasks,  
+                       dat$xfr-1,  
+                       dat$xto-1,  
+                       dat$lfr-1,  
+                       dat$lto-1,
+                       p=ncol(dat$AA)+3, N=length(dat$xfr),
+                       R=R, keep=keep, 
+                       Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
+                       nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
+                       tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                       progressinterval=100, cores=cores)
+    }else{
+    out=
+      loop_vdsrpr_n_RWMH( dat$XX, 
+                        dat$PP,
+                        dat$AA,
+                        dat$Af,
+                        t(dat$tauconst),
+                        dat$nalts,
+                        dat$sumpxs,  
+                        dat$ntasks,  
+                        dat$xfr-1,  
+                        dat$xto-1,  
+                        dat$lfr-1,  
+                        dat$lto-1,
+                        p=ncol(dat$AA)+3, N=length(dat$xfr),
+                        R=R, keep=keep, 
+                        Bbar=matrix(rep(0,ncol(dat$AA)+3),ncol=ncol(dat$AA)+3), A=0.01*diag(1), 
+                        nu=ncol(dat$AA)+9,  V=(ncol(dat$AA)+9)*diag(ncol(dat$AA)+3), 
+                        tuneinterval = 30, steptunestart=.15, tunelength=10000, tunestart=500, 
+                        progressinterval=100, cores=cores)
+    }
+  
   }
-  
-  
 
   
   #Add data information
   out$A_names<-colnames(dat$AA)
   out$parnames=c(colnames(dat$AA),'sigma','gamma','E')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
+  out$model_parnames=c('sigma','gamma','E')
   
   #Add model information
-  out$ec_type="volumetric-conjunctive"
-  out$error_specification="Normal"
-  out$ec_type_short="VD-conj"
+  if(!price_screen){
+    out$ec_type="volumetric-conjunctive"
+    out$ec_type_short="VD-conj"
+  }else{
+    out$ec_type="volumetric-conjunctive-pr"
+    out$ec_type_short="VD-conj-pr"
+  }
+  if(error_dist!="Normal"){
+    out$error_specification="EV1"
+  }else{
+    out$error_specification="Normal"
+  }
   out$Prior=Prior
   
   attributes(out)$Af<-attributes(dat)$Af
   attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="volumetric-conjunctive-Normal",
-                  model_name_short="VD-conj",
-                  error_specification="Normal",
-                  model_parnames=c('sigma','gamma','E'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
-  
+
   #Add training data
   if(control$include_data){
     out$dat=dat
@@ -1325,16 +1356,21 @@ vd_est_vdm_ss = function(vd,
   
   #Add data information
   out$A_names<-colnames(dat$AA)
-  if(order==1)  out$parnames=c(colnames(dat$AA),'xi','sigma','gamma','E')
-  if(order==2)  out$parnames=c(colnames(dat$AA),'tau','xi','sigma','gamma','E')
-  
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
+  if(order==1){
+    out$parnames=c(colnames(dat$AA),'xi','sigma','gamma','E')
+    out$model_parnames=c('xi','sigma','gamma','E')
   }
   
+  if(order==2){
+    out$parnames=c(colnames(dat$AA),'tau','xi','sigma','gamma','E')
+    out$model_parnames=c('tau','xi','sigma','gamma','E')
+  }
+  
+
   #Add model information
-  out$ec_type="volumetric-compensatory-setsize_linear"
   out$error_specification="EV1"
+  if(order==1) out$ec_type="volumetric-compensatory-setsize_linear"
+  if(order==2) out$ec_type="volumetric-compensatory-setsize_quadratic"
   if(order==1) out$ec_type_short="VD-comp-ssl"
   if(order==2) out$ec_type_short="VD-comp-ssq"
   
@@ -1342,25 +1378,7 @@ vd_est_vdm_ss = function(vd,
   
   attributes(out)$Af<-attributes(dat)$Af
   attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  if(order==1){
-  ec_model = list(model_name_full="volumetric-compensatory-EV1-setsize_linear",
-                  model_name_short="VD-comp-ssl",
-                  error_specification="EV1",
-                  model_parnames=c('xi','sigma','gamma','E'),
-                  Prior=Prior)
-  }
-  if(order==2){
-    ec_model = list(model_name_full="volumetric-compensatory-EV1-setsize_linear",
-                    model_name_short="VD-comp-ssq",
-                    error_specification="EV1",
-                    model_parnames=c('tau','xi','sigma','gamma','E'),
-                    Prior=Prior)
-  }
-  
-  attributes(out)$ec_model=ec_model
-  
-  
+
   #Add training data
   if(control$include_data){
     out$dat=dat
@@ -1381,16 +1399,37 @@ vd_est_vdm_ss = function(vd,
 #' @param draw A list, 'echoice2' draws object
 #' @param vd A tibble, tidy choice data (before dummy-coding)
 #' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @examples
+#' data(icecream)
+#' #fit model
+#' icecream_est <- icecream %>% vd_est_vdm(R=10, keep=1)
+#' #compute likelihood for each subject in each draw
+#' loglls<-vd_LL_vdm(icecream_est, icecream, fromdraw = 2)
+#' #300 respondents, 10 draws
+#' dim(loglls)
 #' @return N x Draws Matrix of log-Likelihood values
 #' @export
 vd_LL_vdm <- function(draw, vd, fromdraw=1){
   
+  #Number of draws total
   R=dim(draw$thetaDraw)[3]
   
+  #starting point
+  fromdraw=as.integer(fromdraw)
+  
+  #error dist
+  error_specification = "EV1"
+  if(!is.null(draw$error_specification)){
+    error_specification=draw$error_specification
+  }
+  
+  #prepare data
   dat <- 
     vd %>% 
     vd_long_tidy %>% vd_prepare
   
+  #get LLs
+  if(error_specification=="EV1"){
   out<- 
     vd2LLs(draw$thetaDraw[,,seq(fromdraw,R)],
              dat$XX,
@@ -1403,7 +1442,141 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
              dat$lfr-1, dat$lto-1, 
              ncol(draw$MUDraw), 
              ncol(draw$thetaDraw))
+  }
   
+  if(error_specification=="Normal"){
+    out<- 
+      vdnLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+             dat$XX,
+             dat$PP,
+             dat$AA, 
+             dat$nalts, 
+             dat$sumpxs, 
+             dat$ntasks, 
+             dat$xfr-1, dat$xto-1,
+             dat$lfr-1, dat$lto-1, 
+             ncol(draw$MUDraw), 
+             ncol(draw$thetaDraw))
+  }
+  return(out) 
+}
+
+
+#' Log-Likelihood for conjunctive-screening volumetric demand model
+#' 
+#' 
+#' @param draw A list, 'echoice2' draws object
+#' @param vd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @examples
+#' data(icecream)
+#' #fit model
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=50, keep=1)
+#' #compute likelihood for each subject in each draw
+#' loglls<-vd_LL_vdm_screen(icecream_est, icecream, fromdraw = 2)
+#' #300 respondents, 10 draws
+#' dim(loglls)
+#' @export
+vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
+  
+  #Number of draws total
+  R=dim(draw$thetaDraw)[3]
+  
+  #starting point
+  fromdraw=as.integer(fromdraw)
+  
+  #error dist
+  error_specification = "EV1"
+  if(!is.null(draw$error_specification)){
+    error_specification=draw$error_specification
+  }
+
+  #screening model type "olumetric-conjunctive" or "volumetric-conjunctive-pr"
+  screening_model_type <- draw$ec_type 
+
+  #prepare data
+  dat <- 
+    vd %>% 
+    vd_long_tidy %>% vd_prepare
+  
+  #screening-relevant data
+  dat$Af <- vd %>% vd_long_tidy %>% 
+    attributes() %>% `[[`('Af') %>% as.matrix()
+
+  out<-NULL
+  
+  if(error_specification == "Normal"){
+    if(screening_model_type=="volumetric-conjunctive"){
+      out<- 
+        vdsr2LLs(draw$thetaDraw[,,seq(fromdraw,R)],
+                 draw$tauDraw[,,seq(fromdraw,R)],
+                 dat$XX,
+                 dat$PP,
+                 dat$AA, 
+                 attributes(dat)$Af%>%as.matrix(), 
+                 dat$nalts, 
+                 dat$sumpxs, 
+                 dat$ntasks, 
+                 dat$xfr-1, dat$xto-1,
+                 dat$lfr-1, dat$lto-1, 
+                 ncol(draw$MUDraw), 
+                 ncol(draw$thetaDraw))
+    }
+    if(screening_model_type=="volumetric-conjunctive-pr"){
+      out<- 
+        vdsrprLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+                  draw$tauDraw[,,seq(fromdraw,R)],
+                  draw$tau_pr_draw[,seq(fromdraw,R)], 
+                  dat$XX,
+                  dat$PP,
+                  dat$AA, 
+                  attributes(dat)$Af%>%as.matrix(), 
+                  dat$nalts, 
+                  dat$sumpxs, 
+                  dat$ntasks, 
+                  dat$xfr-1, dat$xto-1,
+                  dat$lfr-1, dat$lto-1, 
+                  ncol(draw$MUDraw), 
+                  ncol(draw$thetaDraw))
+    }
+    
+  }else{
+    if(screening_model_type=="volumetric-conjunctive"){
+      out<- 
+        vdsreLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+                 draw$tauDraw[,,seq(fromdraw,R)],
+                 dat$XX,
+                 dat$PP,
+                 dat$AA, 
+                 attributes(dat)$Af%>%as.matrix(), 
+                 dat$nalts, 
+                 dat$sumpxs, 
+                 dat$ntasks, 
+                 dat$xfr-1, dat$xto-1,
+                 dat$lfr-1, dat$lto-1, 
+                 ncol(draw$MUDraw), 
+                 ncol(draw$thetaDraw))
+    }
+    if(screening_model_type=="volumetric-conjunctive-pr"){
+      out<-
+        vdsrpreLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+                   draw$tauDraw[,,seq(fromdraw,R)],
+                   draw$tau_pr_draw[,seq(fromdraw,R)], 
+                   dat$XX,
+                   dat$PP,
+                   dat$AA, 
+                   attributes(dat)$Af%>%as.matrix(), 
+                   dat$nalts, 
+                   dat$sumpxs, 
+                   dat$ntasks, 
+                   dat$xfr-1, dat$xto-1,
+                   dat$lfr-1, dat$lto-1, 
+                   ncol(draw$MUDraw), 
+                   ncol(draw$thetaDraw))
+    }
+
+  }
   return(out) 
 }
 
@@ -1417,12 +1590,24 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
 #' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
 #' @return N x Draws Matrix of log-Likelihood values
 #' @examples
-#' #analogous to vd_LL_vdm
-#' 
+#' data(icecream)
+#' #fit model
+#' #note: this is just for demo purposes
+#' #on this demo dataset, the model is not identified
+#' #due to a lack of set size variation
+#' icecream_est <- icecream %>% vd_est_vdm_ss(R=10, keep=1)
+#' #compute likelihood for each subject in each draw
+#' loglls<-vd_LL_vdmss(icecream_est, icecream, fromdraw = 2)
+#' #300 respondents, 10 draws
+#' dim(loglls)
 #' @export
 vd_LL_vdmss <- function(draw, vd, fromdraw=1){
   
+  #Number of draws total
   R=dim(draw$thetaDraw)[3]
+  
+  #starting point
+  fromdraw=as.integer(fromdraw)
   
   dat <- 
     vd %>% 
@@ -1446,88 +1631,6 @@ vd_LL_vdmss <- function(draw, vd, fromdraw=1){
 
 
 
-#' Log-Likelihood for conjunctive-screening volumetric demand model
-#' 
-#' 
-#' @param draw A list, 'echoice2' draws object
-#' @param vd A tibble, tidy choice data (before dummy-coding)
-#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
-#' @return N x Draws Matrix of log-Likelihood values
-#' @examples
-#' #analogous to vd_LL_vdm
-#' 
-#' 
-#' @export
-vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
-  
-  R=dim(draw$thetaDraw)[3]
-  
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  dat$Af <- vd %>% vd_long_tidy %>% 
-    attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  out<- 
-    vdsr2LLs(draw$thetaDraw[,,seq(fromdraw,R)],
-             draw$tauDraw[,,seq(fromdraw,R)],
-             dat$XX,
-             dat$PP,
-             dat$AA, 
-             attributes(dat)$Af%>%as.matrix(), 
-             dat$nalts, 
-             dat$sumpxs, 
-             dat$ntasks, 
-             dat$xfr-1, dat$xto-1,
-             dat$lfr-1, dat$lto-1, 
-             ncol(draw$MUDraw), 
-             ncol(draw$thetaDraw))
-  
-  return(out) 
-}
-
-#' Log-Likelihood for conjunctive-screening (with price) volumetric demand model
-#' 
-#' 
-#' @param draw A list, 'echoice2' draws object
-#' @param vd A tibble, tidy choice data (before dummy-coding)
-#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
-#' @return N x Draws Matrix of log-Likelihood values
-#' @examples
-#' #analogous to vd_LL_vdm
-#' 
-#' @export
-vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
-  
-  R=dim(draw$thetaDraw)[3]
-  
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  dat$Af <- vd %>% vd_long_tidy %>% 
-    attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  out<- 
-    vdsrprLLs(draw$thetaDraw[,,seq(fromdraw,R)],
-             draw$tauDraw[,,seq(fromdraw,R)],
-             draw$tau_pr_draw[,,seq(fromdraw,R)], 
-             dat$XX,
-             dat$PP,
-             dat$AA, 
-             attributes(dat)$Af%>%as.matrix(), 
-             dat$nalts, 
-             dat$sumpxs, 
-             dat$ntasks, 
-             dat$xfr-1, dat$xto-1,
-             dat$lfr-1, dat$lto-1, 
-             ncol(draw$MUDraw), 
-             ncol(draw$thetaDraw))
-  
-  return(out) 
-}
-
 
 
 
@@ -1543,8 +1646,11 @@ vd_LL_vdm_screenpr <- function(draw, vd, fromdraw=1){
 #'
 #' @param data_new New long-format choice data 
 #' @param data_old Old long-format choice data
+#' @examples 
+#' data(icecream)
+#' prep_newprediction(icecream, icecream)
 #' 
-#' @return data_new (adjusted)
+#' @return long-format choice data 
 #' 
 #' @export
 prep_newprediction <- function(data_new,data_old){
@@ -1575,23 +1681,30 @@ prep_newprediction <- function(data_new,data_old){
 
 
 
-#' Demand Prediction (Volumetric demand, EV1 errors)
+#' Demand Prediction (Volumetric Demand Model)
 #'
 #' Generating demand predictions for volumetric demand model. 
 #' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
 #' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-#' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
+#' Error realizations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
 #'
 #'
 #' @param vd data
-#' @param tidy apply 'echoice2' tidier
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
-#' @param error_dist A string defining the error term distribution, 'EV1' or 'Normal'
-#' @param cores (optional) cores
-#' 
+#' @param error_dist (optional) A string defining the error term distribution (default: 'EV1')
+#' @param tidy (optional) apply 'echoice2' tidier (default: TRUE)
+#' @param cores (optional) cores (default: auto-detect)
 #' @return Draws of expected demand
-#' 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #column .demdraws contains draws from posterior of predicted demand
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
 #'   [ec_gen_err_ev1()] for pre-generating error realizations and
@@ -1601,9 +1714,14 @@ prep_newprediction <- function(data_new,data_old){
 vd_dem_vdm=function(vd,
                     est,
                     epsilon_not=NULL,
-                    error_dist="EV1",
+                    error_dist=NULL,
                     tidy=TRUE,
                     cores=NULL){
+  
+  #read error dist from draws if not supplied
+  if(is.null(error_dist)){
+    error_dist = est$error_specification
+  }
   
   #error dist: either Normal or EV1
   if(!(error_dist=="Normal")){
@@ -1643,6 +1761,7 @@ vd_dem_vdm=function(vd,
                    est$thetaDraw,
                    cores=cores)      
     }else{
+      #EV1
     out=
       des_dem_vdm( dat$PP,
                    dat$AA,
@@ -1659,6 +1778,7 @@ vd_dem_vdm=function(vd,
     
     
   }else{
+    #pre-supplied
     out=
       der_dem_vdm( dat$PP,
                    dat$AA,
@@ -1690,7 +1810,7 @@ vd_dem_vdm=function(vd,
 
 
 
-#' Demand Prediction (Volumetric demand, attribute-based screening, Normal)
+#' Demand Prediction (Volumetric demand, attribute-based screening)
 #'
 #' Generating demand predictions for volumetric demand model with attribute-based screening. 
 #' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
@@ -1701,8 +1821,17 @@ vd_dem_vdm=function(vd,
 #' @param vd data
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
+#' @param error_dist (optional) A string defining the error term distribution (default: 'EV1')
 #' @param cores (optional) cores
-#' 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm_screen(icecream_est)
+#' #column .demdraws contains draws from posterior of predicted demand
 #' @return Draws of expected demand
 #' 
 #' 
@@ -1711,10 +1840,24 @@ vd_dem_vdm=function(vd,
 #'   [vd_est_vdm_screen()] for estimating the corresponding model
 #' 
 #' @export
-vd_dem_vdmsr=function(vd,
-                    est,
-                    epsilon_not=NULL,
-                    cores=NULL){
+vd_dem_vdm_screen=function(vd,
+                           est,
+                           epsilon_not=NULL,
+                           error_dist=NULL,
+                           cores=NULL){
+  
+  #read error dist from draws if not supplied
+  if(is.null(error_dist)){
+    error_dist = est$error_specification
+  }
+  
+  #error dist: either Normal or EV1
+  if(!(error_dist=="Normal")){
+    error_dist="EV1"
+  }
+  
+  #screening model type "olumetric-conjunctive" or "volumetric-conjunctive-pr"
+  screening_model_type <- est$ec_type
   
   #cores  
   if(is.null(cores)){
@@ -1733,21 +1876,85 @@ vd_dem_vdmsr=function(vd,
   
   #demand sim
   if(is.null(epsilon_not)){
-  out=
-    des_dem_vdm_screen(dat$PP,
-             dat$AA,
-             dat$Af,
-             dat$nalts,
-             dat$tlens,  
-             dat$ntasks,  
-             dat$xfr-1,
-             dat$xto-1,  
-             dat$lfr-1,  
-             dat$lto-1,
-             est$thetaDraw,
-             est$tauDraw, 
-             cores=cores)
+    
+    if(error_dist=="Normal"){
+    if(screening_model_type=="volumetric-conjunctive"){
+    out=
+      des_dem_vdm_screen(dat$PP,
+               dat$AA,
+               dat$Af,
+               dat$nalts,
+               dat$tlens,  
+               dat$ntasks,  
+               dat$xfr-1,
+               dat$xto-1,  
+               dat$lfr-1,  
+               dat$lto-1,
+               est$thetaDraw,
+               est$tauDraw, 
+               cores=cores)
+    }
+    
+    if(screening_model_type=="volumetric-conjunctive-pr"){
+      out=
+        des_dem_vdm_screenpr(dat$PP,
+                             dat$AA,
+                             dat$Af,
+                             dat$nalts,
+                             dat$tlens,  
+                             dat$ntasks,  
+                             dat$xfr-1,
+                             dat$xto-1,  
+                             dat$lfr-1,  
+                             dat$lto-1,
+                             est$thetaDraw,
+                             est$tauDraw, 
+                             est$tau_pr_draw,
+                             cores=cores)
+    }
+    }
+  
+    if(error_dist=="EV1"){
+      if(screening_model_type=="volumetric-conjunctive"){
+        out=
+          des_ev_dem_vdm_screen(dat$PP,
+                                dat$AA,
+                                dat$Af,
+                                dat$nalts,
+                                dat$tlens,  
+                                dat$ntasks,  
+                                dat$xfr-1,
+                                dat$xto-1,  
+                                dat$lfr-1,  
+                                dat$lto-1,
+                                est$thetaDraw,
+                                est$tauDraw, 
+                                cores=cores)
+      }
+      
+      if(screening_model_type=="volumetric-conjunctive-pr"){
+        out=
+          des_ev_dem_vdm_screenpr(dat$PP,
+                                  dat$AA,
+                                  dat$Af,
+                                  dat$nalts,
+                                  dat$tlens,  
+                                  dat$ntasks,  
+                                  dat$xfr-1,
+                                  dat$xto-1,  
+                                  dat$lfr-1,  
+                                  dat$lto-1,
+                                  est$thetaDraw,
+                                  est$tauDraw, 
+                                  est$tau_pr_draw,
+                                  cores=cores)
+      }
+    }  
+    
+    
   }else{
+    
+    if(screening_model_type=="volumetric-conjunctive"){
     out=
       der_dem_vdm_screen(dat$PP,
              dat$AA,
@@ -1763,6 +1970,27 @@ vd_dem_vdmsr=function(vd,
              est$tauDraw,
              epsilon_not,
              cores=cores)
+    }
+    
+    if(screening_model_type=="volumetric-conjunctive-pr"){
+      out=
+        der_dem_vdm_screenpr(dat$PP,
+                             dat$AA,
+                             dat$Af,
+                             dat$nalts,
+                             dat$tlens,  
+                             dat$ntasks,  
+                             dat$xfr-1,
+                             dat$xto-1,  
+                             dat$lfr-1,  
+                             dat$lto-1,
+                             est$thetaDraw,
+                             est$tauDraw, 
+                             est$tau_pr_draw,
+                             cores=cores)
+    }
+    
+    
   }
   
   attributes(out)=NULL
@@ -1771,7 +1999,9 @@ vd_dem_vdmsr=function(vd,
   vd$.demdraws<-map(out,drop)   
   
   #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$attr_names <- 
+    vd %>% colnames %>% setdiff(c("id","task","alt","x","p")) %>% 
+      str_subset('^\\.', negate = TRUE)
   attributes(vd)$ec_model   <- attributes(est)$ec_model
   
   return(vd)
@@ -1779,98 +2009,8 @@ vd_dem_vdmsr=function(vd,
 
 
 
-#' Demand Prediction (Volumetric demand, attribute-based screening including price, Normal)
-#'
-#' Generating demand predictions for volumetric demand model with attribute-based screening including price. 
-#' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
-#' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-#' Eerror realisations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
-#'
-#'
-#' @param vd data
-#' @param est ec-model draws 
-#' @param epsilon_not (optional) error realizations
-#' @param cores (optional) cores
-#' 
-#' @return Draws of expected demand
-#' 
-#' 
-#' @seealso [prep_newprediction()] to match `vd`'s factor levels,
-#'   [ec_gen_err_normal()] for pre-generating error realizations and
-#'   [vd_est_vdm_screen()] for estimating the corresponding model
-#' 
-#' @export
-vd_dem_vdmsrpr=function(vd,
-                      est,
-                      epsilon_not=NULL,
-                      cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #screening-relevant data
-  dat$Af <- vd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  #demand sim
-  if(is.null(epsilon_not)){
-    out=
-      des_dem_vdm_screenpr(dat$PP,
-                         dat$AA,
-                         dat$Af,
-                         dat$nalts,
-                         dat$tlens,  
-                         dat$ntasks,  
-                         dat$xfr-1,
-                         dat$xto-1,  
-                         dat$lfr-1,  
-                         dat$lto-1,
-                         est$thetaDraw,
-                         est$tauDraw, 
-                         est$tau_pr_draw,
-                         cores=cores)
-  }else{
-    out=
-      der_dem_vdm_screenpr(dat$PP,
-                         dat$AA,
-                         dat$Af,
-                         dat$nalts,
-                         dat$tlens,  
-                         dat$ntasks,  
-                         dat$xfr-1,
-                         dat$xto-1,  
-                         dat$lfr-1,  
-                         dat$lto-1,
-                         est$thetaDraw,
-                         est$tauDraw,
-                         est$tau_pr_draw,
-                         epsilon_not,
-                         cores=cores)
-  }
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  vd=as_tibble(vd)
-  vd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
-  return(vd)
-}
 
-
-
-#' Demand Prediction (Volumetric demand, accounting for set-size variation (1st order), EV1 errors)
+#' Demand Prediction (Volumetric demand, accounting for set-size variation, EV1 errors)
 #'
 #' Generating demand predictions for volumetric demand model with set-size adjustment.
 #' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
@@ -1882,19 +2022,32 @@ vd_dem_vdmsrpr=function(vd,
 #' @param est ec-model draws 
 #' @param epsilon_not (optional) error realizations
 #' @param cores (optional) cores
-#' 
 #' @return Draws of expected demand
 #' 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_ss(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm_ss(icecream_est)
+#' #column .demdraws contains draws from posterior of predicted demand
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
 #'   [ec_gen_err_ev1()] for pre-generating error realizations and
 #'   [vd_est_vdm_ss()] for estimating the corresponding model
 #' 
 #' @export
-vd_dem_vdmss=function(vd,
-                    est,
-                    epsilon_not=NULL,
-                    cores=NULL){
+vd_dem_vdm_ss=function(vd,
+                       est,
+                       epsilon_not=NULL,
+                       cores=NULL){
+  
+  #model type
+  model_type = est$ec_type 
+  # "volumetric-compensatory-setsize_linear"
+  # "volumetric-compensatory-setsize_quadratic"
   
   #cores  
   if(is.null(cores)){
@@ -1909,6 +2062,7 @@ vd_dem_vdmss=function(vd,
   
   #demand sim
   if(is.null(epsilon_not)){
+    if(model_type=="volumetric-compensatory-setsize_linear"){
     out=
       des_dem_vdm_ss( dat$PP,
                    dat$AA,
@@ -1921,92 +2075,57 @@ vd_dem_vdmss=function(vd,
                    dat$tlens,
                    est$thetaDraw,
                    cores=cores)
+    }
+    
+    if(model_type=="volumetric-compensatory-setsize_quadratic"){
+      des_dem_vdm_ssq( dat$PP,
+                       dat$AA,
+                       dat$nalts,
+                       dat$sumpxs,  
+                       dat$ntasks,  
+                       dat$xfr-1,
+                       dat$xto-1,  
+                       dat$lfr-1,
+                       dat$lto-1,
+                       dat$tlens,
+                       est$thetaDraw,
+                       cores=cores)
+    }
+    
   }else{
+    if(model_type=="volumetric-compensatory-setsize_linear"){
     out=
       der_dem_vdm_ss( dat$PP,
-                   dat$AA,
-                   dat$nalts,
-                   dat$ntasks,  
-                   dat$xfr-1,
-                   dat$xto-1,  
-                   dat$lfr-1,
-                   dat$lto-1,
-                   dat$tlens,
-                   est$thetaDraw,
-                   epsilon_not,
-                   cores=cores)
+                      dat$AA,
+                      dat$nalts,
+                      dat$ntasks,  
+                      dat$xfr-1,
+                      dat$xto-1,  
+                      dat$lfr-1,
+                      dat$lto-1,
+                      dat$tlens,
+                      est$thetaDraw,
+                      epsilon_not,
+                      cores=cores)
+    }
+    if(model_type=="volumetric-compensatory-setsize_quadratic"){
+    out=
+      der_dem_vdm_ssq(dat$PP,
+                      dat$AA,
+                      dat$nalts,
+                      dat$ntasks,  
+                      dat$xfr-1,
+                      dat$xto-1,  
+                      dat$lfr-1,
+                      dat$lto-1,
+                      dat$tlens,
+                      est$thetaDraw,
+                      epsilon_not,
+                      cores=cores)
+    }
   }
   
-  attributes(out)=NULL
-  #add draws to data tibble
-  vd=as_tibble(vd)
-  vd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
-  return(vd)
-}
 
-
-
-
-
-
-
-#' Demand Prediction (Volumetric demand, accounting for set-size variation (2nd order), EV1 errors)
-#'
-#' Generating demand predictions for volumetric demand model with set-size adjustment.
-#' Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
-#' The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-#' Eerror realizations can be pre-supplied to the `epsilon_not`. This helps create smooth demand curves or conduct optimization.
-#'
-#'
-#' @param vd data
-#' @param est ec-model draws 
-#' @param cores (optional) cores
-#' 
-#' @return Draws of expected demand
-#' 
-#' 
-#' @seealso [prep_newprediction()] to match `vd`'s factor levels,
-#'   [ec_gen_err_ev1()] for pre-generating error realizations and
-#'   [vd_est_vdm_ss()] for estimating the corresponding model
-#' 
-#' @export
-vd_dem_vdmssq=function(vd,
-                      est,
-                      cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    vd %>% 
-    vd_long_tidy %>% vd_prepare
-  
-  
-  #demand sim
-  out=
-    des_dem_vdm_ssq( dat$PP,
-                         dat$AA,
-                         dat$nalts,
-                         dat$sumpxs,  
-                         dat$ntasks,  
-                         dat$xfr-1,
-                         dat$xto-1,  
-                         dat$lfr-1,
-                         dat$lto-1,
-                         dat$tlens,
-                         est$thetaDraw,
-                         cores=cores)
-  
   attributes(out)=NULL
   #add draws to data tibble
   vd=as_tibble(vd)
@@ -2116,31 +2235,18 @@ dd_est_hmnl = function(dd,
   
   #Add data information
   out$A_names<-colnames(dat$AA)
-  out$parnames=c(colnames(dat$AA),'ln_beta_p')
-  if(!is.null(dat$attributes_levels)){
-    out$attributes_levels=dat$attributes_levels
-  }
-  
+  out$parnames<-c(colnames(dat$AA),'ln_beta_p')
   colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
   
   #Add model information
   out$ec_type="discrete-compensatory"
-  out$error_specification="EV1"
   out$ec_type_short="hmnl-comp"
+  out$error_specification="EV1"
+  out$model_parnames=c('beta_p')
   out$Prior=Prior
   
   attributes(out)$Af<-attributes(dat)$Af
   attributes(out)$ec_data<-attributes(dat)$ec_data
-  
-  
-  ec_model = list(model_name_full="discrete-compensatory",
-                  model_name_short="hmnl-comp",
-                  error_specification="EV1",
-                  model_parnames=c('beta_p'),
-                  Prior=Prior)
-  
-  attributes(out)$ec_model=ec_model
-  
   
   #Add training data
   if(control$include_data){
@@ -2299,43 +2405,24 @@ dd_est_hmnl_screen = function(dd,
     #Add data information
     out$A_names<-colnames(dat$AA)
     out$Af_names<-colnames(dat$AAf)
-    
     out$parnames=c(colnames(dat$AA),'ln_beta_p')
-    
-    if(!is.null(dat$attributes_levels)){
-      out$attributes_levels=dat$attributes_levels
-    }
-    
     colnames(out$MUDraw)=c(colnames(dat$AA),'ln_beta_p')
     
     #Add model information
-    out$ec_type="discrete-conjunctive"
+    if(!price_screen){
+      out$ec_type="discrete-conjunctive"
+      out$ec_type_short="hmnl-conj"
+    }else{
+      out$ec_type="discrete-conjunctive-pr"
+      out$ec_type_short="hmnl-conj-pr"
+    }
+    
     out$error_specification="EV1"
-    out$ec_type_short="hmnl-conj"
+    out$model_parnames=c('beta_p')
     out$Prior=Prior
     
     attributes(out)$Af<-attributes(dat)$Af
     attributes(out)$ec_data<-attributes(dat)$ec_data
-    
-    
-    ec_model = list(model_name_full="discrete-conjunctive",
-                    model_name_short="hmnl-conj",
-                    error_specification="EV1",
-                    model_parnames=c('ln_beta_p'),
-                    Prior=Prior)
-    
-    attributes(out)$ec_model=ec_model
-    
-    if(price_screen){
-      out$ec_type="discrete-conjunctive-price"
-      out$ec_type_short="hmnl-conjpr"
-      ec_model = list(model_name_full="discrete-conjunctive-price",
-                      model_name_short="hmnl-conjpr",
-                      error_specification="EV1",
-                      model_parnames=c('ln_beta_p'),
-                      Prior=Prior)
-    }
-    
     
     #Add training data
     if(control$include_data){
@@ -2381,24 +2468,32 @@ dd_LL <- function(draw, dd, fromdraw=1){
 #logll
 dd_LL_sr <- function(draw, dd, fromdraw=1){
   
+  model_type = draw$ec_type="discrete-conjunctive"
+  #"discrete-conjunctive" "discrete-conjunctive-pr"
+  
   R=dim(draw$thetaDraw)[3]
+  
+  out=NULL
   
   dat <- 
     dd %>% 
     vd_long_tidy %>% 
     vd_prepare
   
+  if(model_type=="discrete-conjunctive"){
   out<- 
-    ddLLs(draw$thetaDraw[,,seq(fromdraw,R)],
-          dat$XX,
-          dat$PP,
-          dat$AA, 
-          dat$nalts, 
-          dat$ntasks, 
-          dat$xfr-1, dat$xto-1,
-          dat$lfr-1, dat$lto-1, 
-          ncol(draw$MUDraw), 
-          ncol(draw$thetaDraw))
+    ddsrLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+            draw$tauDraw[,,seq(fromdraw,R)],
+            dat$XX,
+            dat$PP,
+            dat$AA, 
+            dat$nalts, 
+            dat$ntasks, 
+            dat$xfr-1, dat$xto-1,
+            dat$lfr-1, dat$lto-1, 
+            ncol(draw$MUDraw), 
+            ncol(draw$thetaDraw))
+  }
   
   return(out) 
 }
@@ -3698,7 +3793,6 @@ vd_thin_draw=function(est,
     est$loglike=    est$loglike[keepdraws,,drop=FALSE]
     est$logpost=    est$logpost[keepdraws,,drop=FALSE]
     est$reject=     est$reject[keepdraws,,drop=FALSE]
-    
   }else{
     est$thetaDraw=  est$thetaDraw[,,keepdraws]
     est$MUDraw=     est$MUDraw[keepdraws,]
@@ -3710,6 +3804,11 @@ vd_thin_draw=function(est,
     est$reject=     est$reject[keepdraws,,drop=FALSE]
   }
   
+  if(is.null(est$tau_pr_draw)){
+    est$tau_pr_draw       = est$tau_pr_draw[,keepdraws,drop=FALSE]
+    est$prscreenMuSigDraw = est$prscreenMuSigDraw[keepdraws,,drop=FALSE]
+  }
+          
   return(est)
 }
 

@@ -6,6 +6,11 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(openmp)]]
 
+
+// notes
+// it is possible to use unordered_map to consolidate code
+// but there would also be downsides
+
 //global timing objects
 time_t itime;
 time_t itime2;
@@ -2214,7 +2219,7 @@ void draw_dd_taupr( vec& ll_olds,
 
 
  // [[Rcpp::export]]
- double vdl2(arma::vec const& theta, 
+ double vdl_e(arma::vec const& theta, 
              arma::uvec const& nalts,
              arma::vec const& sumpxs, 
              arma::vec const& X, 
@@ -2292,7 +2297,7 @@ void draw_dd_taupr( vec& ll_olds,
    vec ll_olds(N);
 #pragma omp parallel for schedule(static)
    for(int n=0; n<N; n++){
-     ll_olds(n)= vdl2(Theta.col(n),
+     ll_olds(n)= vdl_e(Theta.col(n),
              nalts(span(lfr(n),lto(n))),
              sumpxs(span(lfr(n),lto(n))), 
              XX(span(xfr(n),xto(n))), 
@@ -2384,7 +2389,7 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
     if(exp(theta_cand(p-1))>maxspents(n)){
       
       //eval
-      llnew = vdl2(theta_cand,
+      llnew = vdl_e(theta_cand,
                    nalts(span(lfr(n),lto(n))),
                    sumpxs(span(lfr(n),lto(n))), 
                    XX(span(xfr(n),xto(n))), 
@@ -2471,7 +2476,7 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
    for(int n=0; n<N; n++){
      
-     ll_olds(n)= vdl2(theta_temp.col(n),
+     ll_olds(n)= vdl_e(theta_temp.col(n),
              nalts(span(lfr(n),lto(n))),
              sumpxs(span(lfr(n),lto(n))), 
              XX(span(xfr(n),xto(n))), 
@@ -2593,7 +2598,7 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 
 
  // [[Rcpp::export]]
- double vdln(arma::vec const& theta, 
+ double vdl_n(arma::vec const& theta, 
              arma::uvec const& nalts,
              arma::vec const& sumpxs, 
              arma::vec const& X, 
@@ -2667,7 +2672,7 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
 #pragma omp parallel for schedule(static)
    for(int n=0; n<N; n++){
-     ll_olds(n)= vdln(Theta.col(n),
+     ll_olds(n)= vdl_n(Theta.col(n),
              nalts(span(lfr(n),lto(n))),
              sumpxs(span(lfr(n),lto(n))), 
              XX(span(xfr(n),xto(n))), 
@@ -2759,7 +2764,7 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
     if(exp(theta_cand(p-1))>maxspents(n)){
       
       //eval
-      llnew = vdln(theta_cand,
+      llnew = vdl_n(theta_cand,
                    nalts(span(lfr(n),lto(n))),
                    sumpxs(span(lfr(n),lto(n))), 
                    XX(span(xfr(n),xto(n))), 
@@ -2846,7 +2851,7 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
    for(int n=0; n<N; n++){
      
-     ll_olds(n)= vdln(theta_temp.col(n),
+     ll_olds(n)= vdl_n(theta_temp.col(n),
              nalts(span(lfr(n),lto(n))),
              sumpxs(span(lfr(n),lto(n))), 
              XX(span(xfr(n),xto(n))), 
@@ -2974,7 +2979,7 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 
 
  // [[Rcpp::export]]
- double vdlsr2( arma::vec const& theta, 
+ double vdl_sr_n( arma::vec const& theta, 
                 arma::ivec const& taui,
                 arma::uvec const& nalts,
                 arma::vec const& sumpxs, 
@@ -3033,7 +3038,69 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    }
    return(ll);
  }
-
+ 
+ // [[Rcpp::export]]
+ double vdl_sr_e( arma::vec const& theta, 
+                  arma::ivec const& taui,
+                  arma::uvec const& nalts,
+                  arma::vec const& sumpxs, 
+                  arma::vec const& X, 
+                  arma::vec const& P, 
+                  arma::mat const& A, 
+                  arma::mat const& Afull, 
+                  int ntask, int p ){
+   
+   //para
+   arma::vec beta = theta(arma::span(0,p-4));
+   double bud = exp(theta(p-1));
+   double gamma = exp(theta(p-2));
+   double sigma = exp(theta(p-3));
+   
+   //init ll
+   double ll=0;
+   int xpicker = 0;
+   
+   //task level
+   for(int tt=0; tt<ntask; tt++){
+     int nalt = nalts(tt);
+     double osg = bud-sumpxs(tt);
+     double jactemp=0;
+     
+     //alternative level
+     for(int kk=0; kk<nalt; kk++){
+       double x = X(xpicker);
+       double p = P(xpicker);
+       double ab = as_scalar(A.row(xpicker)*beta);
+       
+       if(x>0){
+         //inside
+         double lngx1 = log(gamma*x+1);
+         double gt = -ab+log(p)+lngx1-log(osg);
+         ll+= -exp(-gt/sigma)-gt/sigma-log(sigma);        
+         
+         //jacobian
+         ll+=log(gamma)-lngx1;
+         jactemp+=(gamma*x+1)*p/(osg*gamma);
+         
+       }else{
+         
+         //screening check
+         if(as_scalar(Afull.row(xpicker)*taui)>(0.01)){
+           
+         }else{
+           //corner
+           double gt = -ab+log(p)-log(osg);
+           ll+=-exp(-gt/sigma);
+         }
+         
+       }
+       xpicker+=1; //move up index for X,A,P
+     }
+     //add 2nd part of jacobian at task level
+     ll+=log(jactemp+1);
+   }
+   return(ll);
+ }
 
  // [[Rcpp::export]]
  vec vdsr2LL( mat const&Theta,
@@ -3056,7 +3123,7 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
 #pragma omp parallel for schedule(static)
    for(int n=0; n<N; n++){
-     ll_olds(n)= vdlsr2(
+     ll_olds(n)= vdl_sr_n(
        Theta.col(n),
        tauis.col(n),
        nalts(span(lfr(n),lto(n))),
@@ -3117,7 +3184,86 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 
 
 
-
+ // [[Rcpp::export]]
+ vec vdsreLL( mat const&Theta,
+              imat const&tauis,
+              vec const& XX, 
+              vec const& PP,
+              mat const& AA,
+              mat const& AAf,
+              uvec const& nalts,
+              vec const& sumpxs,  
+              ivec const& ntasks,  
+              ivec const& xfr,  
+              ivec const& xto,  
+              ivec const& lfr,  
+              ivec const& lto,
+              int p, int N, int cores=1){
+   
+   omp_set_num_threads(cores);
+   
+   vec ll_olds(N);
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     ll_olds(n)= vdl_sr_e(
+       Theta.col(n),
+       tauis.col(n),
+       nalts(span(lfr(n),lto(n))),
+       sumpxs(span(lfr(n),lto(n))), 
+       XX(span(xfr(n),xto(n))), 
+       PP(span(xfr(n),xto(n))), 
+       AA(span(xfr(n),xto(n)),span::all), 
+       AAf(span(xfr(n),xto(n)),span::all), 
+       ntasks(n), p);
+   }
+   
+   return(ll_olds);
+ }
+ 
+ 
+ 
+ // [[Rcpp::export]]
+ mat vdsreLLs(cube const&THETAS,
+              icube const&TAUIS,
+              vec const& XX, 
+              vec const& PP,
+              mat const& AA,
+              mat const& AAf,
+              uvec const& nalts,
+              vec const& sumpxs,  
+              ivec const& ntasks,  
+              ivec const& xfr,  
+              ivec const& xto,  
+              ivec const& lfr,  
+              ivec const& lto,
+              int p, int N, int cores=1){
+   
+   int R = THETAS.n_slices;
+   mat ll_olds(N,R+1);
+   
+   for(int r=0; r<R; r++){
+     Rcpp::checkUserInterrupt();
+     ll_olds.col(r)= 
+       vdsreLL(THETAS.slice(r),
+               TAUIS.slice(r),
+               XX, 
+               PP,
+               AA,
+               AAf,
+               nalts,
+               sumpxs,  
+               ntasks,  
+               xfr,  
+               xto,  
+               lfr,  
+               lto,
+               p,
+               N, cores);
+   }
+   
+   return(ll_olds);
+ }
+ 
 
 
 
@@ -3162,7 +3308,7 @@ void draw_vdsr2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
     if(exp(theta_cand(p-1))>maxspents(n)){
       
       //eval
-      llnew = vdlsr2(theta_cand,
+      llnew = vdl_sr_n(theta_cand,
                      tauis.col(n),
                      nalts(span(lfr(n),lto(n))),
                      sumpxs(span(lfr(n),lto(n))), 
@@ -3191,7 +3337,78 @@ void draw_vdsr2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
     
   }
 }
-
+ 
+ void draw_vdsre_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
+                      arma::vec& lp_olds,       // vectors of lp's, just for tracking 
+                      arma::mat& theta_temp,    // container of current betas for all i
+                      arma::imat const& tauis, 
+                      arma::imat const& tauconsts,
+                      vec const& XX,             // data
+                      vec const& PP,
+                      mat const& AA,
+                      mat const& AAf,
+                      uvec const& nalts,
+                      vec const& sumpxs,  
+                      ivec const& ntasks,  
+                      ivec const& xfr,ivec const& xto,  
+                      ivec const& lfr,ivec const& lto,
+                      vec const& maxspents,
+                      int p, int N, 
+                      arma::vec const& mu,  // upper level mean
+                      arma::mat const& L,   // upper level chol(sigma)
+                      arma::vec& stay,      // rejection tracker, used for tuning
+                      arma::vec& tunes,     // i-level tuning parameters
+                      int cores=1){ 
+   
+   omp_set_num_threads(cores);
+   
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     
+     //local variables (thread-safe)
+     double llnew;
+     double lpnew;
+     vec theta_cand = theta_temp.col(n);
+     
+     //lp old draw (with updated mu,L)
+     lp_olds(n) = lndMvnc(theta_temp.col(n), mu, L);
+     
+     //candidate
+     theta_cand+= tunes(n)*(trans(L) * arma::randn(p));
+     
+     if(exp(theta_cand(p-1))>maxspents(n)){
+       
+       //eval
+       llnew = vdl_sr_e(theta_cand,
+                        tauis.col(n),
+                        nalts(span(lfr(n),lto(n))),
+                        sumpxs(span(lfr(n),lto(n))), 
+                        XX(span(xfr(n),xto(n))), 
+                        PP(span(xfr(n),xto(n))), 
+                        AA(span(xfr(n),xto(n)),span::all), 
+                        AAf(span(xfr(n),xto(n)),span::all), 
+                        ntasks(n), p );
+       
+       lpnew = lndMvnc(theta_cand, mu, L);
+       
+       //A-R
+       double ldiff = llnew + lpnew - ll_olds(n) - lp_olds(n);
+       
+       if(ldiff > log(randu(1)[0])){
+         theta_temp.col(n)= theta_cand;
+         ll_olds(n)       = llnew;
+         lp_olds(n)       = lpnew;
+       }else{
+         stay(n)+=1;
+       }
+       
+     }else{
+       stay(n)+=1;
+     }
+     
+   }
+ }
+ 
 
 void draw_tau(arma::vec& ll_olds,
               imat& tauis,
@@ -3231,7 +3448,7 @@ void draw_tau(arma::vec& ll_olds,
           
           ivec tauk0=tauis.col(n);
           tauk0(kk)=0;
-          ll0 = vdlsr2(theta_temp.col(n),
+          ll0 = vdl_sr_n(theta_temp.col(n),
                        tauk0,
                        nalts(span(lfr(n),lto(n))),
                        sumpxs(span(lfr(n),lto(n))), 
@@ -3245,7 +3462,7 @@ void draw_tau(arma::vec& ll_olds,
           
           ivec tauk1=tauis.col(n);
           tauk1(kk)=1;
-          ll1 = vdlsr2(theta_temp.col(n),
+          ll1 = vdl_sr_n(theta_temp.col(n),
                        tauk1,
                        nalts(span(lfr(n),lto(n))),
                        sumpxs(span(lfr(n),lto(n))), 
@@ -3271,10 +3488,91 @@ void draw_tau(arma::vec& ll_olds,
     }//k=loop
   }//nloop
 }
-
-
+ 
+ void draw_taue(arma::vec& ll_olds,
+               imat& tauis,
+               arma::mat const& theta_temp,
+               imat const& tauconst,
+               mat const& delta,
+               vec const& XX, 
+               vec const& PP,
+               mat const& AA,
+               mat const& AAf,
+               uvec const& nalts,
+               vec const& sumpxs,  
+               ivec const& ntasks,  
+               ivec const& xfr,  
+               ivec const& xto,  
+               ivec const& lfr,  
+               ivec const& lto,
+               int p, int N, int cores){
+   
+   int K=tauconst.n_rows;
+   
+   
+   omp_set_num_threads(cores);
+   
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     double ll0;
+     double ll1;
+     
+     for(int kk=0; kk<K; kk++){
+       
+       if(tauconst(kk,n)==1){
+         
+         if(tauis(kk,n)==1){
+           
+           ll1=ll_olds(n);
+           
+           ivec tauk0=tauis.col(n);
+           tauk0(kk)=0;
+           ll0 = vdl_sr_e(theta_temp.col(n),
+                          tauk0,
+                          nalts(span(lfr(n),lto(n))),
+                          sumpxs(span(lfr(n),lto(n))), 
+                          XX(span(xfr(n),xto(n))), 
+                          PP(span(xfr(n),xto(n))), 
+                          AA(span(xfr(n),xto(n)),span::all), 
+                          AAf(span(xfr(n),xto(n)),span::all), 
+                          ntasks(n), p );
+         }else{
+           ll0=ll_olds(n);
+           
+           ivec tauk1=tauis.col(n);
+           tauk1(kk)=1;
+           ll1 = vdl_sr_e(theta_temp.col(n),
+                          tauk1,
+                          nalts(span(lfr(n),lto(n))),
+                          sumpxs(span(lfr(n),lto(n))), 
+                          XX(span(xfr(n),xto(n))), 
+                          PP(span(xfr(n),xto(n))), 
+                          AA(span(xfr(n),xto(n)),span::all), 
+                          AAf(span(xfr(n),xto(n)),span::all), 
+                          ntasks(n), p );  
+         }
+         
+         double probsc = (exp(ll1) * (delta(kk))) / 
+           (exp(ll1) * (delta(kk)) + exp(ll0)*(1-delta(kk)  )); 
+         
+         tauis(kk,n)= Rf_rbinom( 1, probsc );
+         
+         if(tauis(kk,n)==1){
+           ll_olds(n)=ll1;
+         }else{
+           ll_olds(n)=ll0;
+         }
+         
+       }
+     }//k=loop
+   }//nloop
+ }
+ 
+ //loop_vdrs2_RWMH
+ 
+ 
  // [[Rcpp::export]]
- List loop_vdrs2_RWMH( vec const& XX, 
+  List loop_vdsr_n_RWMH( vec const& XX, 
                        vec const& PP,
                        mat const& AA,
                        mat const& AAf,
@@ -3336,7 +3634,7 @@ void draw_tau(arma::vec& ll_olds,
    vec ll_olds(N);
    for(int n=0; n<N; n++){
      
-     ll_olds(n)= vdlsr2(theta_temp.col(n),
+     ll_olds(n)= vdl_sr_n(theta_temp.col(n),
              tauis.col(n),
              nalts(span(lfr(n),lto(n))),
              sumpxs(span(lfr(n),lto(n))), 
@@ -3440,7 +3738,7 @@ void draw_tau(arma::vec& ll_olds,
        // for(int n=0; n<N; n++){
        //   
        //   ll_olds(n)= 
-       //     vdlsr2(theta_temp.col(n),
+       //     vdl_sr_n(theta_temp.col(n),
        //           tauis.col(n),
        //           nalts(span(lfr(n),lto(n))),
        //           sumpxs(span(lfr(n),lto(n))), 
@@ -3521,7 +3819,255 @@ void draw_tau(arma::vec& ll_olds,
      Named("RRs")            = stay_total/R);
  }
 
-
+ 
+ // [[Rcpp::export]]
+ List loop_vdsr_e_RWMH( vec const& XX, 
+                        vec const& PP,
+                        mat const& AA,
+                        mat const& AAf,
+                        imat const& tauconst,
+                        uvec const& nalts,
+                        vec const& sumpxs,  
+                        ivec const& ntasks,  
+                        ivec const& xfr,  
+                        ivec const& xto,  
+                        ivec const& lfr,  
+                        ivec const& lto,
+                        int p, int N,
+                        int R, int keep, // MCMC parameters draws and keep interval
+                        mat const& Bbar, mat const& A, double nu, mat const& V, //Prior
+                        int tuneinterval = 30, double steptunestart=.5, int tunelength=10000, int tunestart=500, //algo settings
+                        int progressinterval=100, int cores=1){ //report interval
+   
+   //initialize i-parameters
+   arma::mat theta_temp(p,N); // container of current betas for all i
+   theta_temp.fill(0);
+   
+   vec maxspents(N);
+   for(int n=0; n<N; n++){
+     maxspents(n) = max(sumpxs(span(lfr(n),lto(n))));
+   }
+   
+   theta_temp.row(p-1) = trans(log(maxspents+0.01));
+   
+   //no covariates (Z) for now
+   mat Z(N,1);
+   Z.fill(1);
+   
+   // dimensions ..................
+   int Rk=R/keep;
+   int mkeep;
+   int m=1;//Z.n_cols; - no covariates for now
+   int K=tauconst.n_rows;
+   
+   // start values ..................
+   mat MU      = Bbar;
+   mat SIGMA   = eye(p,p);  
+   mat Lprior  = trimatu(chol(SIGMA));
+   imat tauis   = tauconst;
+   vec delta(K); delta.fill(0.5);
+   
+   // tuning ..................
+   arma::vec stay(N);
+   arma::vec stay_total(N);
+   stay.fill(0);
+   stay_total.fill(0);
+   
+   int tunecounter = 1;
+   vec tunes = ones<vec>(N)*steptunestart;
+   double currentRR=0;
+   vec currentRRs(N);
+   
+   
+   // initial log likelihood ..................
+   vec ll_olds(N);
+   for(int n=0; n<N; n++){
+     
+     ll_olds(n)= vdl_sr_e(theta_temp.col(n),
+             tauis.col(n),
+             nalts(span(lfr(n),lto(n))),
+             sumpxs(span(lfr(n),lto(n))), 
+             XX(span(xfr(n),xto(n))), 
+             PP(span(xfr(n),xto(n))), 
+             AA(span(xfr(n),xto(n)),span::all), 
+             AAf(span(xfr(n),xto(n)),span::all), 
+             ntasks(n), p );
+   }
+   
+   // REprintf("Initial LL:");
+   // Rcout << sum(ll_olds);
+   // REprintf("\n");
+   
+   
+   vec lp_olds(N);
+   for(int n=0; n<N; n++){
+     lp_olds(n)=lndMvnc(theta_temp.col(n),vectorise(MU),Lprior);
+   }
+   
+   // draw storage ..................
+   cube thetaDraw(p,N,Rk);
+   cube SIGMADraw(p,p,Rk);
+   icube tauDraw(K,N,Rk);
+   
+   vec  loglike = zeros<vec>(Rk);
+   vec  logpost = zeros<vec>(Rk);
+   mat  MUDraw(Rk,p*m);  
+   mat  deltaDraw(Rk,K);  
+   
+   mat  loglikeM = zeros<mat>(N,Rk);
+   
+   
+   arma::vec rrate(Rk);
+   mat RRs(N,Rk);
+   
+   omp_set_num_threads(cores);
+   
+   // loop ..................    
+   startMcmcTimer();
+   
+   for(int ir=0; ir<R; ir++){
+     Rcpp::checkUserInterrupt();
+     
+     // upper level *********
+     ULreg(trans(theta_temp), 
+           Z,                // upper level covariates if used
+           Bbar,  A, nu, V,  // prior
+           MU,               // outputs (MU, SIGMA, Lprior=chol(SIGMA))
+           SIGMA,
+           Lprior); 
+     
+     
+     // n loop  *********
+     //theta
+     draw_vdsre_RWMH(ll_olds,            // ll for current betas
+                     lp_olds,
+                     theta_temp,          // container of current betas for all i
+                     tauis,
+                     tauconst,
+                     XX,
+                     PP,
+                     AA,
+                     AAf,
+                     nalts,
+                     sumpxs,
+                     ntasks,
+                     xfr,xto,lfr,lto,
+                     maxspents,
+                     p,N,
+                     vectorise(MU),      // Mean Prior
+                     Lprior,             // VarCov Prior (chol)
+                     stay,               // tracking rejections
+                     tunes,              // i-level tuning parameters
+                     cores);       
+     
+     if(ir>1000){
+       //tau
+       draw_taue(ll_olds,
+                tauis,
+                theta_temp,
+                tauconst, 
+                delta,
+                XX, 
+                PP,
+                AA,
+                AAf,
+                nalts,
+                sumpxs,  
+                ntasks,  
+                xfr, xto, lfr,lto,
+                p, N, 
+                cores);
+       
+       // delta_tau
+       
+       drawdelta(delta, tauis, K, N, cores);
+       
+       //update LL
+       // #pragma omp parallel for schedule(static)
+       // for(int n=0; n<N; n++){
+       //   
+       //   ll_olds(n)= 
+       //     vdl_sr_n(theta_temp.col(n),
+       //           tauis.col(n),
+       //           nalts(span(lfr(n),lto(n))),
+       //           sumpxs(span(lfr(n),lto(n))), 
+       //           XX(span(xfr(n),xto(n))), 
+       //           PP(span(xfr(n),xto(n))), 
+       //           AA(span(xfr(n),xto(n)),span::all), 
+       //           AAf(span(xfr(n),xto(n)),span::all), 
+       //           ntasks(n), p );
+       // }
+       
+     }
+     // for(int kk=0; kk<K; kk++){
+     //   double tsum=sum(tauis.row(kk));
+     //   delta(kk)=rbeta(1,tsum, N-tsum+1)(0);
+     // }
+     // vec tsums = sum(tauis,1)
+     
+     
+     
+     // tuning stuff ..................
+     tunecounter+=1; // update counter within tune interval
+     
+     //rejection rate in window
+     if(tunecounter>=tuneinterval){
+       
+       //just for progress output
+       currentRR=mean(stay/tunecounter); 
+       //tune within tune range
+       if( (ir>=tunestart) & (ir<(tunestart+tunelength))){
+         mh_tuner(tunes,stay/tunecounter);
+       }
+       
+       //reset
+       tunecounter=1;
+       stay_total+=stay;
+       stay.fill(0);
+     }
+     // end of loop
+     
+     
+     // save draws  ..................
+     if((ir+1)%keep==0){
+       
+       mkeep = (ir+1)/keep-1;
+       thetaDraw.slice(mkeep)      = theta_temp;
+       
+       
+       tauDraw.slice(mkeep)        = tauis;
+       MUDraw.row(mkeep)           = trans(vectorise(MU,0));
+       deltaDraw.row(mkeep)        = trans(delta);
+       SIGMADraw.slice(mkeep)      = SIGMA;
+       loglike(mkeep)              = sum(ll_olds);
+       logpost(mkeep)              = sum(ll_olds)+sum(lp_olds);
+       rrate(mkeep)                = currentRR;
+       
+       loglikeM.col(mkeep) =ll_olds;
+     }
+     
+     // display progress  ..................
+     if((ir+1)%progressinterval==0){
+       infoMcmcTimerRRLL(ir,R,currentRR,sum(ll_olds));
+     }
+     
+   }
+   endMcmcTimer();
+   
+   //return draws  ..................
+   return List::create(
+     Named("thetaDraw")      = thetaDraw,
+     Named("MUDraw")         = MUDraw,
+     Named("SIGMADraw")      = SIGMADraw,
+     Named("tauDraw")        = tauDraw,
+     Named("deltaDraw")      = deltaDraw,
+     Named("loglike")        = loglike,
+     Named("loglikeM")       = loglikeM,
+     Named("logpost")        = logpost,
+     Named("reject")         = rrate,
+     Named("RRs")            = stay_total/R);
+ }
+ 
 
 
 
@@ -3532,7 +4078,7 @@ void draw_tau(arma::vec& ll_olds,
 
 
  // [[Rcpp::export]]
- double vdlsrpr( arma::vec const& theta, 
+ double vdl_srpr_n( arma::vec const& theta, 
                  arma::ivec const& taui,
                  double tau_pr,
                  arma::uvec const& nalts,
@@ -3594,7 +4140,70 @@ void draw_tau(arma::vec& ll_olds,
    return(ll);
  }
 
-
+ // [[Rcpp::export]]
+ double vdl_srpr_e( arma::vec const& theta, 
+                    arma::ivec const& taui,
+                    double tau_pr,
+                    arma::uvec const& nalts,
+                    arma::vec const& sumpxs, 
+                    arma::vec const& X, 
+                    arma::vec const& P, 
+                    arma::mat const& A, 
+                    arma::mat const& Afull, 
+                    int ntask, int p ){
+   
+   //para
+   arma::vec beta = theta(arma::span(0,p-4));
+   double bud   = exp(theta(p-1));
+   double gamma = exp(theta(p-2));
+   double sigma = exp(theta(p-3));
+   
+   //init ll
+   double ll=0;
+   int xpicker = 0;
+   
+   //task level
+   for(int tt=0; tt<ntask; tt++){
+     int nalt = nalts(tt);
+     double osg = bud-sumpxs(tt);
+     double jactemp=0;
+     
+     //alternative level
+     for(int kk=0; kk<nalt; kk++){
+       double x = X(xpicker);
+       double p = P(xpicker);
+       double ab = as_scalar(A.row(xpicker)*beta);
+       
+       if(x>0){
+         //inside
+         double lngx1 = log(gamma*x+1);
+         double gt = -ab+log(p)+lngx1-log(osg);
+         ll+= -exp(-gt/sigma)-gt/sigma-log(sigma);  
+         //jacobian
+         ll+=log(gamma)-lngx1;
+         jactemp+=(gamma*x+1)*p/(osg*gamma);
+         
+       }else{
+         //screening check; acceptable price and attributes
+         if(as_scalar(Afull.row(xpicker)*taui)>(0.01)){
+           
+         }else{
+           //check price tag screen
+           if(p<=exp(tau_pr)){
+             //corner
+             double gt = -ab+log(p)-log(osg);
+             ll+=-exp(-gt/sigma); 
+           }
+         }
+       }
+       xpicker+=1; //move up index for X,A,P
+     }
+     //add 2nd part of jacobian at task level
+     ll+=log(jactemp+1);
+   }
+   return(ll);
+ }
+ 
 
 
 void draw_taui_pr(arma::vec& ll_olds,
@@ -3637,7 +4246,7 @@ void draw_taui_pr(arma::vec& ll_olds,
           
           ivec tauk0=tauis.col(n);
           tauk0(kk)=0;
-          ll0 = vdlsrpr(theta_temp.col(n),
+          ll0 = vdl_srpr_n(theta_temp.col(n),
                         tauk0,
                         tau_prs(n),
                         nalts(span(lfr(n),lto(n))),
@@ -3652,7 +4261,7 @@ void draw_taui_pr(arma::vec& ll_olds,
           
           ivec tauk1=tauis.col(n);
           tauk1(kk)=1;
-          ll1 = vdlsrpr(theta_temp.col(n),
+          ll1 = vdl_srpr_n(theta_temp.col(n),
                         tauk1,
                         tau_prs(n),
                         nalts(span(lfr(n),lto(n))),
@@ -3679,7 +4288,90 @@ void draw_taui_pr(arma::vec& ll_olds,
     }//k=loop
   }//nloop
 }
-
+ 
+ void draw_tauie_pr(arma::vec& ll_olds,
+                   imat& tauis,
+                   arma::mat const& theta_temp,
+                   vec const& tau_prs,
+                   imat const& tauconst,
+                   mat const& delta,
+                   vec const& XX, 
+                   vec const& PP,
+                   mat const& AA,
+                   mat const& AAf,
+                   uvec const& nalts,
+                   vec const& sumpxs,  
+                   ivec const& ntasks,  
+                   ivec const& xfr,  
+                   ivec const& xto,  
+                   ivec const& lfr,  
+                   ivec const& lto,
+                   int p, int N, int cores){
+   
+   int K=tauconst.n_rows;
+   
+   omp_set_num_threads(cores);
+   
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     double ll0;
+     double ll1;
+     
+     for(int kk=0; kk<K; kk++){
+       
+       
+       if(tauconst(kk,n)==1){
+         
+         if(tauis(kk,n)==1){
+           
+           
+           ll1=ll_olds(n);
+           
+           ivec tauk0=tauis.col(n);
+           tauk0(kk)=0;
+           ll0 = vdl_srpr_e(theta_temp.col(n),
+                            tauk0,
+                            tau_prs(n),
+                            nalts(span(lfr(n),lto(n))),
+                            sumpxs(span(lfr(n),lto(n))), 
+                            XX(span(xfr(n),xto(n))), 
+                            PP(span(xfr(n),xto(n))), 
+                            AA(span(xfr(n),xto(n)),span::all), 
+                            AAf(span(xfr(n),xto(n)),span::all), 
+                            ntasks(n), p );
+         }else{
+           ll0=ll_olds(n);
+           
+           ivec tauk1=tauis.col(n);
+           tauk1(kk)=1;
+           ll1 = vdl_srpr_e(theta_temp.col(n),
+                            tauk1,
+                            tau_prs(n),
+                            nalts(span(lfr(n),lto(n))),
+                            sumpxs(span(lfr(n),lto(n))), 
+                            XX(span(xfr(n),xto(n))), 
+                            PP(span(xfr(n),xto(n))), 
+                            AA(span(xfr(n),xto(n)),span::all), 
+                            AAf(span(xfr(n),xto(n)),span::all), 
+                            ntasks(n), p );
+         }
+         
+         double probsc = (exp(ll1) * (delta(kk))) / 
+           (exp(ll1) * (delta(kk)) + exp(ll0)*(1-delta(kk)  )); 
+         
+         tauis(kk,n)= Rf_rbinom( 1, probsc );
+         
+         if(tauis(kk,n)==1){
+           ll_olds(n)=ll1;
+         }else{
+           ll_olds(n)=ll0;
+         }
+         
+       }      
+     }//k=loop
+   }//nloop
+ }
+ 
 
 
 void draw_taupr(arma::vec& ll_olds,    // vector of current log-likelihoods
@@ -3718,7 +4410,7 @@ void draw_taupr(arma::vec& ll_olds,    // vector of current log-likelihoods
     if(tau_pr_cand>log(maxpaids(n))){
       
       
-      double llnew = vdlsrpr(theta_temp.col(n),
+      double llnew = vdl_srpr_n(theta_temp.col(n),
                              tauis.col(n),
                              tau_pr_cand,
                              nalts(span(lfr(n),lto(n))),
@@ -3751,7 +4443,74 @@ void draw_taupr(arma::vec& ll_olds,    // vector of current log-likelihoods
   }//nloop
 }
 
-
+ void draw_taupre(arma::vec& ll_olds,    // vector of current log-likelihoods
+                 arma::vec& lp_olds,       // vectors of lp's, just for tracking 
+                 arma::imat const& tauis,
+                 arma::mat const& theta_temp,
+                 vec& tau_prs,
+                 vec const& maxpaids,
+                 double const& pr_mean,
+                 double const& pr_sd,
+                 vec& stay,
+                 vec const& pricetune,
+                 vec const& XX, 
+                 vec const& PP,
+                 mat const& AA,
+                 mat const& AAf,
+                 uvec const& nalts,
+                 vec const& sumpxs,  
+                 ivec const& ntasks,  
+                 ivec const& xfr,  
+                 ivec const& xto,  
+                 ivec const& lfr,  
+                 ivec const& lto,
+                 int p, int N, int cores){
+   
+   omp_set_num_threads(cores);
+   
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     
+     //candidate
+     double tau_pr_cand = tau_prs(n) + pricetune(n)*randn(1)[0];
+     
+     
+     //check
+     if(tau_pr_cand>log(maxpaids(n))){
+       
+       
+       double llnew = vdl_srpr_e(theta_temp.col(n),
+                                 tauis.col(n),
+                                 tau_pr_cand,
+                                 nalts(span(lfr(n),lto(n))),
+                                 sumpxs(span(lfr(n),lto(n))), 
+                                 XX(span(xfr(n),xto(n))), 
+                                 PP(span(xfr(n),xto(n))), 
+                                 AA(span(xfr(n),xto(n)),span::all), 
+                                 AAf(span(xfr(n),xto(n)),span::all), 
+                                 ntasks(n), p );
+       
+       
+       //A-R
+       double ldiff = 
+         llnew      + log_normpdf(tau_pr_cand, pr_mean, pr_sd ) - 
+         ll_olds(n) - log_normpdf(tau_prs(n) , pr_mean, pr_sd );
+       
+       
+       if(ldiff > log(randu(1)[0])){
+         tau_prs(n)  = tau_pr_cand;
+         ll_olds(n)  = llnew;
+         // lp_olds(n)       = lpnew;
+       }else{
+         stay(n)+=1;
+       }
+     }else{
+       stay(n)+=1;
+     }
+     
+     
+   }//nloop
+ }
 
 
 
@@ -3797,7 +4556,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
     if(exp(theta_cand(p-1))>maxspents(n)){
       
       //eval
-      llnew = vdlsrpr(theta_cand,
+      llnew = vdl_srpr_n(theta_cand,
                       tauis.col(n),
                       tau_prs(n),
                       nalts(span(lfr(n),lto(n))),
@@ -3829,14 +4588,88 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
 }
 
 
-
+ void draw_vdspre_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
+                      arma::vec& lp_olds,       // vectors of lp's, just for tracking 
+                      arma::mat& theta_temp,    // container of current betas for all i
+                      arma::imat& tauis, 
+                      vec const& tau_prs,
+                      arma::imat const& tauconsts,
+                      vec const& XX,             // data
+                      vec const& PP,
+                      mat const& AA,
+                      mat const& AAf,
+                      uvec const& nalts,
+                      vec const& sumpxs,  
+                      ivec const& ntasks,  
+                      ivec const& xfr,ivec const& xto,  
+                      ivec const& lfr,ivec const& lto,
+                      vec const& maxspents,
+                      int p, int N, 
+                      arma::vec const& mu,  // upper level mean
+                      arma::mat const& L,   // upper level chol(sigma)
+                      arma::vec& stay,      // rejection tracker, used for tuning
+                      arma::vec& tunes,     // i-level tuning parameters
+                      int cores=1){ 
+   
+   omp_set_num_threads(cores);
+   
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     
+     //local variables (thread-safe)
+     double llnew;
+     double lpnew;
+     vec theta_cand = theta_temp.col(n);
+     
+     //lp old draw (with updated mu,L)
+     lp_olds(n) = lndMvnc(theta_temp.col(n), mu, L);
+     
+     //candidate
+     theta_cand+= tunes(n)*(trans(L) * arma::randn(p));
+     
+     if(exp(theta_cand(p-1))>maxspents(n)){
+       
+       //eval
+       llnew = vdl_srpr_e(theta_cand,
+                          tauis.col(n),
+                          tau_prs(n),
+                          nalts(span(lfr(n),lto(n))),
+                          sumpxs(span(lfr(n),lto(n))), 
+                          XX(span(xfr(n),xto(n))), 
+                          PP(span(xfr(n),xto(n))), 
+                          AA(span(xfr(n),xto(n)),span::all), 
+                          AAf(span(xfr(n),xto(n)),span::all), 
+                          ntasks(n), p );
+       
+       lpnew = lndMvnc(theta_cand, mu, L);
+       
+       //A-R
+       double ldiff = llnew + lpnew - ll_olds(n) - lp_olds(n);
+       
+       if(ldiff > log(randu(1)[0])){
+         theta_temp.col(n)= theta_cand;
+         ll_olds(n)       = llnew;
+         lp_olds(n)       = lpnew;
+       }else{
+         stay(n)+=1;
+       }
+       
+     }else{
+       stay(n)+=1;
+     }
+     
+   }
+ }
+ 
+ 
+ 
 
 
 
 
 
  // [[Rcpp::export]]
- List loop_vdrspr_RWMH( vec const& XX, 
+ List loop_vdsrpr_n_RWMH( vec const& XX, 
                         vec const& PP,
                         mat const& AA,
                         mat const& AAf,
@@ -3910,7 +4743,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
    for(int n=0; n<N; n++){
      
-     ll_olds(n)= vdlsrpr(theta_temp.col(n),
+     ll_olds(n)= vdl_srpr_n(theta_temp.col(n),
              tauis.col(n),
              tau_prs(n),
              nalts(span(lfr(n),lto(n))),
@@ -4018,7 +4851,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
        // #pragma omp parallel for schedule(static)
        //       for(int n=0; n<N; n++){
        //         ll_olds(n)= 
-       //           vdlsrpr(theta_temp.col(n),
+       //           vdl_srpr_n(theta_temp.col(n),
        //                   tauis.col(n),
        //                   tau_prs(n),
        //                   nalts(span(lfr(n),lto(n))),
@@ -4130,7 +4963,300 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
      Named("RRs")            = stay_total/R);
  }
 
-
+ // [[Rcpp::export]]
+ List loop_vdsrpr_e_RWMH( vec const& XX, 
+                          vec const& PP,
+                          mat const& AA,
+                          mat const& AAf,
+                          imat const& tauconst,
+                          uvec const& nalts,
+                          vec const& sumpxs,  
+                          ivec const& ntasks,  
+                          ivec const& xfr,  
+                          ivec const& xto,  
+                          ivec const& lfr,  
+                          ivec const& lto,
+                          int p, int N,
+                          int R, int keep, // MCMC parameters draws and keep interval
+                          mat const& Bbar, mat const& A, double nu, mat const& V, //Prior
+                          int tuneinterval = 30, double steptunestart=.5, int tunelength=10000, int tunestart=500, //algo settings
+                          int progressinterval=100, int cores=1){ //report interval
+   
+   //initialize i-parameters
+   arma::mat theta_temp(p,N); // container of current betas for all i
+   theta_temp.fill(0);
+   
+   vec maxspents(N);
+   vec maxpaids(N);
+   for(int n=0; n<N; n++){
+     maxspents(n) = max(sumpxs(span(lfr(n),lto(n))));
+     maxpaids(n) = max(sign(XX(span(xfr(n),xto(n))))%PP(span(xfr(n),xto(n))));
+   }
+   
+   theta_temp.row(p-1) = trans(log(maxspents+0.01));
+   
+   //no covariates (Z) for now
+   mat Z(N,1);
+   Z.fill(1);
+   
+   // dimensions ..................
+   int Rk=R/keep;
+   int mkeep;
+   int m=1;//Z.n_cols; - no covariates for now
+   int K=tauconst.n_rows;
+   
+   // start values ..................
+   mat MU      = Bbar;
+   mat SIGMA   = eye(p,p);  
+   mat Lprior  = trimatu(chol(SIGMA));
+   imat tauis   = tauconst;
+   vec delta(K); delta.fill(0.5);
+   
+   vec tau_prs = maxpaids*1.1;
+   double pr_mean = mean(tau_prs);
+   double pr_sd = 1;
+   
+   // tuning ..................
+   arma::vec stay(N);
+   arma::vec stay_total(N);
+   stay.fill(0);
+   stay_total.fill(0);
+   
+   arma::vec stay_prscr(N);
+   stay_prscr.fill(0);
+   arma::vec pricetunes(N);
+   pricetunes.fill(.1);
+   
+   
+   int tunecounter = 1;
+   vec tunes = ones<vec>(N)*steptunestart;
+   double currentRR=0;
+   vec currentRRs(N);
+   
+   
+   // initial log likelihood ..................
+   vec ll_olds(N);
+   for(int n=0; n<N; n++){
+     
+     ll_olds(n)= vdl_srpr_e(theta_temp.col(n),
+             tauis.col(n),
+             tau_prs(n),
+             nalts(span(lfr(n),lto(n))),
+             sumpxs(span(lfr(n),lto(n))), 
+             XX(span(xfr(n),xto(n))), 
+             PP(span(xfr(n),xto(n))), 
+             AA(span(xfr(n),xto(n)),span::all), 
+             AAf(span(xfr(n),xto(n)),span::all), 
+             ntasks(n), p );
+   }
+   
+   // REprintf("Initial LL:");
+   // Rcout << sum(ll_olds);
+   // REprintf("\n");
+   
+   
+   vec lp_olds(N);
+   for(int n=0; n<N; n++){
+     lp_olds(n)=lndMvnc(theta_temp.col(n),vectorise(MU),Lprior);
+   }
+   
+   // draw storage ..................
+   cube thetaDraw(p,N,Rk);
+   cube SIGMADraw(p,p,Rk);
+   icube tauDraw(K,N,Rk);
+   
+   vec  loglike = zeros<vec>(Rk);
+   vec  logpost = zeros<vec>(Rk);
+   mat  MUDraw(Rk,p*m);  
+   mat  deltaDraw(Rk,K);  
+   mat  pricescreenPriorDraw(Rk,2);
+   mat  tau_pr_draw(N,Rk);
+   
+   mat  loglikeM = zeros<mat>(N,Rk);
+   
+   
+   arma::vec rrate(Rk);
+   mat RRs(N,Rk);
+   
+   omp_set_num_threads(cores);
+   
+   // loop ..................    
+   startMcmcTimer();
+   
+   for(int ir=0; ir<R; ir++){
+     Rcpp::checkUserInterrupt();
+     
+     // upper level *********
+     ULreg(trans(theta_temp), 
+           Z,                // upper level covariates if used
+           Bbar,  A, nu, V,  // prior
+           MU,               // outputs (MU, SIGMA, Lprior=chol(SIGMA))
+           SIGMA,
+           Lprior); 
+     
+     
+     // n loop  *********
+     //theta
+     draw_vdspre_RWMH(ll_olds,            // ll for current betas
+                     lp_olds,
+                     theta_temp,          // container of current betas for all i
+                     tauis,
+                     tau_prs,
+                     tauconst,
+                     XX,
+                     PP,
+                     AA,
+                     AAf,
+                     nalts,
+                     sumpxs,
+                     ntasks,
+                     xfr,xto,lfr,lto,
+                     maxspents,
+                     p,N,
+                     vectorise(MU),      // Mean Prior
+                     Lprior,             // VarCov Prior (chol)
+                     stay,               // tracking rejections
+                     tunes,              // i-level tuning parameters
+                     cores);       
+     
+     if(ir>1000){
+       //tau
+       draw_tauie_pr(ll_olds,
+                    tauis,
+                    theta_temp,
+                    tau_prs,
+                    tauconst,
+                    delta,
+                    XX, 
+                    PP,
+                    AA,
+                    AAf,
+                    nalts,
+                    sumpxs,  
+                    ntasks,  
+                    xfr, xto, lfr,lto,
+                    p, N, 
+                    cores);
+       
+       // delta_tau
+       drawdelta(delta, tauis, K, N, cores);
+       
+       
+       //update LL (integreate into draw_tau)
+       // #pragma omp parallel for schedule(static)
+       //       for(int n=0; n<N; n++){
+       //         ll_olds(n)= 
+       //           vdl_srpr_n(theta_temp.col(n),
+       //                   tauis.col(n),
+       //                   tau_prs(n),
+       //                   nalts(span(lfr(n),lto(n))),
+       //                   sumpxs(span(lfr(n),lto(n))), 
+       //                   XX(span(xfr(n),xto(n))), 
+       //                   PP(span(xfr(n),xto(n))), 
+       //                   AA(span(xfr(n),xto(n)),span::all), 
+       //                   AAf(span(xfr(n),xto(n)),span::all), 
+       //                   ntasks(n), p );
+       //       }
+       
+       //update price screening
+       draw_taupre(ll_olds,    // vector of current log-likelihoods
+                  lp_olds,       // vectors of lp's, just for tracking
+                  tauis,
+                  theta_temp,
+                  tau_prs,
+                  maxpaids,
+                  pr_mean,
+                  pr_sd,
+                  stay_prscr,
+                  pricetunes,
+                  XX,
+                  PP,
+                  AA,
+                  AAf,
+                  nalts,
+                  sumpxs,
+                  ntasks,
+                  xfr,
+                  xto,
+                  lfr,
+                  lto,
+                  p, N, cores);
+       
+       //price screening upper level mu_0, nu, alph, bet
+       ULnormnorm(pr_mean, pr_sd,
+                  tau_prs,
+                  0.0, 0.01, 3.0, 3.0);
+       
+     }
+     // for(int kk=0; kk<K; kk++){
+     //   double tsum=sum(tauis.row(kk));
+     //   delta(kk)=rbeta(1,tsum, N-tsum+1)(0);
+     // }
+     // vec tsums = sum(tauis,1)
+     
+     
+     
+     // tuning stuff ..................
+     tunecounter+=1; // update counter within tune interval
+     
+     //rejection rate in window
+     if(tunecounter>=tuneinterval){
+       
+       //just for progress output
+       currentRR=mean(stay/tunecounter); 
+       //tune within tune range
+       if( (ir>=tunestart) & (ir<(tunestart+tunelength))){
+         mh_tuner(tunes,stay/tunecounter);
+         mh_tuner(pricetunes,stay_prscr/tunecounter);
+       }
+       
+       //reset
+       tunecounter=1;
+       stay_total+=stay;
+       stay.fill(0);
+     }
+     // end of loop
+     
+     // save draws  ..................
+     if((ir+1)%keep==0){
+       mkeep = (ir+1)/keep-1;
+       thetaDraw.slice(mkeep)      = theta_temp;
+       tauDraw.slice(mkeep)        = tauis;
+       MUDraw.row(mkeep)           = trans(vectorise(MU,0));
+       deltaDraw.row(mkeep)        = trans(delta);
+       SIGMADraw.slice(mkeep)      = SIGMA;
+       loglike(mkeep)              = sum(ll_olds);
+       logpost(mkeep)              = sum(ll_olds)+sum(lp_olds);
+       rrate(mkeep)                = currentRR;
+       tau_pr_draw.col(mkeep)        = tau_prs;
+       pricescreenPriorDraw(mkeep,0) = pr_mean;
+       pricescreenPriorDraw(mkeep,1) = pr_sd;
+       loglikeM.col(mkeep) =ll_olds;
+     }
+     
+     // display progress  ..................
+     if((ir+1)%progressinterval==0){
+       infoMcmcTimerRRLL(ir,R,currentRR,sum(ll_olds));
+     }
+     
+   }
+   endMcmcTimer();
+   
+   //return draws  ..................
+   return List::create(
+     Named("thetaDraw")      = thetaDraw,
+     Named("MUDraw")         = MUDraw,
+     Named("SIGMADraw")      = SIGMADraw,
+     Named("tauDraw")        = tauDraw,
+     Named("deltaDraw")      = deltaDraw,
+     Named("tau_pr_draw")    = tau_pr_draw,
+     Named("prscreenMuSigDraw")  = pricescreenPriorDraw,
+     Named("loglike")        = loglike,
+     Named("loglikeM")       = loglikeM,
+     Named("logpost")        = logpost,
+     Named("reject")         = rrate,
+     Named("RRs")            = stay_total/R);
+ }
 
 
  // [[Rcpp::export]]
@@ -4155,7 +5281,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    vec ll_olds(N);
 #pragma omp parallel for schedule(static)
    for(int n=0; n<N; n++){
-     ll_olds(n)= vdlsrpr(
+     ll_olds(n)= vdl_srpr_n(
        Theta.col(n),
        tauis.col(n),
        tau_prs(n),
@@ -4213,7 +5339,86 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
  }
 
 
-
+ // [[Rcpp::export]]
+ vec vdsrpreLL(mat const&Theta,
+              imat const&tauis,
+              vec const&tau_prs,
+              vec const& XX, 
+              vec const& PP,
+              mat const& AA,
+              mat const& AAf,
+              uvec const& nalts,
+              vec const& sumpxs,  
+              ivec const& ntasks,  
+              ivec const& xfr,  
+              ivec const& xto,  
+              ivec const& lfr,  
+              ivec const& lto,
+              int p, int N, int cores=1){
+   
+   omp_set_num_threads(cores);
+   
+   vec ll_olds(N);
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     ll_olds(n)= vdl_srpr_e(
+       Theta.col(n),
+       tauis.col(n),
+       tau_prs(n),
+       nalts(span(lfr(n),lto(n))),
+       sumpxs(span(lfr(n),lto(n))), 
+       XX(span(xfr(n),xto(n))), 
+       PP(span(xfr(n),xto(n))), 
+       AA(span(xfr(n),xto(n)),span::all), 
+       AAf(span(xfr(n),xto(n)),span::all), 
+       ntasks(n), p);
+   }
+   
+   return(ll_olds);
+ }
+ 
+ 
+ // [[Rcpp::export]]
+ mat vdsrpreLLs(cube const&THETAS,
+               icube const&TAUIS,
+               mat const&TAU_PR,
+               vec const& XX, 
+               vec const& PP,
+               mat const& AA,
+               mat const& AAf,
+               uvec const& nalts,
+               vec const& sumpxs,  
+               ivec const& ntasks,  
+               ivec const& xfr,  
+               ivec const& xto,  
+               ivec const& lfr,  
+               ivec const& lto,
+               int p, int N, int cores=1){
+   
+   int R = THETAS.n_slices;
+   mat ll_olds(N,R+1);
+   
+   for(int r=0; r<R; r++){
+     Rcpp::checkUserInterrupt();
+     ll_olds.col(r)= 
+       vdsrpreLL(THETAS.slice(r),
+                TAUIS.slice(r),
+                TAU_PR.col(r),
+                XX, 
+                PP,
+                AA,
+                AAf,
+                nalts,
+                sumpxs,  
+                ntasks,  
+                xfr, xto, lfr, lto,
+                p, N, cores);
+   }
+   
+   return(ll_olds);
+ }
+ 
+ 
 /////////////////////////////////////// 
 // VD Set-Size Compensatory - EV error
 ///////////////////////////////////////
@@ -5335,7 +6540,93 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
    return(XdL);
  }
 
-
+ // ------------- - - - - - - - -
+ //conjunctive volumetric - EV1 error
+ // ------------- - - - - - - - - 
+ 
+ 
+ //[[Rcpp::export]]
+ arma::field<arma::vec> des_ev_dem_vdm_screen(vec const& PP,
+                                              mat const& AA,
+                                              mat const& AAf,
+                                              uvec const& nalts,
+                                              uvec const& tlens,
+                                              ivec const& ntasks,  
+                                              ivec const& xfr,
+                                              ivec const& xto,  
+                                              ivec const& lfr,  
+                                              ivec const& lto,
+                                              cube const& thetaDraw,
+                                              cube const& tauDraw, 
+                                              int cores=1){
+   
+   // vdsr2dem
+   
+   //dimensions
+   int R=thetaDraw.n_slices;
+   int xdim = PP.n_rows;
+   int N = tlens.n_elem;
+   int p = thetaDraw.n_rows;
+   
+   //output init
+   arma::field<arma::vec>XdL(xdim);
+   
+   //start timer
+   startTimer();
+   
+   //resp-level
+   for(int n=0; n<N; n++){
+     infoTimer(n,N);
+     
+     int ntask = tlens(n);
+     int xpick = xfr(n);
+     uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
+     
+     //task-level
+     for(int tt=0; tt<ntask; tt++){
+       Rcpp::checkUserInterrupt();
+       
+       int nalt = nalts_i(tt);
+       
+       //temp storage
+       mat demcontainer(nalt,R, fill::zeros);
+       
+       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
+       
+       //draw-level
+       omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+       for (int ir = 0; ir <R; ++ir){
+         
+         //paras
+         arma::vec theta = thetaDraw.slice(ir).col(n);
+         arma::vec beta  = theta(arma::span(0,p-4));
+         double sigma    = exp(theta(p-3));
+         double gamma    = exp(theta(p-2));
+         double E        = exp(theta(p-1));
+         arma::vec taui  = tauDraw.slice(ir).col(n);
+         
+         //compute psi
+         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
+           revd0(nalt, sigma)); 
+         
+         //screen
+         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
+         
+         //find opt demand
+         arma::vec dem = vd_demand(psi, gamma, E, prcs);
+         demcontainer.col(ir)=dem;
+       }
+       
+       for(int k=0; k<nalt; k++){
+         XdL(k+xpick)=trans(demcontainer.row(k));
+       }  
+       xpick+=nalt;
+     }
+     
+   }
+   return(XdL);
+ }
 
 // ------------- - - - - - - - -
 // conjunctive volumetric - error argument
@@ -5513,7 +6804,95 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
    }
    return(XdL);
  }
-
+ // ------------- - - - - - - - -
+ // conjunctive volumetric - EV1 error
+ // ------------- - - - - - - - - 
+ // screening includes screening on price tags
+ 
+ 
+ //[[Rcpp::export]]
+ arma::field<arma::vec> des_ev_dem_vdm_screenpr(vec const& PP,
+                                                mat const& AA,
+                                                mat const& AAf,
+                                                uvec const& nalts,
+                                                uvec const& tlens,
+                                                ivec const& ntasks,  
+                                                ivec const& xfr,
+                                                ivec const& xto,  
+                                                ivec const& lfr,  
+                                                ivec const& lto,
+                                                cube const& thetaDraw,
+                                                cube const& tauDraw, 
+                                                mat const& tau_pr_Draw,
+                                                int cores=1){
+   
+   //dimensions
+   int R=thetaDraw.n_slices;
+   int xdim = PP.n_rows;
+   int N = tlens.n_elem;
+   int p = thetaDraw.n_rows;
+   
+   //output init
+   arma::field<arma::vec>XdL(xdim);
+   
+   //start timer
+   startTimer();
+   
+   //resp-level
+   for(int n=0; n<N; n++){
+     infoTimer(n,N);
+     
+     int ntask = tlens(n);
+     int xpick = xfr(n);
+     uvec const& nalts_i=nalts.subvec(lfr(n),lto(n));
+     
+     //task-level
+     for(int tt=0; tt<ntask; tt++){
+       Rcpp::checkUserInterrupt();
+       
+       int nalt = nalts_i(tt);
+       
+       //temp storage
+       mat demcontainer(nalt,R, fill::zeros);
+       
+       arma::vec prcs= PP(span(xpick,xpick+nalt-1));
+       
+       //draw-level
+       omp_set_num_threads(cores);
+#pragma omp parallel for schedule(static)
+       for (int ir = 0; ir <R; ++ir){
+         
+         //paras
+         arma::vec theta = thetaDraw.slice(ir).col(n);
+         arma::vec beta  = theta(arma::span(0,p-4));
+         double gamma    = exp(theta(p-2));
+         double E        = exp(theta(p-1));
+         double sigma    = exp(theta(p-3));
+         arma::vec taui  = tauDraw.slice(ir).col(n);
+         
+         //compute psi
+         arma::vec psi = exp(AA(span(xpick,xpick+nalt-1),span::all)*beta +
+           revd0(nalt, sigma));
+         
+         //screen
+         psi.elem(find((AAf(span(xpick,xpick+nalt-1),span::all)*taui)>0.01))*=0;
+         psi.elem(find((prcs>exp(  tau_pr_Draw(n,ir)  ))))*=0;
+         
+         //find opt demand
+         arma::vec dem = vd_demand(psi, gamma, E, prcs);
+         demcontainer.col(ir)=dem;
+       }
+       
+       for(int k=0; k<nalt; k++){
+         XdL(k+xpick)=trans(demcontainer.row(k));
+       }   
+       xpick+=nalt;
+     }
+     
+   }
+   return(XdL);
+ }
+ 
 // ------------- - - - - - - - -
 // conjunctive volumetric - error argument
 // ------------- - - - - - - - - 

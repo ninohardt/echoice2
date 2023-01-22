@@ -2,13 +2,13 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_dem_vdm}
 \alias{vd_dem_vdm}
-\title{Demand Prediction (Volumetric demand, EV1 errors)}
+\title{Demand Prediction (Volumetric Demand Model)}
 \usage{
 vd_dem_vdm(
   vd,
   est,
   epsilon_not = NULL,
-  error_dist = "EV1",
+  error_dist = NULL,
   tidy = TRUE,
   cores = NULL
 )
@@ -20,11 +20,11 @@ vd_dem_vdm(
 
 \item{epsilon_not}{(optional) error realizations}
 
-\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal'}
+\item{error_dist}{(optional) A string defining the error term distribution (default: 'EV1')}
 
-\item{tidy}{apply 'echoice2' tidier}
+\item{tidy}{(optional) apply 'echoice2' tidier (default: TRUE)}
 
-\item{cores}{(optional) cores}
+\item{cores}{(optional) cores (default: auto-detect)}
 }
 \value{
 Draws of expected demand
@@ -33,7 +33,18 @@ Draws of expected demand
 Generating demand predictions for volumetric demand model.
 Reminder: there is no closed-form solution for demand, thus we need to integrate not only over the posterior distribution of parameters and the error distribution.
 The function outputs a tibble containing id, task, alt, p, attributes, draws from the posterior of demand.
-Eerror realisations can be pre-supplied to the \code{epsilon_not}. This helps create smooth demand curves or conduct optimization.
+Error realizations can be pre-supplied to the \code{epsilon_not}. This helps create smooth demand curves or conduct optimization.
+}
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=100, keep=1)
+#Generate demand predictions
+icecream_predicted_demand=
+ icecream \%>\% dplyr::filter(id<100) \%>\%   
+   vd_dem_vdm(icecream_est)
+#column .demdraws contains draws from posterior of predicted demand
+
 }
 \seealso{
 \code{\link[=prep_newprediction]{prep_newprediction()}} to match \code{vd}'s factor levels,

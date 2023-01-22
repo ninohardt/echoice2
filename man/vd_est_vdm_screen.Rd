@@ -23,9 +23,9 @@ vd_est_vdm_screen(
 
 \item{cores}{no of CPU cores to use (default: auto-detect)}
 
-\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal'}
+\item{error_dist}{A string defining the error term distribution, 'EV1' or 'Normal' (default: 'EV1')}
 
-\item{price_screen}{A logical, indicating whether price tag screening should be estimated}
+\item{price_screen}{A logical, indicating whether price tag screening should be estimated (default: TRUE)}
 
 \item{control}{list containing additional settings}
 }

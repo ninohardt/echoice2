@@ -12,9 +12,14 @@ prep_newprediction(data_new, data_old)
 \item{data_old}{Old long-format choice data}
 }
 \value{
-data_new (adjusted)
+long-format choice data
 }
 \description{
 Makes sure the factor levels in \code{data_new} are aligned with \code{data_old}
 This is helpful for demand simulations.
+}
+\examples{
+data(icecream)
+prep_newprediction(icecream, icecream)
+
 }
