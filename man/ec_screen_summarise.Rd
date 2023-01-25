@@ -18,3 +18,15 @@ Summary of screening probabilities
 Adds summaries of posterior draws of demand to tibble.
 (using the new demand draw format)
 }
+\examples{
+data(icecream)
+icecream_est <- icecream \%>\% vd_est_vdm_screen(R=150,  price_screen=TRUE)
+#consideration set by respondent
+cons_ss <- 
+ec_screenprob_sr(icecream, icecream_est) \%>\%
+group_by(id, task)  \%>\%
+  summarise(.screendraws=list(purrr::reduce(.screendraws ,`+`))) \%>\%
+  ec_screen_summarise() \%>\%
+  group_by(id) \%>\%
+  summarise(n_screen=mean(`E(screening)`))
+}

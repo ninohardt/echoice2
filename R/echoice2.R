@@ -136,6 +136,8 @@ NULL
 #' @importFrom purrr map_dbl
 NULL
 
+#' @importFrom purrr reduce
+NULL
 
 
 #' @importFrom tidyselect any_of
@@ -1801,8 +1803,11 @@ vd_dem_vdm=function(vd,
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
+  # attributes(vd)$ec_model   <- attributes(est)$ec_model
+  attributes(vd)$model <- list(ec_type=est$ec_type,
+                               ec_type_short=est$ec_type_short,
+                               error_specification=est$error_specification)
+    
   return(vd)
 }
 
@@ -2002,8 +2007,10 @@ vd_dem_vdm_screen=function(vd,
   attributes(vd)$attr_names <- 
     vd %>% colnames %>% setdiff(c("id","task","alt","x","p")) %>% 
       str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
+
+  attributes(vd)$model <- list(ec_type=est$ec_type,
+                               ec_type_short=est$ec_type_short,
+                               error_specification=est$error_specification)
   return(vd)
 }
 
@@ -2133,8 +2140,9 @@ vd_dem_vdm_ss=function(vd,
   
   #add attributes
   attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(vd)$ec_model   <- attributes(est)$ec_model
-  
+  attributes(vd)$model <- list(ec_type=est$ec_type,
+                               ec_type_short=est$ec_type_short,
+                               error_specification=est$error_specification)
   return(vd)
 }
 
@@ -2885,8 +2893,18 @@ dd_prob_srpr=function(dd,
 #'
 #'
 #' @param de demand draws
-#' 
 #' @return est
+#' 
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #add prodid
+#' icecream_predicted_demand_w_id<-icecream_predicted_demand %>% vd_add_prodid
 #' 
 #' @export
 vd_add_prodid<-function(de){
@@ -2927,8 +2945,18 @@ ec_named_group_split <- function(.tbl, ...) {
 #'
 #' @param de demand draws
 #' @param groupby groupby grouping variables (as (vector of) string(s))
-#' 
 #' @return Aggregated demand predictions
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #aggregate
+#' brand_lvl_pred_demand <-
+#'  icecream_predicted_demand %>% ec_dem_aggregate("Brand")
 #' 
 #' @export
 ec_dem_aggregate = function(de, groupby){
@@ -2949,8 +2977,22 @@ ec_dem_aggregate = function(de, groupby){
 #'
 #' @param de demand draws
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
-#' 
 #' @return Summary of demand predictions
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #aggregate
+#' brand_lvl_pred_demand <-
+#'  icecream_predicted_demand %>% ec_dem_aggregate("Brand")
+#' #summarise
+#' brand_lvl_pred_demand %>% ec_dem_summarise()
+#' 
+#' 
 #' @importFrom rlang :=
 #' @export
 ec_dem_summarise = function(de, quantiles=c(.05,.95)){
@@ -2977,8 +3019,18 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #'
 #' @param sc tibble containing screening draws in .screendraws  
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
-#' 
 #' @return Summary of screening probabilities
+#' @examples
+#' data(icecream)
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150,  price_screen=TRUE)
+#' #consideration set by respondent
+#' cons_ss <- 
+#' ec_screenprob_sr(icecream, icecream_est) %>%
+#' group_by(id, task)  %>%
+#'   summarise(.screendraws=list(purrr::reduce(.screendraws ,`+`))) %>%
+#'   ec_screen_summarise() %>%
+#'   group_by(id) %>%
+#'   summarise(n_screen=mean(`E(screening)`))
 #' @importFrom rlang :=
 #' @export
 ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
@@ -2995,6 +3047,7 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 }
 
 
+
 #' Summarize posterior draws of demand (volumetric models only)
 #'
 #' Adds summaries of posterior draws of demand to tibble.
@@ -3003,8 +3056,21 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 #'
 #' @param de demand draws
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
-#' 
 #' @return Summary of demand predictions
+#' @examples
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #aggregate
+#' brand_lvl_pred_demand <-
+#'  icecream_predicted_demand %>% ec_dem_aggregate("Brand")
+#' #summarise
+#' brand_lvl_pred_demand %>% vd_dem_summarise()
+#' 
 #' @importFrom rlang :=
 #' @export
 vd_dem_summarise = function(de, quantiles=c(.05,.95)){
@@ -3026,11 +3092,6 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
 
 
 
-
-
-
-
-
 #' Evaluate (hold-out) demand predictions
 #'
 #' This function obtains proper posterior fit statistics. 
@@ -3039,22 +3100,31 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
 #'
 #'
 #' @param de demand draws (output from vd_dem_x function)
-#' 
 #' @return Predictive fit statistics (MAE, MSE, RAE, bias, hit-probability)
+#' 
+#' data(icecream)
+#' #run MCMC sampler (use way more than 50 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #Generate demand predictions
+#' icecream_predicted_demand=
+#'  icecream %>% dplyr::filter(id<100) %>%   
+#'    vd_dem_vdm(icecream_est)
+#' #evaluate in-sample fit (note: too few draws for good results)
+#' ec_dem_eval(icecream_predicted_demand)
 #' 
 #' @export
 ec_dem_eval = function(de){
   `%!in%` = Negate(`%in%`)
   
-  is_this_discrete=attributes(de)$ec_model$model_name_full %>% stringr::str_detect('discrete')
+  is_this_discrete=attributes(de)$model$ec_type %>% stringr::str_detect('discrete')
   
   if(is_this_discrete){
     out <- de %>%
-      mutate(.MSE=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
-             .MAE=map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
-             .bias=map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
+      mutate(.MSE=map_dbl(purrr::map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
+             .MAE=map_dbl(purrr::map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
+             .bias=map_dbl(purrr::map2(.demdraws,x,function(draws,x)(draws-x)),mean),
              .R=abs(x-mean(x)),
-             .hp=map_dbl(map2(.demdraws,x,function(draws,x)(draws==x) ),mean)) %>%
+             .hp=map_dbl(purrr::map2(.demdraws,x,function(draws,x)(draws==x) ),mean)) %>%
       summarise(MSE=mean(.$.MSE),
                 MAE=mean(.$.MAE),
                 bias=mean(.$.bias),
@@ -3062,9 +3132,9 @@ ec_dem_eval = function(de){
                 hitrate=mean(.$.hp))
   }else{
     out <- de %>%
-      mutate(.MSE=purrr::map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
-             .MAE=purrr::map_dbl(map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
-             .bias=purrr::map_dbl(map2(.demdraws,x,function(draws,x)(draws-x)),mean),
+      mutate(.MSE=purrr::map_dbl(purrr::map2(.demdraws,x,function(draws,x)(draws-x)^2 ),mean),
+             .MAE=purrr::map_dbl(purrr::map2(.demdraws,x,function(draws,x)abs(draws-x)),mean),
+             .bias=purrr::map_dbl(purrr::map2(.demdraws,x,function(draws,x)(draws-x)),mean),
              .R=abs(x-mean(x))) %>%
       summarise(MSE=mean(.$.MSE),
                 MAE=mean(.$.MAE),
@@ -3274,7 +3344,7 @@ ec_demcurve_cond_dem=function(ec_long,
       dem_temp=
       testmarket_temp %>%
         demfun(est=draws) %>%
-        add_column(.isfocal=focal_product) %>%
+        tibble::add_column(.isfocal=focal_product) %>%
         dplyr::filter(.isfocal)%>% select(-.isfocal) 
       
       demm_split=
@@ -3311,7 +3381,7 @@ ec_demcurve_cond_dem=function(ec_long,
       dem_temp=
         testmarket_temp %>%
         demfun(est=draws) %>%
-        add_column(.isfocal=focal_product) %>%
+        tibble::add_column(.isfocal=focal_product) %>%
         dplyr::filter(.isfocal)%>% select(-.isfocal) 
       
       demm_split=
@@ -3384,10 +3454,6 @@ ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
 
 
 
-
-
-
-
 #' Screening probabilities of choice alternatives
 #'
 #' Obtain draws of screening probabilities of choiec alternatives
@@ -3399,12 +3465,19 @@ ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
 #' @param cores (optional) cores
 #' 
 #' @return Draws of screening probabilities of choice alternatives
-#' 
+#' @examples
+#' data(icecream)
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150,  price_screen=TRUE)
+#' ec_screenprob_sr(icecream, icecream_est) 
 #' 
 #' @export
 ec_screenprob_sr=function(xd,
                           est,
                           cores=NULL){
+  
+  #screening model type "olumetric-conjunctive" or "volumetric-conjunctive-pr"
+  screening_model_type <- est$ec_type
+  with_price_screening <- stringr::str_detect(screening_model_type, "-pr")
   
   #cores  
   if(is.null(cores)){
@@ -3422,7 +3495,23 @@ ec_screenprob_sr=function(xd,
   dat$Af <- xd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
   
   #demand sim
-  
+  if(with_price_screening){
+  out=
+    ec_screenpr_prob_cpp(dat$PP,
+                         dat$AA,
+                         dat$Af,
+                         dat$nalts,
+                         dat$tlens,  
+                         dat$ntasks,  
+                         dat$xfr-1,
+                         dat$xto-1,  
+                         dat$lfr-1,  
+                         dat$lto-1,
+                         est$thetaDraw,
+                         est$tauDraw,
+                         est$tau_pr_draw,
+                         cores=cores)  
+  }else{
   out=
     ec_screen_prob_cpp(dat$PP,
                    dat$AA,
@@ -3437,72 +3526,8 @@ ec_screenprob_sr=function(xd,
                    est$thetaDraw,
                    est$tauDraw, 
                    cores=cores)
-  
-  attributes(out)=NULL
-  
-  #add draws to data tibble
-  xd=as_tibble(xd)
-  xd$.screendraws<-map(out,drop)
-  
-  #add attributes
-  attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(xd)$ec_model   <- attributes(est)$ec_model
-  
-  return(xd)
-}
-
-
-
-#' Screening probabilities of choice alternatives (w/ price)
-#'
-#' Obtain draws of screening probabilities of choiec alternatives
-#'
-#'
-#' @param xd data
-#' @param est ec-model draws 
-#' @param cores (optional) cores
-#' 
-#' @return Draws of screening probabilities of choice alternatives
-#' 
-#' 
-#' @export
-ec_screenprprob_sr=function(xd,
-                            est,
-                            cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
   }
-  message(paste0("Using ",cores," cores"))
   
-  
-  #re-arrange data
-  dat <- 
-    xd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #screening-relevant data
-  dat$Af <- xd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  #demand sim
-  
-  out=
-    ec_screenpr_prob_cpp(dat$PP,
-                     dat$AA,
-                     dat$Af,
-                     dat$nalts,
-                     dat$tlens,  
-                     dat$ntasks,  
-                     dat$xfr-1,
-                     dat$xto-1,  
-                     dat$lfr-1,  
-                     dat$lto-1,
-                     est$thetaDraw,
-                     est$tauDraw,
-                     est$tau_pr_draw,
-                     cores=cores)
-
   attributes(out)=NULL
   
   #add draws to data tibble
@@ -3513,10 +3538,8 @@ ec_screenprprob_sr=function(xd,
   attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
   attributes(xd)$ec_model   <- attributes(est)$ec_model
   
-  
   return(xd)
 }
-
 
 
 

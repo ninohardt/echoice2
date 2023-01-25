@@ -19,3 +19,9 @@ Draws of screening probabilities of choice alternatives
 \description{
 Obtain draws of screening probabilities of choiec alternatives
 }
+\examples{
+data(icecream)
+icecream_est <- icecream \%>\% vd_est_vdm_screen(R=150,  price_screen=TRUE)
+ec_screenprob_sr(icecream, icecream_est) 
+
+}
