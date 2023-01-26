@@ -32,6 +32,23 @@ List containing aggregate demand quantities for each scenario defined by \code{r
 \description{
 This helper function creates demand curves
 }
+\examples{
+data(icecream)
+#run MCMC sampler (use way more than 50 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% 
+vd_est_vdm(R=100, keep=1)
+#demand at different price points
+dem_scenarios<-
+ec_demcurve(icecream\%>\% dplyr::filter(id<100),
+ icecream\%>\% dplyr::filter(id<100) \%>\% pull('Brand')=="Store",
+ c(.75,1,1.25),vd_dem_vdm,icecream_est)
+#optional plot
+# dem_scenarios \%>\% 
+#   do.call('rbind',.) \%>\%
+#   ggplot(aes(x=scenario,y=`E(demand)`,color=Flavor)) + geom_line()
+
+
+}
 \seealso{
 \code{\link[=ec_gen_err_normal]{ec_gen_err_normal()}} to generate error realization from Normal distribution,
 \code{\link[=ec_gen_err_ev1]{ec_gen_err_ev1()}} to generate error realization from EV1 distribution
