@@ -321,7 +321,6 @@ vd_janitor=function(vd,
       `large quantities`=fid_toolittle%>%n_distinct,
       `all 0` = fid_toolittle %>% n_distinct())
   
-  
   #filter and return
   vd = vd %>% dplyr::filter(id %!in% fid_all) 
   attributes(vd)$filter=filter_summary
@@ -1036,7 +1035,6 @@ vd_est_vdm=
     attributes(out)$Af<-attributes(dat)$Af
     attributes(out)$ec_data<-attributes(dat)$ec_data
 
-    
     #Add training data
     if(control$include_data){
       out$dat=dat
@@ -2448,6 +2446,22 @@ dd_est_hmnl_screen = function(dd,
 
 # Log-Likelihoods for entire datasets -------------------------------------
 
+
+
+#' Log-Likelihood for compensatory hmnl model
+#' 
+#' 
+#' @param draw A list, 'echoice2' draws object
+#' @param dd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @examples
+#' data(icecream_discrete)
+#' #fit model
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=10, keep=1)
+#' #compute likelihood for each subject in each draw
+#' loglls<-dd_LL(icecream_est, icecream_discrete, fromdraw = 2)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @export
 dd_LL <- function(draw, dd, fromdraw=1){
   
   R=dim(draw$thetaDraw)[3]
@@ -2473,10 +2487,23 @@ dd_LL <- function(draw, dd, fromdraw=1){
 }
 
 
-#logll
+#' Log-Likelihood for screening hmnl model
+#' 
+#' 
+#' @param draw A list, 'echoice2' draws object
+#' @param dd A tibble, tidy choice data (before dummy-coding)
+#' @param fromdraw An integer, from which draw onwards to compute LL (i.e., excl. burnin)
+#' @examples
+#' data(icecream_discrete)
+#' #fit model
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl_screen(R=10, keep=1)
+#' #compute likelihood for each subject in each draw
+#' loglls<-dd_LL_sr(icecream_est, icecream_discrete, fromdraw = 2)
+#' @return N x Draws Matrix of log-Likelihood values
+#' @export
 dd_LL_sr <- function(draw, dd, fromdraw=1){
   
-  model_type = draw$ec_type="discrete-conjunctive"
+  model_type = draw$ec_type
   #"discrete-conjunctive" "discrete-conjunctive-pr"
   
   R=dim(draw$thetaDraw)[3]
@@ -2495,6 +2522,7 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
             dat$XX,
             dat$PP,
             dat$AA, 
+            attributes(dat)$Af%>%as.matrix(), 
             dat$nalts, 
             dat$ntasks, 
             dat$xfr-1, dat$xto-1,
@@ -2503,6 +2531,23 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
             ncol(draw$thetaDraw))
   }
   
+  
+  if(model_type=="discrete-conjunctive-pr"){
+    out<- 
+      ddsrprLLs(draw$thetaDraw[,,seq(fromdraw,R)],
+              draw$tauDraw[,,seq(fromdraw,R)],
+              draw$tau_pr_draw[,seq(fromdraw,R)], 
+              dat$XX,
+              dat$PP,
+              dat$AA, 
+              attributes(dat)$Af%>%as.matrix(), 
+              dat$nalts, 
+              dat$ntasks, 
+              dat$xfr-1, dat$xto-1,
+              dat$lfr-1, dat$lto-1, 
+              ncol(draw$MUDraw), 
+              ncol(draw$thetaDraw))
+  }
   return(out) 
 }
 
@@ -2517,17 +2562,24 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
 #' Discrete Choice Predictions (HMNL)
 #'
 #'
-#' @param dd data
-#' @param est est
+#' @param dd tibble with long-format choice data
+#' @param est estimation object
+#' @param prob logical, report probabilities instead of demand
 #' @param cores cores
-#' 
 #' @return Draws of expected choice
+#' 
+#' @examples 
+#' data(icecream_discrete)
+#' icecream_est <- icecream_discrete %>% filter(id<100) %>% dd_est_hmnl(R=100)
+#' #demand prediction
+#' icecream_dempred <- icecream_discrete %>% filter(id<100) %>% dd_dem(icecream_est)
 #' 
 #' @seealso [dd_est_hmnl()] to generate demand predictions based on this model
 #' 
 #' @export
 dd_dem=function(dd,
                 est,
+                prob=FALSE,
                 cores=NULL){
   
   #cores  
@@ -2544,6 +2596,20 @@ dd_dem=function(dd,
   
   
   #demand sim
+  if(prob){
+  out=
+    ddprob( dat$PP,
+            dat$AA,
+            dat$nalts,
+            dat$tlens,
+            dat$ntasks,  
+            dat$xfr-1,
+            dat$xto-1,  
+            dat$lfr-1,
+            dat$lto-1,
+            est$thetaDraw,
+            cores=cores)    
+  }else{
   out=
     dddem( dat$PP,
            dat$AA,
@@ -2556,65 +2622,7 @@ dd_dem=function(dd,
            dat$lto-1,
            est$thetaDraw,
            cores=cores)
-  
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  dd=as_tibble(dd)
-  dd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
-  
-  return(dd)
-}
-
-
-
-
-
-#' Discrete Choice Probabilities (HMNL)
-#'
-#'
-#' @param dd data
-#' @param est est
-#' @param cores cores
-#' 
-#' @return Draws of choice probabilities
-#' 
-#' @seealso [dd_est_hmnl()] to generate demand predictions based on this model
-#' 
-#' @export
-dd_prob=function(dd,
-                est,
-                cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
   }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #demand sim
-  out=
-    ddprob( dat$PP,
-           dat$AA,
-           dat$nalts,
-           dat$tlens,
-           dat$ntasks,  
-           dat$xfr-1,
-           dat$xto-1,  
-           dat$lfr-1,
-           dat$lto-1,
-           est$thetaDraw,
-           cores=cores)
   
   attributes(out)=NULL
   #add draws to data tibble
@@ -2623,10 +2631,15 @@ dd_prob=function(dd,
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
+  # attributes(dd)$ec_model   <- attributes(est)$ec_model
+  attributes(dd)$model <- list(ec_type=est$ec_type,
+                               ec_type_short=est$ec_type_short,
+                               error_specification=est$error_specification)
   
   return(dd)
 }
+
+
 
 
 
@@ -2636,16 +2649,26 @@ dd_prob=function(dd,
 #'
 #' @param dd data
 #' @param est est
+#' @param prob logical, report probabilities instead of demand
 #' @param cores cores
-#' 
 #' @return Draws of expected choice
+#' 
+#' @examples 
+#' data(icecream_discrete)
+#' icecream_est <- icecream_discrete %>% filter(id<100) %>% dd_est_hmnl_screen(R=100)
+#' #demand prediction
+#' icecream_dempred <- icecream_discrete %>% filter(id<100) %>% dd_dem_sr(icecream_est)
 #' 
 #' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
 #' 
 #' @export
 dd_dem_sr=function(dd,
                    est,
+                   prob=FALSE,
                    cores=NULL){
+  
+  #screening model type
+  screening_model_type <- est$ec_type 
   
   #cores  
   if(is.null(cores)){
@@ -2662,21 +2685,77 @@ dd_dem_sr=function(dd,
   #screening-relevant data
   dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
   
-  #demand sim
-  out=
-    ddsrdem(dat$PP,
-             dat$AA,
-             dat$Af,
-             dat$nalts,
-             dat$tlens,  
-             dat$ntasks,  
-             dat$xfr-1,
-             dat$xto-1,  
-             dat$lfr-1,  
-             dat$lto-1,
-             est$thetaDraw,
-             est$tauDraw, 
-             cores=cores)
+  if(screening_model_type=="discrete-conjunctive"){
+    if(prob){
+      out=
+        ddsrprob(dat$PP,
+                 dat$AA,
+                 dat$Af,
+                 dat$nalts,
+                 dat$tlens,  
+                 dat$ntasks,  
+                 dat$xfr-1,
+                 dat$xto-1,  
+                 dat$lfr-1,  
+                 dat$lto-1,
+                 est$thetaDraw,
+                 est$tauDraw, 
+                 cores=cores)      
+    }else{
+      out=
+        ddsrdem(dat$PP,
+                dat$AA,
+                dat$Af,
+                dat$nalts,
+                dat$tlens,  
+                dat$ntasks,  
+                dat$xfr-1,
+                dat$xto-1,  
+                dat$lfr-1,  
+                dat$lto-1,
+                est$thetaDraw,
+                est$tauDraw, 
+                cores=cores)
+    }
+    
+  }
+  
+  
+  if(screening_model_type=="discrete-conjunctive-pr"){
+    if(prob){
+      out=
+        ddsrprprob(dat$PP,
+                   dat$AA,
+                   dat$Af,
+                   dat$nalts,
+                   dat$tlens,  
+                   dat$ntasks,  
+                   dat$xfr-1,
+                   dat$xto-1,  
+                   dat$lfr-1,  
+                   dat$lto-1,
+                   est$thetaDraw,
+                   est$tauDraw, 
+                   est$tau_pr_draw,
+                   cores=cores)    
+    }else{
+      out=
+        ddsrprdem(dat$PP,
+                  dat$AA,
+                  dat$Af,
+                  dat$nalts,
+                  dat$tlens,  
+                  dat$ntasks,  
+                  dat$xfr-1,
+                  dat$xto-1,  
+                  dat$lfr-1,  
+                  dat$lto-1,
+                  est$thetaDraw,
+                  est$tauDraw, 
+                  est$tau_pr_draw,
+                  cores=cores)
+    }
+  }
   
   
   attributes(out)=NULL
@@ -2686,197 +2765,13 @@ dd_dem_sr=function(dd,
   
   #add attributes
   attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
-  
+  # attributes(dd)$ec_model   <- attributes(est)$ec_model
+  attributes(dd)$model <- list(ec_type=est$ec_type,
+                               ec_type_short=est$ec_type_short,
+                               error_specification=est$error_specification)
   return(dd)
 }
 
-
-#' Discrete Choice Probabilities (HMNL with attribute-based screening)
-#'
-#'
-#' @param dd data
-#' @param est est
-#' @param cores cores
-#' 
-#' @return Draws of expected choice
-#' 
-#' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
-#' 
-#' @export
-dd_prob_sr=function(dd,
-                   est,
-                   cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #screening-relevant data
-  dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  #demand sim
-  out=
-    ddsrprob(dat$PP,
-            dat$AA,
-            dat$Af,
-            dat$nalts,
-            dat$tlens,  
-            dat$ntasks,  
-            dat$xfr-1,
-            dat$xto-1,  
-            dat$lfr-1,  
-            dat$lto-1,
-            est$thetaDraw,
-            est$tauDraw, 
-            cores=cores)
-  
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  dd=as_tibble(dd)
-  dd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
-  
-  return(dd)
-}
-
-
-
-
-#' Discrete Choice Predictions (HMNL with attribute-based screening w/price)
-#'
-#'
-#' @param dd data
-#' @param est est
-#' @param cores cores
-#' 
-#' @return Draws of expected choice
-#' 
-#' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
-#' 
-#' @export
-dd_dem_srpr=function(dd,
-                   est,
-                   cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #screening-relevant data
-  dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  #demand sim
-  out=
-    ddsrprdem(dat$PP,
-              dat$AA,
-              dat$Af,
-              dat$nalts,
-              dat$tlens,  
-              dat$ntasks,  
-              dat$xfr-1,
-              dat$xto-1,  
-              dat$lfr-1,  
-              dat$lto-1,
-              est$thetaDraw,
-              est$tauDraw, 
-              est$tau_pr_draw,
-              cores=cores)
-  
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  dd=as_tibble(dd)
-  dd$.demdraws<-map(out,drop)   
-  
-  #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
-  
-  return(dd)
-}
-
-
-#' Discrete Choice Probabilities (HMNL with attribute-based screening w/ price)
-#'
-#'
-#' @param dd data
-#' @param est est
-#' @param cores cores
-#' 
-#' @return Draws of expected choice
-#' 
-#' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
-#' 
-#' @export
-dd_prob_srpr=function(dd,
-                    est,
-                    cores=NULL){
-  
-  #cores  
-  if(is.null(cores)){
-    cores=parallel::detectCores(logical=FALSE)
-  }
-  message(paste0("Using ",cores," cores"))
-  
-  
-  #re-arrange data
-  dat <- 
-    dd %>% 
-    vd_long_tidy %>% vd_prepare_nox()
-  
-  #screening-relevant data
-  dat$Af <- dd %>% vd_long_tidy %>%attributes() %>% `[[`('Af') %>% as.matrix()
-  
-  #demand sim
-  out=
-    ddsrprprob(dat$PP,
-               dat$AA,
-               dat$Af,
-               dat$nalts,
-               dat$tlens,  
-               dat$ntasks,  
-               dat$xfr-1,
-               dat$xto-1,  
-               dat$lfr-1,  
-               dat$lto-1,
-               est$thetaDraw,
-               est$tauDraw, 
-               est$tau_pr_draw,
-               cores=cores)
-  
-  
-  attributes(out)=NULL
-  #add draws to data tibble
-  dd=as_tibble(dd)
-  dd$.demdraws<-map(out,drop)  
-  
-  #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
-  attributes(dd)$ec_model   <- attributes(est)$ec_model
-  
-  return(dd)
-}
 
 
 
@@ -3325,13 +3220,13 @@ ec_demcurve_inci=function(ec_long,
 #' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% 
+#' #run MCMC sampler (use way more draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% 
 #' vd_est_vdm(R=4, keep=1)
 #' #demand at different price points
 #' conddem_scenarios<-
-#' ec_demcurve_cond_dem(icecream%>% dplyr::filter(id<50),
-#'  icecream%>% dplyr::filter(id<50) %>% pull('Brand')=="Store",
+#' ec_demcurve_cond_dem(icecream%>% dplyr::filter(id<20),
+#'  icecream%>% dplyr::filter(id<20) %>% pull('Brand')=="Store",
 #'  c(.75,1,1.25),vd_dem_vdm,icecream_est)
 #' 
 #' 

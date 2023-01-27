@@ -4,12 +4,14 @@
 \alias{dd_dem}
 \title{Discrete Choice Predictions (HMNL)}
 \usage{
-dd_dem(dd, est, cores = NULL)
+dd_dem(dd, est, prob = FALSE, cores = NULL)
 }
 \arguments{
-\item{dd}{data}
+\item{dd}{tibble with long-format choice data}
 
-\item{est}{est}
+\item{est}{estimation object}
+
+\item{prob}{logical, report probabilities instead of demand}
 
 \item{cores}{cores}
 }
@@ -18,6 +20,13 @@ Draws of expected choice
 }
 \description{
 Discrete Choice Predictions (HMNL)
+}
+\examples{
+data(icecream_discrete)
+icecream_est <- icecream_discrete \%>\% filter(id<100) \%>\% dd_est_hmnl(R=100)
+#demand prediction
+icecream_dempred <- icecream_discrete \%>\% filter(id<100) \%>\% dd_dem(icecream_est)
+
 }
 \seealso{
 \code{\link[=dd_est_hmnl]{dd_est_hmnl()}} to generate demand predictions based on this model

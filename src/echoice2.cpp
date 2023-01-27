@@ -1224,7 +1224,87 @@ vec ddsrLL(mat const& Theta,
    return(ll);
  }
 
+ 
+ //Log-Likelihood for several respondents and draws for DD conjunctive screening model
+ vec ddsrprLL(mat const& Theta,
+            imat const& tauis,
+            vec const& tau_prs,
+            vec const& XX, 
+            vec const& PP,
+            mat const& AA,
+            mat const& AAf,
+            uvec const& nalts,
+            ivec const& ntasks,  
+            ivec const& xfr,  
+            ivec const& xto,  
+            ivec const& lfr,  
+            ivec const& lto,
+            int p, int N, int cores=1){
+   
+   omp_set_num_threads(cores);
+   
+   vec ll_olds(N);
+#pragma omp parallel for schedule(static)
+   for(int n=0; n<N; n++){
+     ll_olds(n)= 
+       ddlsrpr(Theta.col(n),
+             tauis.col(n),
+             tau_prs(n),
+             nalts(span(lfr(n),lto(n))),
+             XX(span(xfr(n),xto(n))), 
+             PP(span(xfr(n),xto(n))), 
+             AA(span(xfr(n),xto(n)),span::all),
+             AAf(span(xfr(n),xto(n)),span::all), 
+             ntasks(n), p);
+   }
+   
+   return(ll_olds);
+ }
+ 
+ 
 
+ // [[Rcpp::export]]
+ mat ddsrprLLs(cube const&THETAS,
+             icube const&TAUIS,
+             mat const&TAU_PR,
+             vec const& XX, 
+             vec const& PP,
+             mat const& AA,
+             mat const& AAf,
+             uvec const& nalts,
+             ivec const& ntasks,  
+             ivec const& xfr,  
+             ivec const& xto,  
+             ivec const& lfr,  
+             ivec const& lto,
+             int p, int N, int cores=1){
+   
+   int R = THETAS.n_slices;
+   mat ll_olds(N,R+1);
+   
+   for(int r=0; r<R; r++){
+     Rcpp::checkUserInterrupt();
+     ll_olds.col(r)= 
+       ddsrprLL(THETAS.slice(r),
+              TAUIS.slice(r),
+              TAU_PR.col(r),
+              XX, 
+              PP,
+              AA,
+              AAf,
+              nalts,
+              ntasks,  
+              xfr,  
+              xto,  
+              lfr,  
+              lto,
+              p,
+              N, cores);
+   }
+   
+   return(ll_olds);
+ }
+ 
 
 
 void draw_ddsrpr_RWMH( arma::vec& ll_olds,       // vector of current log-likelihoods

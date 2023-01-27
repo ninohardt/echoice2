@@ -4,12 +4,14 @@
 \alias{dd_dem_sr}
 \title{Discrete Choice Predictions (HMNL with attribute-based screening)}
 \usage{
-dd_dem_sr(dd, est, cores = NULL)
+dd_dem_sr(dd, est, prob = FALSE, cores = NULL)
 }
 \arguments{
 \item{dd}{data}
 
 \item{est}{est}
+
+\item{prob}{logical, report probabilities instead of demand}
 
 \item{cores}{cores}
 }
@@ -18,6 +20,13 @@ Draws of expected choice
 }
 \description{
 Discrete Choice Predictions (HMNL with attribute-based screening)
+}
+\examples{
+data(icecream_discrete)
+icecream_est <- icecream_discrete \%>\% filter(id<100) \%>\% dd_est_hmnl_screen(R=100)
+#demand prediction
+icecream_dempred <- icecream_discrete \%>\% filter(id<100) \%>\% dd_dem_sr(icecream_est)
+
 }
 \seealso{
 \code{\link[=dd_est_hmnl_screen]{dd_est_hmnl_screen()}} to generate demand predictions based on this model

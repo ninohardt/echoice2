@@ -259,6 +259,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ddsrprLLs
+mat ddsrprLLs(cube const& THETAS, icube const& TAUIS, mat const& TAU_PR, vec const& XX, vec const& PP, mat const& AA, mat const& AAf, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, int p, int N, int cores);
+RcppExport SEXP _echoice2_ddsrprLLs(SEXP THETASSEXP, SEXP TAUISSEXP, SEXP TAU_PRSEXP, SEXP XXSEXP, SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP pSEXP, SEXP NSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< cube const& >::type THETAS(THETASSEXP);
+    Rcpp::traits::input_parameter< icube const& >::type TAUIS(TAUISSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type TAU_PR(TAU_PRSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type XX(XXSEXP);
+    Rcpp::traits::input_parameter< vec const& >::type PP(PPSEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AA(AASEXP);
+    Rcpp::traits::input_parameter< mat const& >::type AAf(AAfSEXP);
+    Rcpp::traits::input_parameter< uvec const& >::type nalts(naltsSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type ntasks(ntasksSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xfr(xfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type xto(xtoSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lfr(lfrSEXP);
+    Rcpp::traits::input_parameter< ivec const& >::type lto(ltoSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ddsrprLLs(THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // loop_ddrspr_RWMH
 List loop_ddrspr_RWMH(vec const& XX, vec const& PP, mat const& AA, mat const& AAf, imat const& tauconst, uvec const& nalts, ivec const& ntasks, ivec const& xfr, ivec const& xto, ivec const& lfr, ivec const& lto, int p, int N, int R, int keep, mat const& Bbar, mat const& A, double nu, mat const& V, int tuneinterval, double steptunestart, int tunelength, int tunestart, int progressinterval, int cores);
 RcppExport SEXP _echoice2_loop_ddrspr_RWMH(SEXP XXSEXP, SEXP PPSEXP, SEXP AASEXP, SEXP AAfSEXP, SEXP tauconstSEXP, SEXP naltsSEXP, SEXP ntasksSEXP, SEXP xfrSEXP, SEXP xtoSEXP, SEXP lfrSEXP, SEXP ltoSEXP, SEXP pSEXP, SEXP NSEXP, SEXP RSEXP, SEXP keepSEXP, SEXP BbarSEXP, SEXP ASEXP, SEXP nuSEXP, SEXP VSEXP, SEXP tuneintervalSEXP, SEXP steptunestartSEXP, SEXP tunelengthSEXP, SEXP tunestartSEXP, SEXP progressintervalSEXP, SEXP coresSEXP) {
@@ -1665,6 +1691,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_echoice2_loop_ddrs_RWMH", (DL_FUNC) &_echoice2_loop_ddrs_RWMH, 25},
     {"_echoice2_ddsrLLs", (DL_FUNC) &_echoice2_ddsrLLs, 15},
     {"_echoice2_ddlsrpr", (DL_FUNC) &_echoice2_ddlsrpr, 10},
+    {"_echoice2_ddsrprLLs", (DL_FUNC) &_echoice2_ddsrprLLs, 16},
     {"_echoice2_loop_ddrspr_RWMH", (DL_FUNC) &_echoice2_loop_ddrspr_RWMH, 25},
     {"_echoice2_dddem", (DL_FUNC) &_echoice2_dddem, 12},
     {"_echoice2_ddsrdem", (DL_FUNC) &_echoice2_ddsrdem, 13},

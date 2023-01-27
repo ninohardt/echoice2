@@ -53,6 +53,10 @@ ddlsrpr <- function(theta, taui, tau_pr, nalts, X, P, A, Afull, ntask, p) {
     .Call('_echoice2_ddlsrpr', PACKAGE = 'echoice2', theta, taui, tau_pr, nalts, X, P, A, Afull, ntask, p)
 }
 
+ddsrprLLs <- function(THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores = 1L) {
+    .Call('_echoice2_ddsrprLLs', PACKAGE = 'echoice2', THETAS, TAUIS, TAU_PR, XX, PP, AA, AAf, nalts, ntasks, xfr, xto, lfr, lto, p, N, cores)
+}
+
 loop_ddrspr_RWMH <- function(XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval = 30L, steptunestart = .5, tunelength = 10000L, tunestart = 500L, progressinterval = 100L, cores = 1L) {
     .Call('_echoice2_loop_ddrspr_RWMH', PACKAGE = 'echoice2', XX, PP, AA, AAf, tauconst, nalts, ntasks, xfr, xto, lfr, lto, p, N, R, keep, Bbar, A, nu, V, tuneinterval, steptunestart, tunelength, tunestart, progressinterval, cores)
 }
