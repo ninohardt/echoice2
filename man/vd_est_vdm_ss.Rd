@@ -30,7 +30,6 @@ vd_est_vdm_ss(
 est ec-draw object (List)
 }
 \description{
-For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
 This model REQUIRES variation in choice-set size
 }
 \examples{

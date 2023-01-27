@@ -1051,7 +1051,6 @@ vd_est_vdm=
 
 #' Estimate volumetric demand model with attribute-based conjunctive screening
 #'
-#' See https://dx.doi.org/10.2139/ssrn.2770025 for more details
 #'
 #'
 #' @param vd volumetric demand data (long format)
@@ -1248,7 +1247,6 @@ vd_est_vdm_screen = function(vd,
 
 #' Estimate volumetric demand model accounting for set size variation (1st order)
 #' 
-#' For more details on the model: https://dx.doi.org/10.2139/ssrn.3418383
 #' This model REQUIRES variation in choice-set size
 #' 
 #'
@@ -2916,6 +2914,7 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' @return Summary of screening probabilities
 #' @examples
+#' \donttest{
 #' data(icecream)
 #' icecream_est <- icecream %>% vd_est_vdm_screen(R=150,  price_screen=TRUE)
 #' #consideration set by respondent
@@ -2926,6 +2925,7 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #'   ec_screen_summarise() %>%
 #'   group_by(id) %>%
 #'   summarise(n_screen=mean(`E(screening)`))
+#'   }
 #' @importFrom rlang :=
 #' @export
 ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
@@ -3219,16 +3219,17 @@ ec_demcurve_inci=function(ec_long,
 #' @param epsilon_not (optional) error realisatins (this helps make curves look smother for voumetric models)
 #' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
 #' @examples
+#' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more draws for actual use)
 #' icecream_est <- icecream %>% dplyr::filter(id<20) %>% 
-#' vd_est_vdm(R=4, keep=1)
+#' vd_est_vdm(R=2, keep=1)
 #' #demand at different price points
 #' conddem_scenarios<-
 #' ec_demcurve_cond_dem(icecream%>% dplyr::filter(id<20),
 #'  icecream%>% dplyr::filter(id<20) %>% pull('Brand')=="Store",
-#'  c(.75,1,1.25),vd_dem_vdm,icecream_est)
-#' 
+#'  c(.75,1),vd_dem_vdm,icecream_est)
+#' }
 #' 
 #' @seealso [ec_gen_err_normal()] to generate error realization from Normal distribution,
 #' [ec_gen_err_ev1()] to generate error realization from EV1 distribution

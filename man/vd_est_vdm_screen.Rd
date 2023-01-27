@@ -33,7 +33,7 @@ vd_est_vdm_screen(
 est ec-draw object (List)
 }
 \description{
-See https://dx.doi.org/10.2139/ssrn.2770025 for more details
+Estimate volumetric demand model with attribute-based conjunctive screening
 }
 \examples{
 data(icecream)

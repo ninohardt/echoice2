@@ -19,6 +19,7 @@ Adds summaries of posterior draws of demand to tibble.
 (using the new demand draw format)
 }
 \examples{
+\donttest{
 data(icecream)
 icecream_est <- icecream \%>\% vd_est_vdm_screen(R=150,  price_screen=TRUE)
 #consideration set by respondent
@@ -29,4 +30,5 @@ group_by(id, task)  \%>\%
   ec_screen_summarise() \%>\%
   group_by(id) \%>\%
   summarise(n_screen=mean(`E(screening)`))
+  }
 }
