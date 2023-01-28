@@ -33,6 +33,7 @@ List containing aggregate demand quantities for each scenario defined by \code{r
 This helper function creates demand curves
 }
 \examples{
+\donttest{
 data(icecream)
 #run MCMC sampler (use way more than 50 draws for actual use)
 icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% 
@@ -42,7 +43,7 @@ inci_scenarios<-
 ec_demcurve_inci(icecream\%>\% dplyr::filter(id<50),
  icecream\%>\% dplyr::filter(id<50) \%>\% pull('Brand')=="Store",
  c(.75,1,1.25),vd_dem_vdm,icecream_est)
-
+}
 }
 \seealso{
 \code{\link[=ec_gen_err_normal]{ec_gen_err_normal()}} to generate error realization from Normal distribution,

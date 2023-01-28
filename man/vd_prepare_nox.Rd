@@ -22,25 +22,17 @@ Note: This function is only exported because it makes it easier to tinker with t
 This function re-arranges choice data for fast access, mainly for demand prediction.
 }
 \examples{
-\dontrun{
 #Minimal example:
 #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
-Af=
- rbinom(12,2,.5) \%>\% factor \%>\% forcats::fct_relabel(~paste0('attr',.x)) \%>\% 
- enframe \%>\% add_column(val=1) \%>\% 
- pivot_wider(names_from = value, values_from=val) \%>\% map_df(replace_na,0) \%>\%
- select(-name) \%>\%
- add_column(  id=c(rep(1L,6),rep(2L,6)),
-              task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-              alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L), .before = 1)
+dt <- structure(list(id = c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 
+                            2L, 2L), 
+                     task = c(1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L), 
+                     alt = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L), 
+                     x = c(1, 0, 2, 1, 0, 1, 2, 3, 1, 1, 0, 1), 
+                     p = c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1), 
+                     attr2 = c(1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0), 
+                     attr1 = c(0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1)), 
+                 class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA,-12L))
+test <- dt \%>\% dplyr::select(-all_of("x")) \%>\% vd_prepare_nox() 
 
-dt=tibble( id=c(rep(1L,6),rep(2L,6)),
-          task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-          alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L),
-          x=c(1,0,2, 1,0,1, 2,3,1, 1,0,1),
-          p=c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1),
-          Af\%>\%select(attr2:attr1))
-
-dt \%>\% dplyr::select(-all_of("x")) \%>\% vd_prepare_nox 
-}
 }

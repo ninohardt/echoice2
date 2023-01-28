@@ -19,8 +19,8 @@ Generate Screening probability traceplots
 }
 \examples{
 data(icecream)
-#run MCMC sampler (use way more than 50 draws for actual use
-icecream_scr_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm_screen(R=100)
+#run MCMC sampler (use way more than 20 draws for actual use
+icecream_scr_est <- icecream \%>\% dplyr::filter(id<20) \%>\% vd_est_vdm_screen(R=20)
 ec_trace_screen(icecream_scr_est, burnin=1)
 
 

@@ -23,9 +23,9 @@ Discrete Choice Predictions (HMNL with attribute-based screening)
 }
 \examples{
 data(icecream_discrete)
-icecream_est <- icecream_discrete \%>\% filter(id<100) \%>\% dd_est_hmnl_screen(R=100)
+icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% dd_est_hmnl_screen(R=10)
 #demand prediction
-icecream_dempred <- icecream_discrete \%>\% filter(id<100) \%>\% dd_dem_sr(icecream_est)
+icecream_dempred <- icecream_discrete \%>\% filter(id<20) \%>\% dd_dem_sr(icecream_est)
 
 }
 \seealso{

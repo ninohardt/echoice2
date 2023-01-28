@@ -19,18 +19,19 @@ Adds summaries of posterior draws of demand to tibble.
 (using the new demand draw format)
 }
 \examples{
+\donttest{
 data(icecream)
-#run MCMC sampler (use way more than 50 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=100, keep=1)
+#run MCMC sampler (use way more than 10 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<10) \%>\% vd_est_vdm(R=10, keep=1)
 #Generate demand predictions
 icecream_predicted_demand=
- icecream \%>\% dplyr::filter(id<100) \%>\%   
+ icecream \%>\% dplyr::filter(id<10) \%>\%   
    vd_dem_vdm(icecream_est)
 #aggregate
 brand_lvl_pred_demand <-
  icecream_predicted_demand \%>\% ec_dem_aggregate("Brand")
 #summarise
 brand_lvl_pred_demand \%>\% ec_dem_summarise()
-
+}
 
 }

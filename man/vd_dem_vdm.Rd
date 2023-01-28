@@ -37,11 +37,11 @@ Error realizations can be pre-supplied to the \code{epsilon_not}. This helps cre
 }
 \examples{
 data(icecream)
-#run MCMC sampler (use way more than 50 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=100, keep=1)
+#run MCMC sampler (use way more than 10 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm(R=10, keep=1)
 #Generate demand predictions
 icecream_predicted_demand=
- icecream \%>\% dplyr::filter(id<100) \%>\%   
+ icecream \%>\% dplyr::filter(id<50) \%>\%   
    vd_dem_vdm(icecream_est)
 #column .demdraws contains draws from posterior of predicted demand
 

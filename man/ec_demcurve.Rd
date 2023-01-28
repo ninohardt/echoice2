@@ -33,6 +33,7 @@ List containing aggregate demand quantities for each scenario defined by \code{r
 This helper function creates demand curves
 }
 \examples{
+\donttest{
 data(icecream)
 #run MCMC sampler (use way more than 50 draws for actual use)
 icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% 
@@ -46,7 +47,7 @@ ec_demcurve(icecream\%>\% dplyr::filter(id<100),
 # dem_scenarios \%>\% 
 #   do.call('rbind',.) \%>\%
 #   ggplot(aes(x=scenario,y=`E(demand)`,color=Flavor)) + geom_line()
-
+}
 
 }
 \seealso{

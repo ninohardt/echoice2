@@ -118,6 +118,8 @@ NULL
 #' @importFrom stringr str_extract
 NULL
 
+#' @importFrom forcats fct_relabel
+NULL
 
 
 
@@ -125,6 +127,9 @@ NULL
 NULL
 
 #' @importFrom purrr map_dfr
+NULL
+
+#' @importFrom purrr map_df
 NULL
 
 #' @importFrom purrr imap_dfr
@@ -462,29 +467,19 @@ vd_long_tidy<-function(longdata){
 #' @return list containing information for estimation functions
 #'
 #' @examples
-#' \dontrun{
-#' #Minimal example:
-#' #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
-#'Af=
-#'  rbinom(12,2,.5) %>% factor %>% forcats::fct_relabel(~paste0('attr',.x)) %>% 
-#'  enframe %>% add_column(val=1) %>% 
-#'  pivot_wider(names_from = value, values_from=val) %>% map_df(replace_na,0) %>%
-#'  select(-name) %>%
-#'  add_column(  id=c(rep(1L,6),rep(2L,6)),
-#'               task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-#'               alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L), .before = 1)
-#'
-#Choice data
-#'dt=tibble( id=c(rep(1L,6),rep(2L,6)),
-#'           task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-#'           alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L),
-#'           x=c(1,0,2, 1,0,1, 2,3,1, 1,0,1),
-#'           p=c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1),
-#'           Af%>%select(attr2:attr1))
+#' #minimal data example
+#' dt <- structure(list(id = c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 
+#'                             2L, 2L), 
+#'                      task = c(1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L), 
+#'                      alt = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L), 
+#'                      x = c(1, 0, 2, 1, 0, 1, 2, 3, 1, 1, 0, 1), 
+#'                      p = c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1), 
+#'                      attr2 = c(1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0), 
+#'                      attr1 = c(0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1)), 
+#'                  class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA,-12L))
+#' #run prep function
+#' test <- dt %>% vd_prepare 
 #' 
-#' dt %>% vd_prepare 
-#' dt %>% vd_prepare(Af) #with data for attribute-based screening
-#' }
 #' @export
 vd_prepare <- function(dt, Af=NULL){
   
@@ -579,28 +574,19 @@ vd_prepare <- function(dt, Af=NULL){
 #' @return list containing information for prediction functions
 #'
 #' @examples
-#' \dontrun{
 #' #Minimal example:
 #' #One attribute with 3 levels, 2 subjects, 3 alternatives, 2 tasks
-#'Af=
-#'  rbinom(12,2,.5) %>% factor %>% forcats::fct_relabel(~paste0('attr',.x)) %>% 
-#'  enframe %>% add_column(val=1) %>% 
-#'  pivot_wider(names_from = value, values_from=val) %>% map_df(replace_na,0) %>%
-#'  select(-name) %>%
-#'  add_column(  id=c(rep(1L,6),rep(2L,6)),
-#'               task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-#'               alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L), .before = 1)
-#'
-#Choice data
-#'dt=tibble( id=c(rep(1L,6),rep(2L,6)),
-#'           task=c(1L,1L,1L, 2L,2L,2L, 1L,1L,1L, 2L,2L,2L),
-#'           alt=c(1L,2L,3L, 1L,2L,3L, 1L,2L,3L, 1L,2L,3L),
-#'           x=c(1,0,2, 1,0,1, 2,3,1, 1,0,1),
-#'           p=c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1),
-#'           Af%>%select(attr2:attr1))
+#' dt <- structure(list(id = c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 
+#'                             2L, 2L), 
+#'                      task = c(1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L), 
+#'                      alt = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L), 
+#'                      x = c(1, 0, 2, 1, 0, 1, 2, 3, 1, 1, 0, 1), 
+#'                      p = c(0, 1, 1, 1, 2, 0, 2, 2, 1, 2, 1, 1), 
+#'                      attr2 = c(1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0), 
+#'                      attr1 = c(0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1)), 
+#'                  class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA,-12L))
+#' test <- dt %>% dplyr::select(-all_of("x")) %>% vd_prepare_nox() 
 #' 
-#' dt %>% dplyr::select(-all_of("x")) %>% vd_prepare_nox 
-#' }
 #' @export
 vd_prepare_nox <- function(dt, Af=NULL){
   
@@ -746,8 +732,8 @@ ec_summarize_attrlvls<-function(data_in){
 #' @return tibble with MU (upper level) summaries
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #run MCMC sampler (use way more than 20 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm(R=20)
 #' #Upper-level summary
 #' icecream_est %>% ec_estimates_MU
 #' @export
@@ -799,8 +785,8 @@ ec_estimates_MU=function(est, quantiles=c(.05,.95)){
 #' @return estimates of upper level correlations
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #run MCMC sampler (use way more than 20 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm(R=20)
 #' icecream_est %>% ec_estimates_SIGMA_corr %>% round(2)
 #' @export
 ec_estimates_SIGMA_corr=function(est){
@@ -841,9 +827,9 @@ ec_estimates_SIGMA=function(est){
 #' @return tibble with screening summaries
 #' @importFrom rlang :=
 #' @examples
-#' #run MCMC sampler (use way more than 100 draws for actual use)
+#' #run MCMC sampler (use way more than 20 draws for actual use)
 #' data(icecream)
-#' est_scr_icecream <- vd_est_vdm_screen(icecream, R=100)
+#' est_scr_icecream <- vd_est_vdm_screen(icecream, R=20)
 #' #summarise draws of screening probabilities
 #' ec_estimates_screen(est_scr_icecream)
 #' #Note: There is no variance in this illustrative example - more draws are needed
@@ -1470,10 +1456,9 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
 #' @examples
 #' data(icecream)
 #' #fit model
-#' icecream_est <- icecream %>% vd_est_vdm_screen(R=50, keep=1)
+#' icecream_est <- icecream %>% filter(id<20) %>% vd_est_vdm_screen(R=20, keep=1)
 #' #compute likelihood for each subject in each draw
-#' loglls<-vd_LL_vdm_screen(icecream_est, icecream, fromdraw = 2)
-#' #300 respondents, 10 draws
+#' loglls<-vd_LL_vdm_screen(icecream_est, icecream%>% filter(id<20), fromdraw = 2)
 #' dim(loglls)
 #' @export
 vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
@@ -1696,11 +1681,11 @@ prep_newprediction <- function(data_new,data_old){
 #' @return Draws of expected demand
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<50) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' 
@@ -1826,11 +1811,11 @@ vd_dem_vdm=function(vd,
 #' @param cores (optional) cores
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100, keep=1)
+#' #run MCMC sampler (use way more than 20 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm_screen(R=20, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<50) %>%   
 #'    vd_dem_vdm_screen(icecream_est)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' @return Draws of expected demand
@@ -2029,11 +2014,11 @@ vd_dem_vdm_screen=function(vd,
 #' 
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_ss(R=100, keep=1)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm_ss(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<10) %>%   
 #'    vd_dem_vdm_ss(icecream_est)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' 
@@ -2163,7 +2148,7 @@ vd_dem_vdm_ss=function(vd,
 #' @param control list containing additional settings
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=150)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=20)
 #' 
 #' @return est ec-draw object (List)
 #' 
@@ -2275,7 +2260,7 @@ dd_est_hmnl = function(dd,
 #' @param control list containing additional settings
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% dd_est_hmnl_screen(R=150)
+#' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl_screen(R=20)
 #' @return est ec-draw object (List)
 #' 
 #' @seealso [dd_dem_sr()] to generate demand predictions based on this model
@@ -2568,9 +2553,9 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
 #' 
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% filter(id<100) %>% dd_est_hmnl(R=100)
+#' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl(R=10)
 #' #demand prediction
-#' icecream_dempred <- icecream_discrete %>% filter(id<100) %>% dd_dem(icecream_est)
+#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% dd_dem(icecream_est)
 #' 
 #' @seealso [dd_est_hmnl()] to generate demand predictions based on this model
 #' 
@@ -2653,9 +2638,9 @@ dd_dem=function(dd,
 #' 
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% filter(id<100) %>% dd_est_hmnl_screen(R=100)
+#' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl_screen(R=10)
 #' #demand prediction
-#' icecream_dempred <- icecream_discrete %>% filter(id<100) %>% dd_dem_sr(icecream_est)
+#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% dd_dem_sr(icecream_est)
 #' 
 #' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
 #' 
@@ -2790,11 +2775,11 @@ dd_dem_sr=function(dd,
 #' 
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<50) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #add prodid
 #' icecream_predicted_demand_w_id<-icecream_predicted_demand %>% vd_add_prodid
@@ -2842,10 +2827,10 @@ ec_named_group_split <- function(.tbl, ...) {
 #' @examples
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<20) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #aggregate
 #' brand_lvl_pred_demand <-
@@ -2872,19 +2857,20 @@ ec_dem_aggregate = function(de, groupby){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' @return Summary of demand predictions
 #' @examples
+#' \donttest{
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<10) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #aggregate
 #' brand_lvl_pred_demand <-
 #'  icecream_predicted_demand %>% ec_dem_aggregate("Brand")
 #' #summarise
 #' brand_lvl_pred_demand %>% ec_dem_summarise()
-#' 
+#' }
 #' 
 #' @importFrom rlang :=
 #' @export
@@ -2916,7 +2902,7 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
 #' @examples
 #' \donttest{
 #' data(icecream)
-#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150,  price_screen=TRUE)
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=20,  price_screen=TRUE)
 #' #consideration set by respondent
 #' cons_ss <- 
 #' ec_screenprob_sr(icecream, icecream_est) %>%
@@ -2953,19 +2939,20 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
 #' @param quantiles Quantiles for Credibility Intervals (default: 90% interval)
 #' @return Summary of demand predictions
 #' @examples
+#' \donttest{
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=100, keep=1)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<100) %>%   
+#'  icecream %>% dplyr::filter(id<10) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #aggregate
 #' brand_lvl_pred_demand <-
 #'  icecream_predicted_demand %>% ec_dem_aggregate("Brand")
 #' #summarise
 #' brand_lvl_pred_demand %>% vd_dem_summarise()
-#' 
+#' }
 #' @importFrom rlang :=
 #' @export
 vd_dem_summarise = function(de, quantiles=c(.05,.95)){
@@ -3058,6 +3045,7 @@ ec_dem_eval = function(de){
 #' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
 #' 
 #' @examples
+#' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use)
 #' icecream_est <- icecream %>% dplyr::filter(id<100) %>% 
@@ -3071,7 +3059,7 @@ ec_dem_eval = function(de){
 #' # dem_scenarios %>% 
 #' #   do.call('rbind',.) %>%
 #' #   ggplot(aes(x=scenario,y=`E(demand)`,color=Flavor)) + geom_line()
-#' 
+#' }
 #' 
 #' @seealso [ec_gen_err_normal()] to generate error realization from Normal distribution,
 #' [ec_gen_err_ev1()] to generate error realization from EV1 distribution
@@ -3141,6 +3129,7 @@ ec_demcurve=function(ec_long,
 #' @param epsilon_not (optional) error realisatins (this helps make curves look smother for voumetric models)
 #' @return List containing aggregate demand quantities for each scenario defined by `rel_pricerange`
 #' @examples
+#' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use)
 #' icecream_est <- icecream %>% dplyr::filter(id<50) %>% 
@@ -3150,7 +3139,7 @@ ec_demcurve=function(ec_long,
 #' ec_demcurve_inci(icecream%>% dplyr::filter(id<50),
 #'  icecream%>% dplyr::filter(id<50) %>% pull('Brand')=="Store",
 #'  c(.75,1,1.25),vd_dem_vdm,icecream_est)
-#' 
+#' }
 #' @seealso [ec_gen_err_normal()] to generate error realization from Normal distribution,
 #' [ec_gen_err_ev1()] to generate error realization from EV1 distribution
 #' 
@@ -3236,11 +3225,11 @@ ec_demcurve_inci=function(ec_long,
 #' 
 #' @export
 ec_demcurve_cond_dem=function(ec_long,
-                          focal_product,
-                          rel_pricerange,
-                          dem_fun,
-                          draws,
-                          epsilon_not=NULL){
+                              focal_product,
+                              rel_pricerange,
+                              dem_fun,
+                              draws,
+                              epsilon_not=NULL){
   
   #select correct demand function
   if(is.function(dem_fun)){
@@ -3409,8 +3398,8 @@ ec_gen_err_ev1 = function(ec_dem, draws, seed=NULL){
 #' @return Draws of screening probabilities of choice alternatives
 #' @examples
 #' data(icecream)
-#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150,  price_screen=TRUE)
-#' ec_screenprob_sr(icecream, icecream_est) 
+#' icecream_est <- icecream %>% filter(id<10) %>% vd_est_vdm_screen(R=10,  price_screen=TRUE)
+#' ec_screenprob_sr(icecream %>% filter(id<10), icecream_est) 
 #' 
 #' @export
 ec_screenprob_sr=function(xd,
@@ -3495,8 +3484,8 @@ ec_screenprob_sr=function(xd,
 #' @return  A tibble, long format, draws of MU
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #run MCMC sampler (use way more than 20 draws for actual use
+#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=20)
 #' ec_draws_MU(icecream_est)
 #' 
 #' @seealso [ec_draws_screen()] to obtain screening parameter draws (where applicable),
@@ -3521,8 +3510,8 @@ ec_draws_MU <- function(draws){
 #' @return  A tibble, long format, draws of MU
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
+#' #run MCMC sampler (use way more than 20 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm_screen(R=20)
 #' ec_draws_screen(icecream_scr_est)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,
@@ -3548,8 +3537,8 @@ ec_draws_screen <- function(draws){
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #run MCMC sampler (use way more than 20 draws for actual use
+#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=20)
 #' ec_trace_MU(icecream_est)
 #' 
 #' @seealso [ec_boxplot_MU()] to obtain boxplot
@@ -3581,8 +3570,8 @@ ec_trace_MU <- function(draws, burnin=100){
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
+#' #run MCMC sampler (use way more than 20 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm_screen(R=20)
 #' ec_trace_screen(icecream_scr_est, burnin=1)
 #' 
 #' 
@@ -3658,9 +3647,8 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' #run MCMC sampler (use way more than 50 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=100)
+#' #run MCMC sampler (use way more than 20 draws for actual use
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=20)
 #' ec_boxplot_screen(icecream_scr_est, burnin = 1)
 #' 
 #' @seealso [ec_draws_MU()] to obtain MU_theta draws,

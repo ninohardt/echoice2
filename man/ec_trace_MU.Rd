@@ -19,8 +19,8 @@ Generate MU_theta traceplot
 }
 \examples{
 data(icecream)
-#run MCMC sampler (use way more than 50 draws for actual use
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+#run MCMC sampler (use way more than 20 draws for actual use
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=20)
 ec_trace_MU(icecream_est)
 
 }

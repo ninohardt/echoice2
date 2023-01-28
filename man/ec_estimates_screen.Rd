@@ -18,9 +18,9 @@ tibble with screening summaries
 Summarize attribute-based screening parameters from an attribute-based screening model in 'echoice2'
 }
 \examples{
-#run MCMC sampler (use way more than 100 draws for actual use)
+#run MCMC sampler (use way more than 20 draws for actual use)
 data(icecream)
-est_scr_icecream <- vd_est_vdm_screen(icecream, R=100)
+est_scr_icecream <- vd_est_vdm_screen(icecream, R=20)
 #summarise draws of screening probabilities
 ec_estimates_screen(est_scr_icecream)
 #Note: There is no variance in this illustrative example - more draws are needed
