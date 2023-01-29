@@ -31,7 +31,7 @@ Estimate discrete choice model (HMNL)
 }
 \examples{
 data(icecream_discrete)
-icecream_est <- icecream_discrete \%>\% dd_est_hmnl(R=20)
+icecream_est <- icecream_discrete \%>\% dd_est_hmnl(R=20, cores=2)
 
 }
 \seealso{

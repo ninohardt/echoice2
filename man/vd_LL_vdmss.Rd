@@ -25,7 +25,7 @@ data(icecream)
 #note: this is just for demo purposes
 #on this demo dataset, the model is not identified
 #due to a lack of set size variation
-icecream_est <- icecream \%>\% vd_est_vdm_ss(R=10, keep=1)
+icecream_est <- icecream \%>\% vd_est_vdm_ss(R=10, keep=1, cores=2)
 #compute likelihood for each subject in each draw
 loglls<-vd_LL_vdmss(icecream_est, icecream, fromdraw = 2)
 #300 respondents, 10 draws

@@ -22,7 +22,7 @@ Log-Likelihood for screening hmnl model
 \examples{
 data(icecream_discrete)
 #fit model
-icecream_est <- icecream_discrete \%>\% dd_est_hmnl_screen(R=10, keep=1)
+icecream_est <- icecream_discrete \%>\% dd_est_hmnl_screen(R=10, keep=1, cores=2)
 #compute likelihood for each subject in each draw
 loglls<-dd_LL_sr(icecream_est, icecream_discrete, fromdraw = 2)
 }

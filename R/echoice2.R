@@ -913,8 +913,8 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
 #' 
 #' @examples
 #' data(icecream)
-#' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=50)
+#' #run MCMC sampler (use way more than 10 draws for actual use)
+#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=10, cores=2)
 #' @export
 vd_est_vdm=
   function(vd,
@@ -1052,7 +1052,7 @@ vd_est_vdm=
 #' 
 #' @examples
 #' data(icecream)
-#' icecream_est <- icecream %>% vd_est_vdm_screen(R=150)
+#' icecream_est <- icecream %>% vd_est_vdm_screen(R=10, cores=2)
 #' @export
 vd_est_vdm_screen = function(vd,
                       R=100000, 
@@ -1246,7 +1246,7 @@ vd_est_vdm_screen = function(vd,
 #' data(icecream)
 #' #note that for this example dataset, the model is not identified
 #' #because the data lacks variation in set size
-#' icecream_est <- icecream %>% vd_est_vdm_ss(R=50)
+#' icecream_est <- icecream %>% vd_est_vdm_ss(R=10, cores=2)
 #' @return est ec-draw object (List)
 #' 
 #' 
@@ -1386,10 +1386,9 @@ vd_est_vdm_ss = function(vd,
 #' @examples
 #' data(icecream)
 #' #fit model
-#' icecream_est <- icecream %>% vd_est_vdm(R=10, keep=1)
+#' icecream_est <- icecream %>% vd_est_vdm(R=10, keep=1, cores=2)
 #' #compute likelihood for each subject in each draw
 #' loglls<-vd_LL_vdm(icecream_est, icecream, fromdraw = 2)
-#' #300 respondents, 10 draws
 #' dim(loglls)
 #' @return N x Draws Matrix of log-Likelihood values
 #' @export
@@ -1456,7 +1455,7 @@ vd_LL_vdm <- function(draw, vd, fromdraw=1){
 #' @examples
 #' data(icecream)
 #' #fit model
-#' icecream_est <- icecream %>% filter(id<20) %>% vd_est_vdm_screen(R=20, keep=1)
+#' icecream_est <- icecream %>% filter(id<20) %>% vd_est_vdm_screen(R=10, keep=1, cores=2)
 #' #compute likelihood for each subject in each draw
 #' loglls<-vd_LL_vdm_screen(icecream_est, icecream%>% filter(id<20), fromdraw = 2)
 #' dim(loglls)
@@ -1578,7 +1577,7 @@ vd_LL_vdm_screen <- function(draw, vd, fromdraw=1){
 #' #note: this is just for demo purposes
 #' #on this demo dataset, the model is not identified
 #' #due to a lack of set size variation
-#' icecream_est <- icecream %>% vd_est_vdm_ss(R=10, keep=1)
+#' icecream_est <- icecream %>% vd_est_vdm_ss(R=10, keep=1, cores=2)
 #' #compute likelihood for each subject in each draw
 #' loglls<-vd_LL_vdmss(icecream_est, icecream, fromdraw = 2)
 #' #300 respondents, 10 draws
@@ -1682,11 +1681,11 @@ prep_newprediction <- function(data_new,data_old){
 #' @examples
 #' data(icecream)
 #' #run MCMC sampler (use way more than 10 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=10, keep=1)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm(R=10, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<50) %>%   
-#'    vd_dem_vdm(icecream_est)
+#'  icecream %>% dplyr::filter(id<20) %>%   
+#'    vd_dem_vdm(icecream_est, cores=2)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
@@ -1812,11 +1811,11 @@ vd_dem_vdm=function(vd,
 #' @examples
 #' data(icecream)
 #' #run MCMC sampler (use way more than 20 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm_screen(R=20, keep=1)
+#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm_screen(R=20, keep=1)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<50) %>%   
-#'    vd_dem_vdm_screen(icecream_est)
+#'  icecream %>% dplyr::filter(id<20) %>%   
+#'    vd_dem_vdm_screen(icecream_est, cores=2)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' @return Draws of expected demand
 #' 
@@ -1973,6 +1972,7 @@ vd_dem_vdm_screen=function(vd,
                              est$thetaDraw,
                              est$tauDraw, 
                              est$tau_pr_draw,
+                             epsilon_not,
                              cores=cores)
     }
     
@@ -2019,7 +2019,7 @@ vd_dem_vdm_screen=function(vd,
 #' #Generate demand predictions
 #' icecream_predicted_demand=
 #'  icecream %>% dplyr::filter(id<10) %>%   
-#'    vd_dem_vdm_ss(icecream_est)
+#'    vd_dem_vdm_ss(icecream_est, cores=2)
 #' #column .demdraws contains draws from posterior of predicted demand
 #' 
 #' @seealso [prep_newprediction()] to match `vd`'s factor levels,
@@ -2148,7 +2148,7 @@ vd_dem_vdm_ss=function(vd,
 #' @param control list containing additional settings
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=20)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=20, cores=2)
 #' 
 #' @return est ec-draw object (List)
 #' 
@@ -2260,7 +2260,8 @@ dd_est_hmnl = function(dd,
 #' @param control list containing additional settings
 #' @examples 
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl_screen(R=20)
+#' icecream_est <- icecream_discrete %>% filter(id<20) %>% 
+#'   dd_est_hmnl_screen(R=20, cores=2)
 #' @return est ec-draw object (List)
 #' 
 #' @seealso [dd_dem_sr()] to generate demand predictions based on this model
@@ -2440,7 +2441,7 @@ dd_est_hmnl_screen = function(dd,
 #' @examples
 #' data(icecream_discrete)
 #' #fit model
-#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=10, keep=1)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl(R=10, keep=1, cores=2)
 #' #compute likelihood for each subject in each draw
 #' loglls<-dd_LL(icecream_est, icecream_discrete, fromdraw = 2)
 #' @return N x Draws Matrix of log-Likelihood values
@@ -2479,7 +2480,7 @@ dd_LL <- function(draw, dd, fromdraw=1){
 #' @examples
 #' data(icecream_discrete)
 #' #fit model
-#' icecream_est <- icecream_discrete %>% dd_est_hmnl_screen(R=10, keep=1)
+#' icecream_est <- icecream_discrete %>% dd_est_hmnl_screen(R=10, keep=1, cores=2)
 #' #compute likelihood for each subject in each draw
 #' loglls<-dd_LL_sr(icecream_est, icecream_discrete, fromdraw = 2)
 #' @return N x Draws Matrix of log-Likelihood values
@@ -2555,7 +2556,8 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
 #' data(icecream_discrete)
 #' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl(R=10)
 #' #demand prediction
-#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% dd_dem(icecream_est)
+#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% 
+#'   dd_dem(icecream_est, cores=2)
 #' 
 #' @seealso [dd_est_hmnl()] to generate demand predictions based on this model
 #' 
@@ -2640,7 +2642,8 @@ dd_dem=function(dd,
 #' data(icecream_discrete)
 #' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl_screen(R=10)
 #' #demand prediction
-#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% dd_dem_sr(icecream_est)
+#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% 
+#'  dd_dem_sr(icecream_est, cores=2)
 #' 
 #' @seealso [dd_est_hmnl_screen()] to generate demand predictions based on this model
 #' 

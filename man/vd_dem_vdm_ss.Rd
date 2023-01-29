@@ -31,7 +31,7 @@ icecream_est <- icecream \%>\% dplyr::filter(id<10) \%>\% vd_est_vdm_ss(R=10, ke
 #Generate demand predictions
 icecream_predicted_demand=
  icecream \%>\% dplyr::filter(id<10) \%>\%   
-   vd_dem_vdm_ss(icecream_est)
+   vd_dem_vdm_ss(icecream_est, cores=2)
 #column .demdraws contains draws from posterior of predicted demand
 
 }

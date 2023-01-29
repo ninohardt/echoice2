@@ -22,9 +22,8 @@ Log-Likelihood for compensatory volumetric demand model
 \examples{
 data(icecream)
 #fit model
-icecream_est <- icecream \%>\% vd_est_vdm(R=10, keep=1)
+icecream_est <- icecream \%>\% vd_est_vdm(R=10, keep=1, cores=2)
 #compute likelihood for each subject in each draw
 loglls<-vd_LL_vdm(icecream_est, icecream, fromdraw = 2)
-#300 respondents, 10 draws
 dim(loglls)
 }

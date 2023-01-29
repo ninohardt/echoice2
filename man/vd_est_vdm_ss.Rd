@@ -36,5 +36,5 @@ This model REQUIRES variation in choice-set size
 data(icecream)
 #note that for this example dataset, the model is not identified
 #because the data lacks variation in set size
-icecream_est <- icecream \%>\% vd_est_vdm_ss(R=50)
+icecream_est <- icecream \%>\% vd_est_vdm_ss(R=10, cores=2)
 }

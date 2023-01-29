@@ -37,8 +37,8 @@ Estimate volumetric demand model
 }
 \examples{
 data(icecream)
-#run MCMC sampler (use way more than 50 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+#run MCMC sampler (use way more than 10 draws for actual use)
+icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm(R=10, cores=2)
 }
 \seealso{
 \code{\link[=vd_dem_vdm]{vd_dem_vdm()}} to generate demand predictions based on this model

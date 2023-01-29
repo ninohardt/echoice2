@@ -37,5 +37,5 @@ Estimate volumetric demand model with attribute-based conjunctive screening
 }
 \examples{
 data(icecream)
-icecream_est <- icecream \%>\% vd_est_vdm_screen(R=150)
+icecream_est <- icecream \%>\% vd_est_vdm_screen(R=10, cores=2)
 }

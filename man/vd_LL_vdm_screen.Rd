@@ -22,7 +22,7 @@ Log-Likelihood for conjunctive-screening volumetric demand model
 \examples{
 data(icecream)
 #fit model
-icecream_est <- icecream \%>\% filter(id<20) \%>\% vd_est_vdm_screen(R=20, keep=1)
+icecream_est <- icecream \%>\% filter(id<20) \%>\% vd_est_vdm_screen(R=10, keep=1, cores=2)
 #compute likelihood for each subject in each draw
 loglls<-vd_LL_vdm_screen(icecream_est, icecream\%>\% filter(id<20), fromdraw = 2)
 dim(loglls)

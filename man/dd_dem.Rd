@@ -25,7 +25,8 @@ Discrete Choice Predictions (HMNL)
 data(icecream_discrete)
 icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% dd_est_hmnl(R=10)
 #demand prediction
-icecream_dempred <- icecream_discrete \%>\% filter(id<20) \%>\% dd_dem(icecream_est)
+icecream_dempred <- icecream_discrete \%>\% filter(id<20) \%>\% 
+  dd_dem(icecream_est, cores=2)
 
 }
 \seealso{
