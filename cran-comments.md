@@ -3,4 +3,4 @@
 0 errors | 0 warnings | 1 note
 
 * This is a new release.
-  -  `RcppArmadillo` is necessary in imports, otherwise the following error appears: "Namespace dependency missing from DESCRIPTION Imports/Depends entries: 'RcppArmadillo'"
+  -  This package uses OpenMP to speed up MCMC samplers. Please make sure it is part of your toolchain. This should not be an issue on most linux distributions and Windows with RTools installed. All examples are set to use 2 cores, but if set to NULL, all available cores will be used.

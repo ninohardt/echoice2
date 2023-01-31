@@ -29,7 +29,7 @@ Eerror realisations can be pre-supplied to the \code{epsilon_not}. This helps cr
 \examples{
 data(icecream)
 #run MCMC sampler (use way more than 20 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<20) \%>\% vd_est_vdm_screen(R=20, keep=1)
+icecream_est <- icecream \%>\% dplyr::filter(id<20) \%>\% vd_est_vdm_screen(R=20, keep=1, cores=2)
 #Generate demand predictions
 icecream_predicted_demand=
  icecream \%>\% dplyr::filter(id<20) \%>\%   

@@ -34,7 +34,7 @@ Estimate discrete choice model (HMNL, attribute-based screening (not including p
 }
 \examples{
 data(icecream_discrete)
-icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% 
+icecream_est <- icecream_discrete \%>\% dplyr::filter(id<20) \%>\% 
   dd_est_hmnl_screen(R=20, cores=2)
 }
 \seealso{

@@ -20,7 +20,7 @@ Summarize attribute-based screening parameters from an attribute-based screening
 \examples{
 #run MCMC sampler (use way more than 20 draws for actual use)
 data(icecream)
-est_scr_icecream <- vd_est_vdm_screen(icecream, R=20)
+est_scr_icecream <- vd_est_vdm_screen(icecream\%>\%dplyr::filter(id<30), R=20, cores=2)
 #summarise draws of screening probabilities
 ec_estimates_screen(est_scr_icecream)
 #Note: There is no variance in this illustrative example - more draws are needed
