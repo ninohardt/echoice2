@@ -10,7 +10,7 @@ Authors@R:
            email = "me@ninohardt.com",
            comment = c(ORCID = "0000-0001-5215-6216"))
 Maintainer: Nino Hardt <me@ninohardt.com>
-Description: Implements choice models based on economic theory, and provides a tidyverse-inspired interface to running the related MCMC-samplers. Models include versions of the Hierarchical Multinomial Logit and Multiple Discrete-Continous (Volumetric) models with and without screening. The foundations of these models are described in Allenby, Hardt and Rossi (2019)  <doi: 10.1016/bs.hem.2019.04.002>. Models with conjunctive screening are described in Kim, Hardt, Kim and Allenby (2022) <doi: 10.1016/j.ijresmar.2022.04.001>. Models with set-size variation are described in Hardt and Kurz (2020) <doi: 10.2139/ssrn.3418383>.
+Description: Implements choice models based on economic theory, including estimation using Markov chain Monte Carlo (MCMC), prediction, and more. Its usability is inspired by ideas from 'tidyverse'. Models include versions of the Hierarchical Multinomial Logit and Multiple Discrete-Continous (Volumetric) models with and without screening. The foundations of these models are described in Allenby, Hardt and Rossi (2019)  <doi:10.1016/bs.hem.2019.04.002>. Models with conjunctive screening are described in Kim, Hardt, Kim and Allenby (2022) <doi:10.1016/j.ijresmar.2022.04.001>. Models with set-size variation are described in Hardt and Kurz (2020) <doi:10.2139/ssrn.3418383>.
 License: MIT + file LICENSE
 URL: http://ninohardt.de/echoice2/
 Imports: 
