@@ -1,10 +1,11 @@
 #include "RcppArmadillo.h"
-#include <omp.h>
+#include "myomp.h"
 
 using namespace arma;
 using namespace Rcpp;
+
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::plugins(openmp)]]
+
 
 
 // notes
@@ -357,10 +358,10 @@ vec ddLL(mat const&Theta,
          ivec const& lto,
          int p, int N, int cores=1){
   
-  omp_set_num_threads(cores);
-  
+
   vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     ll_olds(n)= 
       ddl(Theta.col(n),
@@ -435,9 +436,8 @@ void draw_dd_RWMH( arma::vec& ll_olds,    // vector of current log-likelihoods
                    arma::vec& tunes,     // i-level tuning parameters
                    int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -651,9 +651,8 @@ void drawdelta(vec& delta,
                int K, int N, 
                int cores, 
                double a0=1, double b0=1){
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int kk=0; kk<K; kk++){
     double tsum=sum(tauis.row(kk));
     delta(kk)=Rf_rbeta(tsum+a0, N-tsum+b0);
@@ -740,9 +739,8 @@ void draw_ddsr_RWMH( arma::vec& ll_olds,       // vector of current log-likeliho
                      arma::vec& tunes,     // i-level tuning parameters
                      int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -804,9 +802,7 @@ void draw_dd_tau(  arma::vec& ll_olds,
   
   int K=tauconst.n_rows;
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     double ll0;
     double ll1;
@@ -947,8 +943,7 @@ void draw_dd_tau(  arma::vec& ll_olds,
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -1096,10 +1091,9 @@ vec ddsrLL(mat const& Theta,
            ivec const& lto,
            int p, int N, int cores=1){
   
-  omp_set_num_threads(cores);
-  
+
   vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     ll_olds(n)= 
       ddlsr(Theta.col(n),
@@ -1241,10 +1235,9 @@ vec ddsrLL(mat const& Theta,
             ivec const& lto,
             int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= 
        ddlsrpr(Theta.col(n),
@@ -1328,9 +1321,8 @@ void draw_ddsrpr_RWMH( arma::vec& ll_olds,       // vector of current log-likeli
                        arma::vec& tunes,     // i-level tuning parameters
                        int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -1394,9 +1386,8 @@ void draw_dd_tauipr(arma::vec& ll_olds,
   
   int K=tauconst.n_rows;
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     double ll0;
     double ll1;
@@ -1479,9 +1470,8 @@ void draw_dd_taupr( vec& ll_olds,
   
   //int K=tauconst.n_rows;
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     
@@ -1627,8 +1617,7 @@ void draw_dd_taupr( vec& ll_olds,
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
 
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -1852,8 +1841,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -1932,8 +1920,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -2016,8 +2003,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -2102,8 +2088,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -2177,8 +2162,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -2254,8 +2238,7 @@ void draw_dd_taupr( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -2372,10 +2355,8 @@ void draw_dd_taupr( vec& ll_olds,
            ivec const& lto,
            int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_e(Theta.col(n),
              nalts(span(lfr(n),lto(n))),
@@ -2450,9 +2431,8 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                    arma::vec& tunes,     // i-level tuning parameters
                    int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -2747,10 +2727,9 @@ void draw_vd2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
            ivec const& lto,
            int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_n(Theta.col(n),
              nalts(span(lfr(n),lto(n))),
@@ -2825,9 +2804,8 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                    arma::vec& tunes,     // i-level tuning parameters
                    int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -3198,10 +3176,9 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
               ivec const& lto,
               int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_sr_n(
        Theta.col(n),
@@ -3280,10 +3257,9 @@ void draw_vdn_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
               ivec const& lto,
               int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_sr_e(
        Theta.col(n),
@@ -3369,9 +3345,8 @@ void draw_vdsr2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                      arma::vec& tunes,     // i-level tuning parameters
                      int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -3440,9 +3415,8 @@ void draw_vdsr2_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                       arma::vec& tunes,     // i-level tuning parameters
                       int cores=1){ 
    
-   omp_set_num_threads(cores);
-   
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      
      //local variables (thread-safe)
@@ -3511,9 +3485,8 @@ void draw_tau(arma::vec& ll_olds,
   int K=tauconst.n_rows;
   
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     double ll0;
     double ll1;
@@ -3590,9 +3563,7 @@ void draw_tau(arma::vec& ll_olds,
    int K=tauconst.n_rows;
    
    
-   omp_set_num_threads(cores);
-   
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      double ll0;
      double ll1;
@@ -3751,8 +3722,7 @@ void draw_tau(arma::vec& ll_olds,
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -4000,8 +3970,7 @@ void draw_tau(arma::vec& ll_olds,
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -4307,9 +4276,8 @@ void draw_taui_pr(arma::vec& ll_olds,
   
   int K=tauconst.n_rows;
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     double ll0;
     double ll1;
@@ -4390,9 +4358,8 @@ void draw_taui_pr(arma::vec& ll_olds,
    
    int K=tauconst.n_rows;
    
-   omp_set_num_threads(cores);
-   
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      double ll0;
      double ll1;
@@ -4477,9 +4444,8 @@ void draw_taupr(arma::vec& ll_olds,    // vector of current log-likelihoods
                 ivec const& lto,
                 int p, int N, int cores){
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //candidate
@@ -4546,9 +4512,8 @@ void draw_taupr(arma::vec& ll_olds,    // vector of current log-likelihoods
                  ivec const& lto,
                  int p, int N, int cores){
    
-   omp_set_num_threads(cores);
-   
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      
      //candidate
@@ -4617,9 +4582,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                      arma::vec& tunes,     // i-level tuning parameters
                      int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -4691,9 +4654,8 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
                       arma::vec& tunes,     // i-level tuning parameters
                       int cores=1){ 
    
-   omp_set_num_threads(cores);
-   
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      
      //local variables (thread-safe)
@@ -4863,8 +4825,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -5158,8 +5119,7 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -5356,10 +5316,9 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
               ivec const& lto,
               int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_srpr_n(
        Theta.col(n),
@@ -5436,10 +5395,9 @@ void draw_vdspr_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoods
               ivec const& lto,
               int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_srpr_e(
        Theta.col(n),
@@ -5595,9 +5553,8 @@ void draw_vdl_ss_RWMH(arma::vec& ll_olds,    // vector of current log-likelihood
                       arma::vec& tunes,     // i-level tuning parameters
                       int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -5922,9 +5879,8 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
                        arma::vec& tunes,     // i-level tuning parameters
                        int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -6161,10 +6117,9 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
              ivec const& lto,
              int p, int N, int cores=1){
    
-   omp_set_num_threads(cores);
-   
+
    vec ll_olds(N);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
    for(int n=0; n<N; n++){
      ll_olds(n)= vdl_ss(Theta.col(n),
              nalts(span(lfr(n),lto(n))),
@@ -6328,8 +6283,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6415,8 +6369,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6500,8 +6453,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6586,8 +6538,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6674,8 +6625,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6761,8 +6711,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6850,8 +6799,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -6938,8 +6886,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7029,8 +6976,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7120,8 +7066,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7213,8 +7158,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7301,8 +7245,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7390,8 +7333,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs= PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras
@@ -7479,8 +7421,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        mat demcontainer(nalt,R, fill::zeros);
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          arma::vec pr(nalt, fill::zeros);
          arma::vec taui  = tauDraw.slice(ir).col(n);
@@ -7553,8 +7494,7 @@ void draw_vdl_ssQ_RWMH(arma::vec& ll_olds,    // vector of current log-likelihoo
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          arma::vec pr(nalt);
@@ -7673,9 +7613,7 @@ void draw_ddpr_RWMH( arma::vec& ll_olds,       // vector of current log-likeliho
                      arma::vec& tunes,     // i-level tuning parameters
                      int cores=1){ 
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     //local variables (thread-safe)
@@ -7738,9 +7676,7 @@ void draw_dd_taupr1( vec& ll_olds,
   
   //int K=tauconst.n_rows;
   
-  omp_set_num_threads(cores);
-  
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
   for(int n=0; n<N; n++){
     
     
@@ -7875,8 +7811,7 @@ void draw_dd_taupr1( vec& ll_olds,
    arma::vec rrate(Rk);
    mat RRs(N,Rk);
    
-   omp_set_num_threads(cores);
-   
+
    // loop ..................    
    startMcmcTimer();
    
@@ -8065,8 +8000,7 @@ void draw_dd_taupr1( vec& ll_olds,
        arma::vec prcs = PP(span(xpick,xpick+nalt-1));
        
        //draw-level
-       omp_set_num_threads(cores);
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(cores)
        for (int ir = 0; ir <R; ++ir){
          
          //paras

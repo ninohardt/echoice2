@@ -33,3 +33,16 @@ echoice2.Rproj
 .dll
 revdep/
 CRAN-SUBMISSION
+readme.Rmd
+# object and shared objects
+*.o
+*.so
+# common devel objects
+.Renviron
+lib
+library
+*.csv
+*.csvy
+*.RDS
+*.diff
+*.patch
