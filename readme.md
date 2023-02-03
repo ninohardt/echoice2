@@ -27,6 +27,11 @@ though no front-end is built into the package yet.
 
 - **Looking for co-developers!**
 
+- Version **0.21**:
+
+  - Pending CRAN inspection
+  - Package should compile in absense of OpenMP Support
+
 - Version
   [**0.20**](https://github.com/ninohardt/echoice2/releases/tag/v0.20):
 
@@ -65,15 +70,15 @@ library(echoice2)
 
 ### Installation notes
 
-- If you use Linux it should just work. If not, you might need to
-  install ‘libgomp’ before compilation.
+#### If installing from source/github
 
-- If you are using OSX, you may have to install CLI, XQuartz and
-  potentially other things that Apple removed from OSX. Google ‘+OSX
-  +Rcpp’ if you run into trouble.
-
+- If you use Linux it should just work.
 - If you are using Windows, install
-  \[Rtools\](<https://cran.r-project.org/bin/windows/Rtools/)> first.
+  [Rtools](https://cran.r-project.org/bin/windows/Rtools/) first.
+- If you are using OSX, you may have to install CLI, XQuartz and
+  potentially other things that Apple removed from OSX. For multicore
+  support, you also need to find a compiler that does support OpenMP.
+  Just google it.
 
 ## Functionality
 
@@ -150,20 +155,20 @@ Upper-level estimates can be summarized using `ec_estimates_MU`:
 ``` r
 est_icecream %>% ec_estimates_MU()
 #> # A tibble: 21 × 12
-#>    attribute lvl   par     mean     sd `CI-5%` CI-95…¹ sig   model error refer…²
-#>    <chr>     <chr> <chr>  <dbl>  <dbl>   <dbl>   <dbl> <lgl> <chr> <chr> <chr>  
-#>  1 <NA>      <NA>  int   -3.21  0.521   -3.52  -2.69   TRUE  VD-c… EV1   <NA>   
-#>  2 Brand     Blue… Bran… -0.734 0.154   -0.916 -0.519  TRUE  VD-c… EV1   BenNJe…
-#>  3 Brand     Blue… Bran… -0.641 0.151   -0.826 -0.333  TRUE  VD-c… EV1   BenNJe…
-#>  4 Brand     Brey… Bran… -0.100 0.0949  -0.264  0.0402 FALSE VD-c… EV1   BenNJe…
-#>  5 Brand     Drye… Bran… -0.568 0.124   -0.744 -0.399  TRUE  VD-c… EV1   BenNJe…
-#>  6 Brand     Haag… Bran… -0.366 0.0891  -0.496 -0.239  TRUE  VD-c… EV1   BenNJe…
-#>  7 Brand     Store Bran… -0.491 0.118   -0.655 -0.305  TRUE  VD-c… EV1   BenNJe…
-#>  8 Flavor    Choc… Flav… -0.398 0.116   -0.578 -0.207  TRUE  VD-c… EV1   Chocol…
-#>  9 Flavor    Choc… Flav… -0.436 0.128   -0.642 -0.236  TRUE  VD-c… EV1   Chocol…
-#> 10 Flavor    Cook… Flav… -0.423 0.101   -0.565 -0.269  TRUE  VD-c… EV1   Chocol…
+#>    attrib…¹ lvl   par      mean     sd `CI-5%` CI-95…² sig   model error refer…³
+#>    <chr>    <chr> <chr>   <dbl>  <dbl>   <dbl>   <dbl> <lgl> <chr> <chr> <chr>  
+#>  1 <NA>     <NA>  int   -3.27   0.528   -3.55  -2.69   TRUE  VD-c… EV1   <NA>   
+#>  2 Brand    Blue… Bran… -0.637  0.141   -0.821 -0.441  TRUE  VD-c… EV1   BenNJe…
+#>  3 Brand    Blue… Bran… -0.592  0.134   -0.772 -0.400  TRUE  VD-c… EV1   BenNJe…
+#>  4 Brand    Brey… Bran… -0.0525 0.0871  -0.199  0.0879 FALSE VD-c… EV1   BenNJe…
+#>  5 Brand    Drye… Bran… -0.541  0.129   -0.725 -0.346  TRUE  VD-c… EV1   BenNJe…
+#>  6 Brand    Haag… Bran… -0.342  0.0985  -0.510 -0.205  TRUE  VD-c… EV1   BenNJe…
+#>  7 Brand    Store Bran… -0.485  0.131   -0.668 -0.278  TRUE  VD-c… EV1   BenNJe…
+#>  8 Flavor   Choc… Flav… -0.317  0.116   -0.486 -0.0969 TRUE  VD-c… EV1   Chocol…
+#>  9 Flavor   Choc… Flav… -0.371  0.116   -0.548 -0.177  TRUE  VD-c… EV1   Chocol…
+#> 10 Flavor   Cook… Flav… -0.340  0.0979  -0.490 -0.180  TRUE  VD-c… EV1   Chocol…
 #> # … with 11 more rows, 1 more variable: parameter <chr>, and abbreviated
-#> #   variable names ¹​`CI-95%`, ²​reference_lvl
+#> #   variable names ¹​attribute, ²​`CI-95%`, ³​reference_lvl
 ```
 
 Corresponding demand predictions can be obtained using the `vd_dem_vdm`
@@ -230,16 +235,16 @@ dempres_icecream %>%
 #> # A tibble: 300 × 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        38.0       13.0    18.8      61.1
-#>  2     2 <dbl [1,000]>        95.9       29.0    53.3     144. 
-#>  3     3 <dbl [1,000]>        31.6        6.18   21.1      41.5
-#>  4     4 <dbl [1,000]>        87.3       26.9    48.2     135. 
-#>  5     5 <dbl [1,000]>        32.2       18.0    10.5      69.4
-#>  6     6 <dbl [1,000]>        16.0        8.78    4.62     32.9
-#>  7     7 <dbl [1,000]>        72.9       20.9    49.6     104. 
-#>  8     8 <dbl [1,000]>        49.6       19.7    22.7      88.2
-#>  9     9 <dbl [1,000]>        13.2        4.48    6.28     20.9
-#> 10    10 <dbl [1,000]>        37.5       10.2    21.2      54.5
+#>  1     1 <dbl [1,000]>        38.5       12.8    18.5      61.8
+#>  2     2 <dbl [1,000]>       101.        26.4    61.5     147. 
+#>  3     3 <dbl [1,000]>        31.1        5.93   21.8      41.2
+#>  4     4 <dbl [1,000]>        88.8       29.1    47.2     141. 
+#>  5     5 <dbl [1,000]>        32.7       17.8    10.1      67.9
+#>  6     6 <dbl [1,000]>        15.7        8.69    4.52     31.7
+#>  7     7 <dbl [1,000]>        73.4       21.7    49.4     108. 
+#>  8     8 <dbl [1,000]>        50.7       20.5    21.4      90.3
+#>  9     9 <dbl [1,000]>        14.4        4.43    7.56     22.3
+#> 10    10 <dbl [1,000]>        37.3       10.3    20.9      54.4
 #> # … with 290 more rows
 ```
 
