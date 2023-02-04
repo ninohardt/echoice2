@@ -27,10 +27,12 @@ though no front-end is built into the package yet.
 
 - **Looking for co-developers!**
 
-- Version **0.21**:
+- Version
+  [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.21):
 
-  - Pending CRAN inspection
-  - Package should compile in absense of OpenMP Support
+  - Package compiles in absense of OpenMP Support
+  - MacOS CRAN binaries are compiled without OpenMP - for full speed
+    compile yourself or use binaries supplied here
 
 - Version
   [**0.20**](https://github.com/ninohardt/echoice2/releases/tag/v0.20):
@@ -157,16 +159,16 @@ est_icecream %>% ec_estimates_MU()
 #> # A tibble: 21 × 12
 #>    attrib…¹ lvl   par      mean     sd `CI-5%` CI-95…² sig   model error refer…³
 #>    <chr>    <chr> <chr>   <dbl>  <dbl>   <dbl>   <dbl> <lgl> <chr> <chr> <chr>  
-#>  1 <NA>     <NA>  int   -3.27   0.528   -3.55  -2.69   TRUE  VD-c… EV1   <NA>   
-#>  2 Brand    Blue… Bran… -0.637  0.141   -0.821 -0.441  TRUE  VD-c… EV1   BenNJe…
-#>  3 Brand    Blue… Bran… -0.592  0.134   -0.772 -0.400  TRUE  VD-c… EV1   BenNJe…
-#>  4 Brand    Brey… Bran… -0.0525 0.0871  -0.199  0.0879 FALSE VD-c… EV1   BenNJe…
-#>  5 Brand    Drye… Bran… -0.541  0.129   -0.725 -0.346  TRUE  VD-c… EV1   BenNJe…
-#>  6 Brand    Haag… Bran… -0.342  0.0985  -0.510 -0.205  TRUE  VD-c… EV1   BenNJe…
-#>  7 Brand    Store Bran… -0.485  0.131   -0.668 -0.278  TRUE  VD-c… EV1   BenNJe…
-#>  8 Flavor   Choc… Flav… -0.317  0.116   -0.486 -0.0969 TRUE  VD-c… EV1   Chocol…
-#>  9 Flavor   Choc… Flav… -0.371  0.116   -0.548 -0.177  TRUE  VD-c… EV1   Chocol…
-#> 10 Flavor   Cook… Flav… -0.340  0.0979  -0.490 -0.180  TRUE  VD-c… EV1   Chocol…
+#>  1 <NA>     <NA>  int   -3.22   0.545   -3.50  -2.71   TRUE  VD-c… EV1   <NA>   
+#>  2 Brand    Blue… Bran… -0.695  0.155   -0.882 -0.458  TRUE  VD-c… EV1   BenNJe…
+#>  3 Brand    Blue… Bran… -0.618  0.145   -0.796 -0.355  TRUE  VD-c… EV1   BenNJe…
+#>  4 Brand    Brey… Bran… -0.0750 0.0894  -0.235  0.0546 FALSE VD-c… EV1   BenNJe…
+#>  5 Brand    Drye… Bran… -0.546  0.126   -0.704 -0.342  TRUE  VD-c… EV1   BenNJe…
+#>  6 Brand    Haag… Bran… -0.285  0.0861  -0.425 -0.150  TRUE  VD-c… EV1   BenNJe…
+#>  7 Brand    Store Bran… -0.498  0.114   -0.650 -0.337  TRUE  VD-c… EV1   BenNJe…
+#>  8 Flavor   Choc… Flav… -0.317  0.127   -0.493 -0.0434 TRUE  VD-c… EV1   Chocol…
+#>  9 Flavor   Choc… Flav… -0.392  0.115   -0.563 -0.206  TRUE  VD-c… EV1   Chocol…
+#> 10 Flavor   Cook… Flav… -0.415  0.111   -0.580 -0.235  TRUE  VD-c… EV1   Chocol…
 #> # … with 11 more rows, 1 more variable: parameter <chr>, and abbreviated
 #> #   variable names ¹​attribute, ²​`CI-95%`, ³​reference_lvl
 ```
@@ -235,16 +237,16 @@ dempres_icecream %>%
 #> # A tibble: 300 × 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        38.5       12.8    18.5      61.8
-#>  2     2 <dbl [1,000]>       101.        26.4    61.5     147. 
-#>  3     3 <dbl [1,000]>        31.1        5.93   21.8      41.2
-#>  4     4 <dbl [1,000]>        88.8       29.1    47.2     141. 
-#>  5     5 <dbl [1,000]>        32.7       17.8    10.1      67.9
-#>  6     6 <dbl [1,000]>        15.7        8.69    4.52     31.7
-#>  7     7 <dbl [1,000]>        73.4       21.7    49.4     108. 
-#>  8     8 <dbl [1,000]>        50.7       20.5    21.4      90.3
-#>  9     9 <dbl [1,000]>        14.4        4.43    7.56     22.3
-#> 10    10 <dbl [1,000]>        37.3       10.3    20.9      54.4
+#>  1     1 <dbl [1,000]>        39.8       13.5    19.8      64.6
+#>  2     2 <dbl [1,000]>        99.6       27.0    57.8     145. 
+#>  3     3 <dbl [1,000]>        30.3        5.79   20.8      40.1
+#>  4     4 <dbl [1,000]>        89.7       27.4    50.4     139. 
+#>  5     5 <dbl [1,000]>        31.8       17.5     9.57     65.8
+#>  6     6 <dbl [1,000]>        15.9        8.76    4.64     31.6
+#>  7     7 <dbl [1,000]>        73.2       20.0    49.9     108. 
+#>  8     8 <dbl [1,000]>        51.2       20.3    23.9      91.6
+#>  9     9 <dbl [1,000]>        13.9        4.43    7.05     21.7
+#> 10    10 <dbl [1,000]>        37.5       11.1    19.2      55.8
 #> # … with 290 more rows
 ```
 
