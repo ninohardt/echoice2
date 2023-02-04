@@ -28,7 +28,7 @@ though no front-end is built into the package yet.
 - **Looking for co-developers!**
 
 - Version
-  [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.21):
+  [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.1):
 
   - Package compiles in absense of OpenMP Support
   - MacOS CRAN binaries are compiled without OpenMP - for full speed
