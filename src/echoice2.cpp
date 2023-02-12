@@ -1541,7 +1541,7 @@ void draw_dd_taupr( vec& ll_olds,
 
    vec maxpaids(N);
    for(int n=0; n<N; n++){
-     maxpaids(n) = max(sign(XX(span(xfr(n),xto(n)))%PP(span(xfr(n),xto(n)))));
+     maxpaids(n) = max(sign(XX(span(xfr(n),xto(n))))%PP(span(xfr(n),xto(n))));
    }
 
    //no covariates (Z) for now
