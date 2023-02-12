@@ -840,7 +840,8 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   quantiles_name=paste0("CI-",quantiles*100,"%")
   
   out<-
-    est$deltaDraw %>% as_tibble %>%
+    est$deltaDraw %>% 
+    as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)) %>%
     rlang::set_names(colnames(attributes(est)$Af)) %>% 
     pivot_longer(cols = everything(), names_to = 'par') %>%
     group_by(par) %>% 
