@@ -854,7 +854,9 @@ ec_estimates_screen=function(est,quantiles=c(.05,.95)){
   #add limits (maximum possible screening probability)
   if(!is.null(est$dat)){
     out<- out %>% 
-      left_join(est$dat$tauconst %>% colMeans() %>% enframe(name = 'par', value = 'limit'))
+      left_join(est$dat$tauconst %>% 
+                  colMeans() %>% enframe(name = 'par', value = 'limit'),
+                by = "par")
   }
   
   #add attribute groups
@@ -3662,7 +3664,8 @@ ec_boxplot_MU <- function(draws, burnin=100){
 ec_boxplot_screen <- function(draws, burnin=100){
   
   myplot<-
-  draws$deltaDraw %>% as_tibble %>%
+  draws$deltaDraw %>% 
+    as_tibble(.name_repair = ~make.names(seq_along(.), unique=TRUE)) %>%
     rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
