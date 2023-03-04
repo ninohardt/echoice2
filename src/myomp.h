@@ -1,5 +1,4 @@
 #ifdef _OPENMP
-// [[Rcpp::plugins(openmp)]]
   #include <omp.h>
   #if _OPENMP >= 201511
     #define monotonic_dynamic monotonic:dynamic // #4786
