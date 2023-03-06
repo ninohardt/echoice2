@@ -2,9 +2,12 @@
 % Please edit documentation in R/echoice2.R
 \name{ec_screen_summarise}
 \alias{ec_screen_summarise}
+\alias{ec_screen_summarize}
 \title{Summarize posterior draws of screening}
 \usage{
 ec_screen_summarise(sc, quantiles = c(0.05, 0.95))
+
+ec_screen_summarize(sc, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{sc}{tibble containing screening draws in .screendraws}

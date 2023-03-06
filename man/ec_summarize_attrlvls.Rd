@@ -2,9 +2,12 @@
 % Please edit documentation in R/echoice2.R
 \name{ec_summarize_attrlvls}
 \alias{ec_summarize_attrlvls}
+\alias{ec_summarise_attrlvls}
 \title{Summarize attributes and levels}
 \usage{
 ec_summarize_attrlvls(data_in)
+
+ec_summarise_attrlvls(data_in)
 }
 \arguments{
 \item{data_in}{A tibble, containing long-format choice data}

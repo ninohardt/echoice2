@@ -695,6 +695,7 @@ dd_check_long=function(dat){
 
 
 
+
 #' Summarize attributes and levels
 #' 
 #' Summarize attributes and levels in tidy choice data containing categorical attributes (before dummy-coding)
@@ -719,6 +720,11 @@ ec_summarize_attrlvls<-function(data_in){
       as_tibble() %>% 
       pivot_longer(everything()) %>% rlang::set_names(c('attribute','levels')) )
 }
+#' @rdname ec_summarize_attrlvls
+#' @export
+ec_summarise_attrlvls <- ec_summarize_attrlvls
+
+
 
 
 # Working with estimates and draw objects ---------------------------------
@@ -2892,6 +2898,9 @@ ec_dem_summarise = function(de, quantiles=c(.05,.95)){
       !!(quantiles_name[2]):=map_dbl(.demdraws, quantile, probs=quantiles[2])
     ) )
 }
+#' @rdname ec_dem_summarise
+#' @export
+ec_dem_summarize <- ec_dem_summarise
 
 
 
@@ -2932,6 +2941,9 @@ ec_screen_summarise = function(sc, quantiles=c(.05,.95)){
       !!(quantiles_name[2]):=map_dbl(.screendraws, quantile, probs=quantiles[2])
     ) )
 }
+#' @rdname ec_screen_summarise
+#' @export
+ec_screen_summarize <- ec_screen_summarise
 
 
 
@@ -2975,6 +2987,10 @@ vd_dem_summarise = function(de, quantiles=c(.05,.95)){
       `S(interior)`= map_dbl(map(.demdraws, sign),sd)
     ) )
 }
+#' @rdname vd_dem_summarise
+#' @export
+vd_dem_summarize <- vd_dem_summarise
+
 
 
 

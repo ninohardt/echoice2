@@ -2,9 +2,12 @@
 % Please edit documentation in R/echoice2.R
 \name{ec_dem_summarise}
 \alias{ec_dem_summarise}
+\alias{ec_dem_summarize}
 \title{Summarize posterior draws of demand}
 \usage{
 ec_dem_summarise(de,quantiles)
+
+ec_dem_summarize(de, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{de}{demand draws}

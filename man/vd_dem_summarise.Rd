@@ -2,9 +2,12 @@
 % Please edit documentation in R/echoice2.R
 \name{vd_dem_summarise}
 \alias{vd_dem_summarise}
+\alias{vd_dem_summarize}
 \title{Summarize posterior draws of demand (volumetric models only)}
 \usage{
 vd_dem_summarise(de, quantiles = c(0.05, 0.95))
+
+vd_dem_summarize(de, quantiles = c(0.05, 0.95))
 }
 \arguments{
 \item{de}{demand draws}
