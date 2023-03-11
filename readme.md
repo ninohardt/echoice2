@@ -28,6 +28,13 @@ though no front-end is built into the package yet.
 - **Looking for co-developers!**
 
 - Version
+  [**0.22**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.2):
+
+  - Added a vignette on volumetric choice modeling with and without 
+    conjunctive screening
+  - CRAN release to follow soon
+    
+- Version
   [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.1):
 
   - Package compiles in absense of OpenMP Support
