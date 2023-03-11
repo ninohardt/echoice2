@@ -25,3 +25,10 @@ NULL
 #' @details Data from discrete choice conjoint analysis in the ice cream category. 300 respondents total. 
 #' Attributes include brand name, flavor, and container size. 
 NULL
+#'
+#' pizza
+#'
+#' @name pizza
+#' @docType data
+#' @details Data from volumetric conjoint analysis in the frozen pizza category.
+NULL
