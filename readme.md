@@ -70,7 +70,7 @@ though no front-end is built into the package yet.
 
 #install from github
 # install.packages("remotes")
-# remotes::install_github("ninohardt/echoice2")
+# remotes::install_github("ninohardt/echoice2", build_vignettes = TRUE)
 ```
 
 ``` r
