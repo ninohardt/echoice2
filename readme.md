@@ -28,12 +28,19 @@ though no front-end is built into the package yet.
 - **Looking for co-developers!**
 
 - Version
+  [**0.23**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.3):
+  
+  - The vignette "Importing list-of-lists choice data and discrete choice modeling with echoice2"
+    demonstrates how to import list-of-lists style choice data, convert it for use with echoice2 and
+    fit choice models. Related convenience functions have been added to the package.
+  - CRAN binaries to be online soon
+  
+- Version
   [**0.22**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.2):
 
   - Added a vignette on volumetric choice modeling with and without 
     conjunctive screening
-  - CRAN release to follow soon
-    
+
 - Version
   [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.1):
 
