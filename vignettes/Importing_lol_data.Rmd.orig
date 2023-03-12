@@ -1,0 +1,308 @@
+---
+title: "Importing list-of-lists choice data and discrete choice modeling with echoice2"
+output: rmarkdown::html_vignette
+description: >
+  This vignette shows how to model volumetric demand using a volumetric choice experiment example.
+vignette: >
+  %\VignetteIndexEntry{Importing list-of-lists choice data and discrete choice modeling with echoice2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r v02setup_vignette, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>", out.width = "100%",
+  fig.width = 7, fig.height = 4, dev = "CairoPNG", dpi = 150, fig.path = "",
+  message = FALSE, warning = FALSE, error = FALSE
+)
+library(echoice2)
+library(bayesm)
+```
+
+## Background
+
+Many users have organized their choice data in a list-of-lists format, where a `list` of length "number of respondents" is created, and each element of that lists contains another list with design matrix and choice information. An example of this is the `camera` dataset in 'bayesm'. echoice2 contains some helper functions that make it easy to import such data, and estimate corresponding discrete choice models.
+
+## Installation
+
+The `echoice2` package is available from [CRAN](https://CRAN.R-project.org/package=echoice2) and [GitHub](https://github.com/ninohardt/echoice2).
+
+To install from CRAN, run:
+
+```{r 2install_from_cran, eval=FALSE, include=TRUE}
+  install.packages("echoice2")
+```
+
+To install the latest development version from GitHub run:
+
+```{r v02install_from_github, eval=FALSE, include=TRUE}
+  remotes::install_github("ninohardt/echoice2")
+```
+
+
+## Getting started
+
+Load the package.
+
+```{r v02load_echoice2, message=FALSE, warning=FALSE}
+  library(echoice2)
+```
+
+Key functions for using the package are:
+
+-   `vd_est_vdm`: Estimating the "standard" volumetric demand model
+-   `vd_est_vdm_screen`: Estimating volumetric demand model with screening
+-   `vd_dem_vdm`: Demend predictions for the "standard" volumetric demand model
+-   `vd_dem_vdm_screen`: Demend predictions for the volumetric demand model with screening
+
+Functions that relate to discrete demand start in `dd_`, while functions for volumetric demand start in `vd_`. Estimation functions continue in `est`, demand simulators in `dem`. Universal functions (discrete and volumetric choice) start in `ec_`.
+
+
+## Data organization
+
+Choice data should be provided in a 'long' format tibble or data.frame, i.e. one row per alternative, choice task and respondent.
+
+It should contain the following columns
+
+-   `id` (integer; respondent identifier)
+-   `task` (integer; task number)
+-   `alt` (integer; alternative #no within task)
+-   `x` (double; quantity purchased)
+-   `p` (double; price)
+-   attributes defining the choice alternatives (factor, ordered) and/or
+-   continuous attributes defining the choice alternatives (numeric)
+
+By default, it is assumed that respondents were able to choose the 'outside good', i.e. there is a 'no-choice' option. The no-choice option should *not* be **explicitly** stated, i.e. there is no "no-choice-level" in any of the attributes. This differs common practice in *discrete* choice modeling, however, the **implicit** outside good is consistent with both *volumetric* and *discrete* choice models based on economic assumptions.
+
+Dummy-coding is performed automatically to ensure consistency between estimation and prediction, and to set up screening models in a consistent manner. Categorical attributes should therefore be provided as `factor` or `ordered`, and not be dummy-coded.
+
+
+
+## Importing list-of-list data
+
+Let's consider the camera example dataset from bayesm.
+
+```{r v02show_data}
+  data(camera)
+  head(camera[[1]]$X)
+  head(camera[[1]]$y)
+```
+
+Now let's prepare this dataset for analysis with 'echoice2'. 
+Using `ec_lol_tidy1` we can stack information from all respondents.
+The `price` variable is renamed to `p`.
+
+```{r}
+  data_tidier <- ec_lol_tidy1(camera) %>% rename(`p`='price')
+  data_tidier %>% head
+```
+
+Looking into the `p` column, we can see that the 5th alternative in each task has a price of `0`. This is an explicit outside good which needs to be removed:
+
+```{r}
+  data_tidier_2 <- data_tidier %>% filter(p>0)
+  data_tidier_2 %>% head
+```
+
+We can already see a couple of brand dummies, which need to be "un-dummied" into a categorical variable. Let's first check if there are more attributes in dummy form by checking mutually exlusive attributes:
+
+```{r}
+  data_tidier_2 %>% ec_util_dummy_mutualeclusive() %>% filter(mut_ex)
+```
+As we can see, only brand names come up. "Un-dummying" it is easy using the `ec_undummy` function. It has to be supplied with the column names of the dummies to be un-dummied, and the name of the target variable, in this case "brand".
+
+
+```{r}
+  data_tidier_3 <- 
+    data_tidier_2 %>% ec_undummy(c('canon','sony','nikon','panasonic'), 'brand')
+  data_tidier_3 %>% head
+```
+
+The remaining dummies are either high-low or yes-no type binary attributes. The two utility functions `ec_undummy_lowhigh` and `ec_undummy_yesno` make it convenient to undummy these as well:
+
+```{r}
+  data_tidied<-
+    data_tidier_3 %>% 
+      mutate(across(c(pixels,zoom), ec_undummy_lowhigh))%>% 
+      mutate(across(c(swivel,video,wifi), ec_undummy_yesno))
+  data_tidied %>% head()
+```
+
+Now `data_tidied` is ready for analysis.
+
+
+
+
+## Checking data
+
+To verify attributes and levels, we can use `ec_summarize_attrlvls`:
+
+
+```{r v02summarize_attributes}
+  data_tidied %>% ec_summarize_attrlvls
+```
+
+Since we have an implicit outside good, let's check that task total exhibit variation:
+
+```{r v02total_by_task}
+  data_tidied %>%
+    group_by(id, task) %>%
+      summarise(x_total = sum(x), .groups = "keep") %>%
+      group_by(x_total) %>% count(x_total)
+```
+
+
+### Holdout
+
+For hold-out validation, we keep 1 task per respondent. In v-fold cross-validation, this is done several times. However, each re-run of the model may take a while. For this example, we only use 1 set of holdout tasks. Hold-out evaluations results may vary slightly between publications that discuss this dataset.
+
+```{r v02holdout_split}
+  #randomly assign hold-out group, use seed for reproducible plot
+  set.seed(555) 
+    data_ho_tasks=
+    data_tidied %>%
+      distinct(id,task) %>%
+      mutate(id=as.integer(id))%>%
+      group_by(id) %>%
+      summarise(task=sample(task,1), .groups = "keep")
+  set.seed(NULL)
+
+  #calibration data
+    data_cal= data_tidied %>% mutate(id=as.integer(id)) %>%
+      anti_join(data_ho_tasks, by=c('id','task'))
+    
+  #'hold-out' data
+    data_ho= data_tidied %>% mutate(id=as.integer(id)) %>%
+      semi_join(data_ho_tasks, by=c('id','task'))
+```
+
+
+## Estimation
+
+Estimate both models using *at least* 200,000 draws. Saving each 50th or 100th draw is sufficient. The `vd_est_vdm` fits the compensatory volumetric demand model, while `vd_est_vdm_screen` fits the model with attribute-based conjunctive screening. Using the `error_dist` argument, the type of error distribution can be specified. While [KHKA 2022](https://doi.org/10.1016/j.ijresmar.2022.04.001) assume Normal-distributed errors, here we assume Extreme Value Type 1 errors.
+
+```{r v02estimating all final models, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+  #compensatory
+  out_camera_compensatory <- dd_est_hmnl(data_tidied)
+  dir.create("draws")
+  save(out_camera_compensatory,file='draws/out_camera_cal.rdata')
+
+  #conjunctive screening
+  out_camera_screening <- dd_est_hmnl_screen(data_tidied)
+  save(out_camera_screening,file='draws/out_camera_screening.rdata')
+```
+
+```{r v02loading draws from previous run, message=FALSE, warning=FALSE, eval=TRUE, include=FALSE}
+  load('draws/out_camera_cal.rdata')
+  load('draws/out_camera_screening.rdata')
+```
+
+
+### Diagnostics
+
+#### Quick check of convergence, or stationarity of the traceplots.
+
+Compensatory:
+
+```{r v02traceplot_vd, fig.height=4, fig.width=7}
+  out_camera_compensatory %>% ec_trace_MU(burnin = 100)
+```
+
+Conjunctive Screening:
+
+```{r v02traceplot_vd-screen, fig.height=4, fig.width=7}
+  out_camera_screening %>% ec_trace_MU(burnin = 100)
+```
+
+
+#### Distribution of Log-likehoods to check for outlier respondents:
+
+```{r v02outlier_check, fig.height=4, fig.width=6}
+  dd_LL(out_camera_compensatory ,data_cal, fromdraw = 3000) %>% 
+    apply(1,mean) %>% tibble(LL=.) %>% 
+    ggplot(aes(x=LL)) + 
+      geom_density(fill="lightgrey", linewidth=1) + theme_minimal() +
+      xlab("Individual average Log-Likelihood")
+```
+
+All average log-likelihoods are better than random selection, indicating good data quality.
+
+
+## Fit
+
+### In-sample
+
+First, we compare in-sample fit. The proposed model fits better.
+
+```{r v02LMD}
+  list(compensatory = out_camera_compensatory,
+       conjunctive  = out_camera_screening) %>%
+    purrr::map_dfr(ec_lmd_NR, .id = 'model') %>%
+    filter(part==1) %>% select(-part)
+```
+
+
+### Holdout
+
+Now, we compare "holdout"-fit. Here we obtain posterior distributions of choice share predictions via `dd_dem` and `dd_dem_sr` and then compute the hit probabilities. It is adviced to carefully think about your relevant loss function and choose an appropriate metric for holdout fit comparisons. 
+
+
+```{r}
+ho_prob_dd=
+    data_ho %>%
+      prep_newprediction(data_cal) %>%
+        dd_dem(out_camera_compensatory, prob=TRUE)
+
+ho_prob_ddscreen=
+    data_ho %>%
+      prep_newprediction(data_cal) %>%
+        dd_dem_sr(out_camera_screening, prob=TRUE)
+
+hit_probabilities=c()
+
+hit_probabilities$compensatory=
+ho_prob_dd %>%
+  vd_dem_summarise() %>%
+  select(id,task,alt,x,p,`E(demand)`) %>%
+  group_by(id,task) %>% group_split() %>%
+  purrr::map_dbl(. %>%  select(c(x,`E(demand)`)) %>% 
+                        add_row(x=1-sum(.$x),`E(demand)`=1-sum(.$`E(demand)`)) %>%
+                        summarise(hp=sum(x*`E(demand)`))%>% unlist) %>% mean()
+
+hit_probabilities$screening=
+ho_prob_ddscreen %>%
+  vd_dem_summarise() %>%
+  select(id,task,alt,x,p,`E(demand)`) %>%
+  group_by(id,task) %>% group_split() %>%
+  purrr::map_dbl(. %>%  select(c(x,`E(demand)`)) %>% 
+                        add_row(x=1-sum(.$x),`E(demand)`=1-sum(.$`E(demand)`)) %>%
+                        summarise(hp=sum(x*`E(demand)`))%>% unlist) %>% mean()
+
+hit_probabilities
+```
+
+
+
+## Estimates
+
+### Part-Worths
+
+Using `ec_estimates_MU` it is easy to obtain the "upper level" posterior means of the key parameters. We can see that Canon is the most popular brand. All brand "part-worths" are larger when accounting for screening, but it is particularly noticeable for Sony and Panasonic.
+
+```{r v02vd_mu, fig.height=4, fig.width=6}
+  out_camera_compensatory %>% ec_estimates_MU()
+```
+
+```{r v02vdscreen_mu, fig.height=4, fig.width=6}
+  out_camera_screening %>% ec_estimates_MU()
+```
+
+
+### Screening probabilities
+
+Using `ec_estimates_screen`, screening probabilities be obtained. As we can see, screening does not play a huge role in this dataset, and therefore improvements in fit are just modest.
+
+```{r v02estimates_screening, fig.height=4, fig.width=6}
+  out_camera_screening %>% ec_estimates_screen()
+```
+

@@ -121,6 +121,8 @@ NULL
 #' @importFrom forcats fct_relabel
 NULL
 
+#' @importFrom forcats fct_recode
+NULL
 
 
 #' @importFrom purrr map
@@ -222,6 +224,8 @@ NULL
 #' @importFrom ggplot2 guides
 NULL
 
+#' @importFrom utils combn
+NULL
 
 
 
@@ -3790,3 +3794,240 @@ vd_thin_draw=function(est,
 
 
 
+
+# Special helper functions---------------------------------------------------------
+
+#' Convert a vector of choices to long format
+#'
+#' Converts a vector of choices into a long format data frame, where each row represents 
+#' a single choice and contains the choice status for each alternative.
+#'
+#' @param myvec A vector of choices, where each element represents the index of the chosen alternative.
+#' @param all_index A vector of all the possible alternative indices.
+#' 
+#' @return A tibble with columns 'x', 'task', and 'alt', where 'x' is a binary indicator of whether
+#' the alternative was chosen or not, 'task' is the task index, and 'alt' is the alternative index.
+#' 
+#' @examples
+#' #There are 3 alternatives in this task. 
+#' #Since there are 3 observations in myvec, there are 3 tasks total.
+#' ec_util_choice_to_long(c(1, 2, 1), c(1, 2, 3))
+#'
+#' @export
+ec_util_choice_to_long <- function(myvec, all_index) {
+  # Create a matrix of zeros with dimensions n x p, 
+  # where n is the length of myvec and p is the length of all_index
+  dummy_mat <- matrix(0, nrow = length(myvec), ncol = length(all_index))
+  
+  # Loop through each index in myvec and set the corresponding element in dummy_mat to 1
+  for (i in 1:length(myvec)) {
+    dummy_mat[i, myvec[i]] <- 1
+  }
+  long_choices= as.vector(t(dummy_mat))
+  long_task   = rep(seq_along(myvec), each=length(all_index))
+  long_alt    = rep(seq_along(all_index),length(myvec))
+  
+  return(tibble(x    = long_choices,
+                task = long_task,
+                alt  = long_alt))
+}
+
+
+#' Convert "list of lists" format to long "tidy" format
+#'
+#' @param data_lol A list of data frames containing design matrices and response vectors
+#' @param X The column name of the design matrix, default: "X"
+#' @param y The column name of the response vector, default: "y"
+#'
+#' @return A tidy data frame with columns for each design matrix column, the response vector,
+#' and an id column indicating which data frame the row came from
+#' 
+#' @examples
+#' loldata<-list()
+#' loldata[[1]]=list()
+#' loldata[[1]]$y = c(1,2)
+#' loldata[[1]]$X= data.frame(brand1=c(1,0, 1,0),brand2=c(0,1, 0,1),price=c(1,2))
+#' loldata[[2]]=list()
+#' loldata[[2]]$y = c(1,1)
+#' loldata[[2]]$X= data.frame(brand1=c(1,0, 1,0),brand2=c(0,1, 0,1),price=c(1,2))
+#' ec_lol_tidy1(loldata)
+#' 
+#' @export
+ec_lol_tidy1 <- function(data_lol, X="X", y="y"){
+  
+  all_possible_responses <-
+    map(data_lol,`[[`,y) %>% do.call("c",.) %>% unique()
+  
+  combined_design_matrices <- 
+    map(data_lol,`[[`, X) %>% 
+    map_dfr(~data.frame(.),.id = "id")
+  
+  combined_responses <-  
+    map(data_lol,`[[`,y) %>%
+    map_dfr(~ec_util_choice_to_long(.,all_possible_responses))
+  
+  combined_design_matrices %>%
+    add_column(combined_responses) %>% 
+    relocate(c(task,alt),.after=id) %>%
+    as.data.frame() %>% as_tibble() %>% return()
+}
+
+
+
+#' Find mutually exclusive columns
+#'
+#' This function finds pairs of columns in a data frame that are mutually exclusive, i.e., that never have positive values at the same time.
+#'
+#' @param data_in A data frame containing the data.
+#' @param filtered A logical value indicating whether to return only the mutually exclusive pairs (TRUE) or all pairs (FALSE). Default is TRUE.
+#' 
+#' @return A tibble containing all pairs of mutually exclusive columns in the data frame.
+#' 
+#' @examples
+#' minidata=structure(list(id = c("1", "1", "1", "1", "2", "2", "2", "2"), 
+#' task = c(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L), 
+#' alt = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L), 
+#' brand1 = c(1, 0, 1, 0, 1, 0, 1, 0), 
+#' brand2 = c(0, 1, 0, 1, 0, 1, 0, 1), 
+#' price = c(1, 2, 1, 2, 1, 2, 1, 2), 
+#' x = c(1, 0, 0, 1, 1, 0, 1, 0)), 
+#' class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -8L))
+#' ec_util_dummy_mutualeclusive(minidata)
+#'
+#' 
+#' @export
+ec_util_dummy_mutualeclusive= function(data_in, filtered=TRUE){
+  
+  #helper  
+  ec_util_mut_exc = function(a,b) max(sign(a)+sign(b))<=1
+  
+  #select relevant columns
+  dat<-data_in %>% select(-any_of(c("id","task","alt","x")))
+  
+  combs       <- t(utils::combn(seq_len(ncol(dat)),2))
+  combs_name  <- t(utils::combn(colnames(dat),2)) %>% as_tibble()
+  
+  m_ex=rep(NA,nrow(combs))
+  for(kk in seq_len(nrow(combs))){
+    m_ex[kk]<-ec_util_mut_exc(dat[combs[kk,1]], dat[combs[kk,2]])
+  }
+  if(filtered){
+    combs_name %>% add_column(mut_ex=m_ex) %>% filter(mut_ex=TRUE) %>% return()
+  }else{
+    combs_name %>% add_column(mut_ex=m_ex) %>% return()
+  }
+} 
+
+
+
+#' Converts a set of dummy variables into a single categorical variable
+#'
+#' Given a set of dummy variables, this function converts them into a single
+#' categorical variable. The categorical variable is created by determining
+#' which variables are active (i.e. have a value of 1) for each observation and
+#' assigning a category based on the set of active variables. If necessary, a
+#' reference level can be specified to ensure that all possible categories are
+#' represented. Often, all brands of a brand attribute are added as brand 
+#' intercepts, while other categorical attributes are coded with respect to a
+#' reference level.
+#'
+#' @param data_in a data frame containing the dummy variables
+#' @param set_members a character vector of the names of the dummy variables
+#' @param attribute_name a character string representing the name of the new
+#'   categorical variable
+#' @param ref_level a character string representing the name of the reference
+#'   level. If specified, a new dummy variable will be created for this level,
+#'   and it will be used as the reference category for the categorical variable.
+#'   Defaults to NULL.
+#'
+#' @return a data frame with the same columns as \code{data_in}, except for the
+#'   dummy variables in \code{set_members}, which are replaced with the new
+#'   categorical variable \code{attribute_name}
+#'
+#' @examples
+#' minidata=structure(list(id = c("1", "1", "1", "1", "2", "2", "2", "2"), 
+#' task = c(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L), 
+#' alt = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L), 
+#' brand1 = c(1, 0, 1, 0, 1, 0, 1, 0), 
+#' brand2 = c(0, 1, 0, 1, 0, 1, 0, 1), 
+#' price = c(1, 2, 1, 2, 1, 2, 1, 2), 
+#' x = c(1, 0, 0, 1, 1, 0, 1, 0)), 
+#' class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -8L))
+#' 
+#' minidata %>% ec_undummy(c('brand1','brand2'),"brand")
+#'
+#' 
+#' @export
+ec_undummy=function(data_in, 
+                    set_members, 
+                    attribute_name, 
+                    ref_level=NULL){
+  
+  datax=data_in %>% select(all_of(set_members)) 
+  row_sum_check<-datax %>% rowSums() %>% min
+  
+  if(row_sum_check!=1){
+    if(is.null(ref_level)) stop("You need to define the name of the reference level.")
+    datax<-datax %>% mutate(!!(ref_level):= 1-rowSums(select(.,everything())))
+    set_members=c(set_members,ref_level)
+  }else{
+    if(!is.null(ref_level)) warning("Reference level is not needed.")
+  }
+  
+  data_in %>%
+    add_column(
+      !!(attribute_name):=
+      (sign(data.matrix(datax))>0)  %>% which(arr.ind = TRUE) %>% 
+        as.data.frame%>%arrange(across("row")) %>% pull("col") %>% {set_members[.]} %>% factor(),
+      .before = set_members[1]
+    ) %>% 
+    select(-any_of(set_members)) %>%
+    return()
+  
+}
+
+
+
+#' Convert dummy-coded variables to low/high factor
+#' 
+#' @param vec_in A vector of dummy-coded variables (0/1) 
+#' @return A factor vector with levels "low" and "high"
+#' 
+#' @examples
+#' ec_undummy_lowhigh(c(0,1,0,1,1))
+#'
+#'
+#' @export
+ec_undummy_lowhigh=function(vec_in){
+  vec_in %>% factor() %>% fct_recode("low"="0","high"="1") %>% return()
+}
+
+
+#' Convert dummy-coded variables to yes/no factor
+#' 
+#' @param vec_in A vector of dummy-coded variables (0/1) 
+#' @return A factor vector with levels "no" and "yes"
+#' 
+#' @examples
+#' ec_undummy_yesno(c(0,1,0,1,1))
+#'
+#'
+#' @export
+ec_undummy_yesno=function(vec_in){
+  vec_in %>% factor() %>% fct_recode("no"="0","yes"="1") %>% return()
+}
+
+
+#' Convert dummy-coded variables to low/medium/high factor
+#' 
+#' @param vec_in A vector of dummy-coded variables (0/1/2) 
+#' @return A factor vector with levels "low", "medium" and "high"
+#' 
+#' @examples
+#' ec_undummy_lowmediumhigh(c(0,1,2,1,0,2))
+#'
+#'
+#' @export
+ec_undummy_lowmediumhigh=function(vec_in){
+  vec_in %>% factor() %>% fct_recode("low"="0","medium"="1","high"="2") %>% return()
+}
