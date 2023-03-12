@@ -25,7 +25,7 @@ The case study described in this vignette deals with demand for consumer package
 
 ## Installation
 
-The `echoice2` package is available from [CRAN](https://cran.r-project.org/web/packages/echoice2) and [GitHub](https://github.com/ninohardt/echoice2).
+The `echoice2` package is available from [CRAN](https://CRAN.R-project.org/package=echoice2) and [GitHub](https://github.com/ninohardt/echoice2).
 
 To install from CRAN, run:
 
@@ -141,7 +141,7 @@ For hold-out validation, we keep 1 task per respondent. In v-fold cross-validati
 
 ## Estimation
 
-Estimate both models using *at least* 200,000 draws. Saving each 50th or 100th draw is sufficient. The `vd_est_vdm` fits the compensatory volumetric demand model, while `vd_est_vdm_screen` fits the model with attribute-based conjunctive screening. Using the `error_dist` argument, the type of error distribution can be specified. While KHKA 2022 <doi:10.1016/j.ijresmar.2022.04.001> assume Normal-distributed errors, here we assume Extreme Value Type 1 errors.
+Estimate both models using *at least* 200,000 draws. Saving each 50th or 100th draw is sufficient. The `vd_est_vdm` fits the compensatory volumetric demand model, while `vd_est_vdm_screen` fits the model with attribute-based conjunctive screening. Using the `error_dist` argument, the type of error distribution can be specified. While [KHKA 2022](https://doi.org/10.1016/j.ijresmar.2022.04.001) assume Normal-distributed errors, here we assume Extreme Value Type 1 errors.
 
 ```{r estimating all final models, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
   #compensatory
