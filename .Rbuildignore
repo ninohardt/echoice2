@@ -11,3 +11,12 @@
 ^CRAN-SUBMISSION$
 readme.Rmd
 readme.md
+^vignettes/draws
+^\.libs$
+^.*\.dll$
+^bus$
+^pkgdown$
+^lib$
+^library$
+^\.Rhistory$
+^NEWS\.0\.md$
