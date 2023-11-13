@@ -2,4 +2,4 @@
 
 0 errors | 0 warnings | 1 note
 
-* This version adds functions for handling 'bayesm'-style 'list-of-list' choice data and 2 vignettes.
+* Adapting to change in Roxygen documentation system, no implications for using the package.
