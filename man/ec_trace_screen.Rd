@@ -18,11 +18,12 @@ A ggplot2 plot containing traceplots of draws
 Generate Screening probability traceplots
 }
 \examples{
+\dontrun{
 data(icecream)
 #run MCMC sampler (use way more than 20 draws for actual use
-icecream_scr_est <- icecream \%>\% dplyr::filter(id<20) \%>\% vd_est_vdm_screen(R=20)
+icecream_scr_est <- icecream \%>\% dplyr::filter(id<20) \%>\% vd_est_vdm_screen(R=20, cores=2)
 ec_trace_screen(icecream_scr_est, burnin=1)
-
+}
 
 }
 \seealso{

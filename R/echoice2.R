@@ -2272,9 +2272,11 @@ dd_est_hmnl = function(dd,
 #' @param cores no of CPU cores to use (default: auto-detect)
 #' @param control list containing additional settings
 #' @examples 
+#' \donttest{
 #' data(icecream_discrete)
 #' icecream_est <- icecream_discrete %>% dplyr::filter(id<20) %>% 
 #'   dd_est_hmnl_screen(R=20, cores=2)
+#' }
 #' @return est ec-draw object (List)
 #' 
 #' @seealso [dd_dem_sr()] to generate demand predictions based on this model
@@ -2566,12 +2568,13 @@ dd_LL_sr <- function(draw, dd, fromdraw=1){
 #' @return Draws of expected choice
 #' 
 #' @examples 
+#' \donttest{
 #' data(icecream_discrete)
-#' icecream_est <- icecream_discrete %>% filter(id<20) %>% dd_est_hmnl(R=10, cores=2)
+#' icecream_est <- icecream_discrete %>% filter(id<10) %>% dd_est_hmnl(R=4, cores=2)
 #' #demand prediction
-#' icecream_dempred <- icecream_discrete %>% filter(id<20) %>% 
+#' icecream_dempred <- icecream_discrete %>% filter(id<10) %>% 
 #'   dd_dem(icecream_est, cores=2)
-#' 
+#' }
 #' @seealso [dd_est_hmnl()] to generate demand predictions based on this model
 #' 
 #' @export
@@ -2795,10 +2798,10 @@ dd_dem_sr=function(dd,
 #' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 10 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<50) %>% vd_est_vdm(R=10, keep=1, cores=2)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm(R=4, keep=1, cores=2)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<50) %>%   
+#'  icecream %>% dplyr::filter(id<10) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #add prodid
 #' icecream_predicted_demand_w_id<-icecream_predicted_demand %>% vd_add_prodid
@@ -2848,10 +2851,10 @@ ec_named_group_split <- function(.tbl, ...) {
 #' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm(R=10, keep=1, cores=2)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm(R=4, keep=1, cores=2)
 #' #Generate demand predictions
 #' icecream_predicted_demand=
-#'  icecream %>% dplyr::filter(id<20) %>%   
+#'  icecream %>% dplyr::filter(id<10) %>%   
 #'    vd_dem_vdm(icecream_est)
 #' #aggregate
 #' brand_lvl_pred_demand <-
@@ -2930,7 +2933,7 @@ ec_dem_summarize <- ec_dem_summarise
 #' icecream_est <- icecream %>% vd_est_vdm_screen(R=20,  price_screen=TRUE, cores=2)
 #' #consideration set by respondent
 #' cons_ss <- 
-#' ec_screenprob_sr(icecream, icecream_est) %>%
+#' ec_screenprob_sr(icecream, icecream_est, cores=2) %>%
 #' group_by(id, task)  %>%
 #'   summarise(.screendraws=list(purrr::reduce(.screendraws ,`+`))) %>%
 #'   ec_screen_summarise() %>%
@@ -3374,10 +3377,10 @@ ec_demcurve_cond_dem=function(ec_long,
 #' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use)
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% 
-#' vd_est_vdm(R=100, keep=1, error_dist = "Normal", cores=2)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% 
+#' vd_est_vdm(R=10, keep=1, error_dist = "Normal", cores=2)
 #' #generate error realizations
-#' errs<- ec_gen_err_normal(icecream %>% dplyr::filter(id<100), icecream_est, seed=123)
+#' errs<- ec_gen_err_normal(icecream %>% dplyr::filter(id<10), icecream_est, seed=123)
 #' }
 #' 
 #' @return error realizations
@@ -3570,10 +3573,10 @@ ec_draws_screen <- function(draws){
 #' @param burnin burn-in to remove
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 20 draws for actual use
-#' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=20, cores=2)
+#' icecream_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm(R=10, cores=2)
 #' ec_trace_MU(icecream_est)
 #' }
 #' 
@@ -3605,7 +3608,7 @@ ec_trace_MU <- function(draws, burnin=100){
 #' @param burnin burn-in to remove
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 20 draws for actual use
 #' icecream_scr_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm_screen(R=20, cores=2)
@@ -3645,7 +3648,7 @@ ec_trace_screen <- function(draws, burnin=100){
 #' @param burnin burn-in to remove
 #' @return A ggplot2 plot containing traceplots of draws
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 50 draws for actual use
 #' icecream_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm(R=20, cores=2)
@@ -3688,7 +3691,7 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 20 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<100) %>% vd_est_vdm_screen(R=20, cores=2)
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm_screen(R=10, cores=2)
 #' ec_boxplot_screen(icecream_scr_est, burnin = 1)
 #' }
 #' 

@@ -2,7 +2,7 @@ Type: Package
 Package: echoice2
 Title: Choice Models with Economic Foundation
 Version: 0.2.4
-Date: 2023-11-13
+Date: 2023-11-20
 Authors@R: 
     person(given = "Nino",
            family = "Hardt",

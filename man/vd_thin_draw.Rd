@@ -20,13 +20,14 @@ thinned 'echoice2' draw object (list)
 Thin 'echoice2'-vd draw objects
 }
 \examples{
+\donttest{
 data(icecream)
 #run MCMC sampler (use way more than 50 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50, keep = 1)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=10, keep = 1, cores=2)
 #without thinning, yields R=50 draWs
 dim(icecream_est$MUDraw)
 icecream_est_thinned <- vd_thin_draw(icecream_est,.5)
 #26 draws left after thinning about half
 dim(icecream_est_thinned$MUDraw)
-
+}
 }

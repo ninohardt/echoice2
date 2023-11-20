@@ -18,7 +18,7 @@ Obtain MU_theta draws
 \examples{
 data(icecream)
 #run MCMC sampler (use way more than 20 draws for actual use
-icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm(R=20)
+icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm(R=20, cores=2)
 ec_draws_MU(icecream_est)
 
 }

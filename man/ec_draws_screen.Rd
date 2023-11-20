@@ -18,7 +18,7 @@ Obtain Screening probability draws
 \examples{
 data(icecream)
 #run MCMC sampler (use way more than 20 draws for actual use
-icecream_scr_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm_screen(R=20)
+icecream_scr_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm_screen(R=20, cores=2)
 ec_draws_screen(icecream_scr_est)
 
 }

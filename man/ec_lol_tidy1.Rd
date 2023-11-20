@@ -21,6 +21,7 @@ and an id column indicating which data frame the row came from
 Convert "list of lists" format to long "tidy" format
 }
 \examples{
+\donttest{
 loldata<-list()
 loldata[[1]]=list()
 loldata[[1]]$y = c(1,2)
@@ -29,5 +30,6 @@ loldata[[2]]=list()
 loldata[[2]]$y = c(1,1)
 loldata[[2]]$X= data.frame(brand1=c(1,0, 1,0),brand2=c(0,1, 0,1),price=c(1,2))
 ec_lol_tidy1(loldata)
+}
 
 }

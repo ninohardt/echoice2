@@ -22,7 +22,7 @@ is computed for each part. This helps to double-check convergence.
 \examples{
 data(icecream)
 #run MCMC sampler (use way more than 50 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=50)
+icecream_est <- icecream \%>\% dplyr::filter(id<100) \%>\% vd_est_vdm(R=20, cores=2)
 #obtain LMD by quartile of draws
 ec_lmd_NR(icecream_est)
 

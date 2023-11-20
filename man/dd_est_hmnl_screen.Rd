@@ -33,9 +33,11 @@ est ec-draw object (List)
 Estimate discrete choice model (HMNL, attribute-based screening (not including price))
 }
 \examples{
+\donttest{
 data(icecream_discrete)
 icecream_est <- icecream_discrete \%>\% dplyr::filter(id<20) \%>\% 
   dd_est_hmnl_screen(R=20, cores=2)
+}
 }
 \seealso{
 \code{\link[=dd_dem_sr]{dd_dem_sr()}} to generate demand predictions based on this model

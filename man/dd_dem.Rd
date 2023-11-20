@@ -22,12 +22,13 @@ Draws of expected choice
 Discrete Choice Predictions (HMNL)
 }
 \examples{
+\donttest{
 data(icecream_discrete)
-icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% dd_est_hmnl(R=10)
+icecream_est <- icecream_discrete \%>\% filter(id<10) \%>\% dd_est_hmnl(R=4, cores=2)
 #demand prediction
-icecream_dempred <- icecream_discrete \%>\% filter(id<20) \%>\% 
+icecream_dempred <- icecream_discrete \%>\% filter(id<10) \%>\% 
   dd_dem(icecream_est, cores=2)
-
+}
 }
 \seealso{
 \code{\link[=dd_est_hmnl]{dd_est_hmnl()}} to generate demand predictions based on this model

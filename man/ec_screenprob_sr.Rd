@@ -21,7 +21,7 @@ Obtain draws of screening probabilities of choiec alternatives
 }
 \examples{
 data(icecream)
-icecream_est <- icecream \%>\% filter(id<10) \%>\% vd_est_vdm_screen(R=10,  price_screen=TRUE)
-ec_screenprob_sr(icecream \%>\% filter(id<10), icecream_est) 
+icecream_est <- icecream \%>\% filter(id<10) \%>\% vd_est_vdm_screen(R=10,  price_screen=TRUE, cores=2)
+ec_screenprob_sr(icecream \%>\% filter(id<10), icecream_est, cores=2) 
 
 }

@@ -24,10 +24,10 @@ Adds summaries of posterior draws of demand to tibble.
 \examples{
 \donttest{
 data(icecream)
-icecream_est <- icecream \%>\% vd_est_vdm_screen(R=20,  price_screen=TRUE)
+icecream_est <- icecream \%>\% vd_est_vdm_screen(R=20,  price_screen=TRUE, cores=2)
 #consideration set by respondent
 cons_ss <- 
-ec_screenprob_sr(icecream, icecream_est) \%>\%
+ec_screenprob_sr(icecream, icecream_est, cores=2) \%>\%
 group_by(id, task)  \%>\%
   summarise(.screendraws=list(purrr::reduce(.screendraws ,`+`))) \%>\%
   ec_screen_summarise() \%>\%

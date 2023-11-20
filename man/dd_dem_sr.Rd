@@ -22,11 +22,13 @@ Draws of expected choice
 Discrete Choice Predictions (HMNL with attribute-based screening)
 }
 \examples{
+\donttest{
 data(icecream_discrete)
-icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% dd_est_hmnl_screen(R=10)
+icecream_est <- icecream_discrete \%>\% filter(id<20) \%>\% dd_est_hmnl_screen(R=10, cores=2)
 #demand prediction
 icecream_dempred <- icecream_discrete \%>\% filter(id<20) \%>\% 
  dd_dem_sr(icecream_est, cores=2)
+ }
 
 }
 \seealso{

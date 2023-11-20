@@ -16,14 +16,16 @@ est
 This adds a unique product identifier to  demand draw objects.
 }
 \examples{
+\donttest{
 data(icecream)
 #run MCMC sampler (use way more than 10 draws for actual use)
-icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% vd_est_vdm(R=10, keep=1)
+icecream_est <- icecream \%>\% dplyr::filter(id<10) \%>\% vd_est_vdm(R=4, keep=1, cores=2)
 #Generate demand predictions
 icecream_predicted_demand=
- icecream \%>\% dplyr::filter(id<50) \%>\%   
+ icecream \%>\% dplyr::filter(id<10) \%>\%   
    vd_dem_vdm(icecream_est)
 #add prodid
 icecream_predicted_demand_w_id<-icecream_predicted_demand \%>\% vd_add_prodid
+}
 
 }

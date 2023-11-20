@@ -37,7 +37,7 @@ This helper function creates demand curves
 data(icecream)
 #run MCMC sampler (use way more than 50 draws for actual use)
 icecream_est <- icecream \%>\% dplyr::filter(id<50) \%>\% 
-vd_est_vdm(R=20, keep=1)
+vd_est_vdm(R=20, keep=1, cores=2)
 #demand at different price points
 inci_scenarios<-
 ec_demcurve_inci(icecream\%>\% dplyr::filter(id<50),
