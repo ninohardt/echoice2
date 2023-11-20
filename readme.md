@@ -28,39 +28,49 @@ though no front-end is built into the package yet.
 - **Looking for co-developers!**
 
 - Version
-  [**0.23**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.3):
-  
-  - The vignette "Importing list-of-lists choice data and discrete choice modeling with echoice2"
-    demonstrates how to import list-of-lists style choice data, convert it for use with echoice2 and
-    fit choice models. Related convenience functions have been added to the package.
-  - CRAN binaries to be online soon
-  
-- Version
-  [**0.22**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.2):
+  [**0.2.4**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.4):
 
-  - Added a vignette on volumetric choice modeling with and without 
+  - A lot of work because of Roxygen’s [breaking
+    change](https://github.com/r-lib/roxygen2/issues/1491), from
+    recommended use of docType to breaking it
+  - Nothing changed functionality-wise
+
+- Version
+  [**0.2.3**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.3):
+
+  - The vignette “Importing list-of-lists choice data and discrete
+    choice modeling with echoice2” demonstrates how to import
+    list-of-lists style choice data, convert it for use with echoice2
+    and fit choice models. Related convenience functions have been added
+    to the package.
+  - CRAN release to follow soon
+
+- Version
+  [**0.2.2**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.2):
+
+  - Added a vignette on volumetric choice modeling with and without
     conjunctive screening
 
 - Version
-  [**0.21**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.1):
+  [**0.2.1**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.1):
 
   - Package compiles in absense of OpenMP Support
   - MacOS CRAN binaries are compiled without OpenMP - for full speed
     compile yourself or use binaries supplied here
 
 - Version
-  [**0.20**](https://github.com/ninohardt/echoice2/releases/tag/v0.20):
+  [**0.2.0**](https://github.com/ninohardt/echoice2/releases/tag/v0.20):
 
   - Initial CRAN release
   - No new functionality, but cleaner code
 
 - Version
-  [**0.16**](https://github.com/ninohardt/echoice2/releases/tag/v0.16):
+  [**0.1.6**](https://github.com/ninohardt/echoice2/releases/tag/v0.16):
 
   - Stability/Performance improvements for demand simulators
 
 - Version
-  [**0.15**](https://github.com/ninohardt/echoice2/releases/tag/v0.15):
+  [**0.1.5**](https://github.com/ninohardt/echoice2/releases/tag/v0.15):
 
   - Initial release
   - faster and more efficient screening model estimation
@@ -163,7 +173,7 @@ est_icecream <- icecream %>% vd_est_vdm(R=10000)
 #> Using 16 cores
 #>  MCMC in progress 
 #> MCMC complete
-#>  Total Time Elapsed: 0.15 minutes
+#>  Total Time Elapsed: 0.17 minutes
 ```
 
 Upper-level estimates can be summarized using `ec_estimates_MU`:
@@ -171,20 +181,20 @@ Upper-level estimates can be summarized using `ec_estimates_MU`:
 ``` r
 est_icecream %>% ec_estimates_MU()
 #> # A tibble: 21 × 12
-#>    attrib…¹ lvl   par      mean     sd `CI-5%` CI-95…² sig   model error refer…³
-#>    <chr>    <chr> <chr>   <dbl>  <dbl>   <dbl>   <dbl> <lgl> <chr> <chr> <chr>  
-#>  1 <NA>     <NA>  int   -3.22   0.545   -3.50  -2.71   TRUE  VD-c… EV1   <NA>   
-#>  2 Brand    Blue… Bran… -0.695  0.155   -0.882 -0.458  TRUE  VD-c… EV1   BenNJe…
-#>  3 Brand    Blue… Bran… -0.618  0.145   -0.796 -0.355  TRUE  VD-c… EV1   BenNJe…
-#>  4 Brand    Brey… Bran… -0.0750 0.0894  -0.235  0.0546 FALSE VD-c… EV1   BenNJe…
-#>  5 Brand    Drye… Bran… -0.546  0.126   -0.704 -0.342  TRUE  VD-c… EV1   BenNJe…
-#>  6 Brand    Haag… Bran… -0.285  0.0861  -0.425 -0.150  TRUE  VD-c… EV1   BenNJe…
-#>  7 Brand    Store Bran… -0.498  0.114   -0.650 -0.337  TRUE  VD-c… EV1   BenNJe…
-#>  8 Flavor   Choc… Flav… -0.317  0.127   -0.493 -0.0434 TRUE  VD-c… EV1   Chocol…
-#>  9 Flavor   Choc… Flav… -0.392  0.115   -0.563 -0.206  TRUE  VD-c… EV1   Chocol…
-#> 10 Flavor   Cook… Flav… -0.415  0.111   -0.580 -0.235  TRUE  VD-c… EV1   Chocol…
-#> # … with 11 more rows, 1 more variable: parameter <chr>, and abbreviated
-#> #   variable names ¹​attribute, ²​`CI-95%`, ³​reference_lvl
+#>    attribute lvl         par      mean     sd `CI-5%` `CI-95%` sig   model error
+#>    <chr>     <chr>       <chr>   <dbl>  <dbl>   <dbl>    <dbl> <lgl> <chr> <chr>
+#>  1 <NA>      <NA>        int    -3.22  0.547   -3.56   -2.52   TRUE  VD-c… EV1  
+#>  2 Brand     BlueBell    Brand… -0.713 0.169   -0.944  -0.471  TRUE  VD-c… EV1  
+#>  3 Brand     BlueBunny   Brand… -0.731 0.169   -0.945  -0.394  TRUE  VD-c… EV1  
+#>  4 Brand     Breyers     Brand… -0.117 0.0976  -0.295   0.0331 FALSE VD-c… EV1  
+#>  5 Brand     Dryers      Brand… -0.554 0.122   -0.705  -0.358  TRUE  VD-c… EV1  
+#>  6 Brand     HaagenDa    Brand… -0.358 0.0937  -0.510  -0.211  TRUE  VD-c… EV1  
+#>  7 Brand     Store       Brand… -0.526 0.126   -0.707  -0.348  TRUE  VD-c… EV1  
+#>  8 Flavor    ChocChip    Flavo… -0.393 0.113   -0.566  -0.213  TRUE  VD-c… EV1  
+#>  9 Flavor    ChocDough   Flavo… -0.435 0.128   -0.618  -0.192  TRUE  VD-c… EV1  
+#> 10 Flavor    CookieCream Flavo… -0.443 0.111   -0.611  -0.256  TRUE  VD-c… EV1  
+#> # ℹ 11 more rows
+#> # ℹ 2 more variables: reference_lvl <chr>, parameter <chr>
 ```
 
 Corresponding demand predictions can be obtained using the `vd_dem_vdm`
@@ -195,7 +205,6 @@ dempres_icecream <-
   icecream %>%
   vd_dem_vdm(est = est_icecream)
 #> Using 16 cores
-#>  Computation in progress
 ```
 
 The resulting output makes it easy to work with demand predictions
@@ -217,7 +226,7 @@ dempres_icecream
 #>  8     1     1     8     0 1.99  BlueBunny Neapolitan  4     <dbl [1,000]>
 #>  9     1     1     9     0 0.622 Breyers   RockyRoad   16    <dbl [1,000]>
 #> 10     1     1    10     0 3.49  Breyers   Vanilla     4     <dbl [1,000]>
-#> # … with 39,590 more rows
+#> # ℹ 39,590 more rows
 ```
 
 We can aggregate (e.g., by subject `id`) using `ec_dem_aggregate`:
@@ -238,7 +247,7 @@ dempres_icecream %>%
 #>  8     8 <dbl [1,000]>
 #>  9     9 <dbl [1,000]>
 #> 10    10 <dbl [1,000]>
-#> # … with 290 more rows
+#> # ℹ 290 more rows
 ```
 
 Once we have the desired aggregation level, we can obtain summaries
@@ -251,17 +260,17 @@ dempres_icecream %>%
 #> # A tibble: 300 × 6
 #>       id .demdraws     `E(demand)` `S(demand)` `CI-5%` `CI-95%`
 #>    <int> <list>              <dbl>       <dbl>   <dbl>    <dbl>
-#>  1     1 <dbl [1,000]>        39.8       13.5    19.8      64.6
-#>  2     2 <dbl [1,000]>        99.6       27.0    57.8     145. 
-#>  3     3 <dbl [1,000]>        30.3        5.79   20.8      40.1
-#>  4     4 <dbl [1,000]>        89.7       27.4    50.4     139. 
-#>  5     5 <dbl [1,000]>        31.8       17.5     9.57     65.8
-#>  6     6 <dbl [1,000]>        15.9        8.76    4.64     31.6
-#>  7     7 <dbl [1,000]>        73.2       20.0    49.9     108. 
-#>  8     8 <dbl [1,000]>        51.2       20.3    23.9      91.6
-#>  9     9 <dbl [1,000]>        13.9        4.43    7.05     21.7
-#> 10    10 <dbl [1,000]>        37.5       11.1    19.2      55.8
-#> # … with 290 more rows
+#>  1     1 <dbl [1,000]>        39.5       12.6    20.7      62.5
+#>  2     2 <dbl [1,000]>        99.1       27.5    56.7     146. 
+#>  3     3 <dbl [1,000]>        31.6        6.05   21.7      41.5
+#>  4     4 <dbl [1,000]>        87.9       28.9    48.0     138. 
+#>  5     5 <dbl [1,000]>        32.2       17.9    10.7      68.2
+#>  6     6 <dbl [1,000]>        16.1        8.78    4.96     33.6
+#>  7     7 <dbl [1,000]>        72.1       22.4    47.7     110. 
+#>  8     8 <dbl [1,000]>        49.7       20.5    21.5      88.9
+#>  9     9 <dbl [1,000]>        13.7        4.66    6.48     22.3
+#> 10    10 <dbl [1,000]>        38.0       11.5    19.3      56.7
+#> # ℹ 290 more rows
 ```
 
 Both `ec_dem_aggregate` and `ec_dem_summarise` simply apply common
