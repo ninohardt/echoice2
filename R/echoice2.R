@@ -3691,7 +3691,7 @@ ec_boxplot_MU <- function(draws, burnin=100){
 #' \donttest{
 #' data(icecream)
 #' #run MCMC sampler (use way more than 20 draws for actual use
-#' icecream_scr_est <- icecream %>% dplyr::filter(id<10) %>% vd_est_vdm_screen(R=10, cores=2)
+#' icecream_scr_est <- icecream %>% dplyr::filter(id<20) %>% vd_est_vdm_screen(R=20, cores=2)
 #' ec_boxplot_screen(icecream_scr_est, burnin = 1)
 #' }
 #' 
