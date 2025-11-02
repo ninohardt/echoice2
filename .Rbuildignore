@@ -20,3 +20,4 @@ readme.md
 ^library$
 ^\.Rhistory$
 ^NEWS\.0\.md$
+^dev$
