@@ -343,7 +343,7 @@ dummyvar<-function(data){
                         data=data, 
                         na.action = "na.pass") 
   attributes(out)[c("assign", "contrasts")]=NULL
-  return(as_tibble(out))
+  return(as_tibble(out, .name_repair = "unique"))
 }
 
 
@@ -359,7 +359,7 @@ dummyvar<-function(data){
 #'
 #' @export
 dummify=function(dat, sel){
-  dat=as_tibble(dat)
+  dat=as_tibble(dat, .name_repair = "unique")
   for(i in seq_along(sel)){
     selv=sel[i]
     dummidata <- dat %>% select(all_of(selv)) %>% dummyvar()
@@ -713,7 +713,7 @@ ec_summarize_attrlvls<-function(data_in){
       map(table) %>% 
       map(names) %>% 
       map(paste,collapse=', ') %>% 
-      as_tibble() %>% 
+      as_tibble(.name_repair = "unique") %>% 
       pivot_longer(everything()) %>% rlang::set_names(c('attribute','levels')) )
 }
 #' @rdname ec_summarize_attrlvls
@@ -1783,7 +1783,7 @@ vd_dem_vdm=function(vd,
   
   attributes(out)=NULL
   #add draws to data tibble
-  vd=as_tibble(vd)
+  vd=as_tibble(vd, .name_repair = "unique")
   vd$.demdraws<-map(out,drop)  
   
   #add attributes
@@ -1986,7 +1986,7 @@ vd_dem_vdm_screen=function(vd,
   
   attributes(out)=NULL
   #add draws to data tibble
-  vd=as_tibble(vd)
+  vd=as_tibble(vd, .name_repair = "unique")
   vd$.demdraws<-map(out,drop)   
   
   #add attributes
@@ -2121,7 +2121,7 @@ vd_dem_vdm_ss=function(vd,
 
   attributes(out)=NULL
   #add draws to data tibble
-  vd=as_tibble(vd)
+  vd=as_tibble(vd, .name_repair = "unique")
   vd$.demdraws<-map(out,drop)  
   
   #add attributes
@@ -2619,7 +2619,7 @@ dd_dem=function(dd,
   
   attributes(out)=NULL
   #add draws to data tibble
-  dd=as_tibble(dd)
+  dd=as_tibble(dd, .name_repair = "unique")
   dd$.demdraws<-map(out,drop)  
   
   #add attributes
@@ -2756,7 +2756,7 @@ dd_dem_sr=function(dd,
   
   attributes(out)=NULL
   #add draws to data tibble
-  dd=as_tibble(dd)
+  dd=as_tibble(dd, .name_repair = "unique")
   dd$.demdraws<-map(out,drop)  
   
   #add attributes
@@ -3491,7 +3491,7 @@ ec_screenprob_sr=function(xd,
   attributes(out)=NULL
   
   #add draws to data tibble
-  xd=as_tibble(xd)
+  xd=as_tibble(xd, .name_repair = "unique")
   xd$.screendraws<-map(out,drop)
   
   #add attributes
@@ -3523,7 +3523,7 @@ ec_screenprob_sr=function(xd,
 #' @export
 ec_draws_MU <- function(draws){
   
-  draws$MUDraw %>% as_tibble %>%
+  draws$MUDraw %>% as_tibble(.name_repair = ~make.names(seq_along(.), unique = TRUE)) %>%
     rlang::set_names(draws$parnames) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
@@ -3549,7 +3549,7 @@ ec_draws_MU <- function(draws){
 #' @export
 ec_draws_screen <- function(draws){
   
-  draws$deltaDraw %>% as_tibble %>%
+  draws$deltaDraw %>% as_tibble(.name_repair = ~make.names(seq_along(.), unique = TRUE)) %>%
     rlang::set_names(colnames(attributes(draws)$Af)) %>% 
     rowid_to_column(var = 'draw') %>%
     pivot_longer(cols = -any_of('draw'), 
@@ -3882,7 +3882,7 @@ ec_lol_tidy1 <- function(data_lol, X="X", y="y"){
   combined_design_matrices %>%
     add_column(combined_responses) %>% 
     relocate(c(task,alt),.after=id) %>%
-    as.data.frame() %>% as_tibble() %>% return()
+    as.data.frame() %>% as_tibble(.name_repair = "unique") %>% return()
 }
 
 
@@ -3918,7 +3918,7 @@ ec_util_dummy_mutualeclusive= function(data_in, filtered=TRUE){
   dat<-data_in %>% select(-any_of(c("id","task","alt","x")))
   
   combs       <- t(utils::combn(seq_len(ncol(dat)),2))
-  combs_name  <- t(utils::combn(colnames(dat),2)) %>% as_tibble()
+  combs_name  <- t(utils::combn(colnames(dat),2)) %>% as_tibble(.name_repair = "unique")
   
   m_ex=rep(NA,nrow(combs))
   for(kk in seq_len(nrow(combs))){
