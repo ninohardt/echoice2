@@ -1,8 +1,8 @@
 Type: Package
 Package: echoice2
 Title: Choice Models with Economic Foundation
-Version: 0.2.4
-Date: 2023-11-20
+Version: 0.2.5
+Date: 2025-11-02
 Authors@R: 
     person(given = "Nino",
            family = "Hardt",
@@ -10,17 +10,25 @@ Authors@R:
            email = "me@ninohardt.com",
            comment = c(ORCID = "0000-0001-5215-6216"))
 Maintainer: Nino Hardt <me@ninohardt.com>
-Description: Implements choice models based on economic theory, including estimation using Markov chain Monte Carlo (MCMC), prediction, and more. Its usability is inspired by ideas from 'tidyverse'. Models include versions of the Hierarchical Multinomial Logit and Multiple Discrete-Continous (Volumetric) models with and without screening. The foundations of these models are described in Allenby, Hardt and Rossi (2019)  <doi:10.1016/bs.hem.2019.04.002>. Models with conjunctive screening are described in Kim, Hardt, Kim and Allenby (2022) <doi:10.1016/j.ijresmar.2022.04.001>. Models with set-size variation are described in Hardt and Kurz (2020) <doi:10.2139/ssrn.3418383>.
+Description: Implements choice models based on economic theory, including
+    estimation using Markov chain Monte Carlo (MCMC), prediction, and
+    more. Its usability is inspired by ideas from 'tidyverse'. Models
+    include versions of the Hierarchical Multinomial Logit and Multiple
+    Discrete-Continous (Volumetric) models with and without screening. The
+    foundations of these models are described in Allenby, Hardt and Rossi
+    (2019) <doi:10.1016/bs.hem.2019.04.002>. Models with conjunctive
+    screening are described in Kim, Hardt, Kim and Allenby (2022)
+    <doi:10.1016/j.ijresmar.2022.04.001>. Models with set-size variation
+    are described in Hardt and Kurz (2020) <doi:10.2139/ssrn.3418383>.
 License: MIT + file LICENSE
-BugReports: https://github.com/ninohardt/echoice2/issues
 URL: https://github.com/ninohardt/echoice2, http://ninohardt.de/echoice2/
+BugReports: https://github.com/ninohardt/echoice2/issues
 Imports: 
 	Rcpp,
 	parallel,
 	magrittr,
 	stats,
 	graphics,
-	stringr,
 	purrr,
   tibble,
   tidyselect,
@@ -39,8 +47,9 @@ Suggests:
 LinkingTo: 
   Rcpp,
   RcppArmadillo
+VignetteBuilder: 
+    knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-VignetteBuilder: knitr
+RoxygenNote: 7.3.3

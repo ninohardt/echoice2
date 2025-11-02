@@ -109,15 +109,6 @@ NULL
 
 
 
-#' @importFrom stringr str_subset
-NULL
-
-#' @importFrom stringr str_remove
-NULL
-
-#' @importFrom stringr str_extract
-NULL
-
 #' @importFrom forcats fct_relabel
 NULL
 
@@ -397,9 +388,10 @@ get_attr_lvl=function(tdc){
   tdc %>%
     select(-any_of(c('id','task','alt','p','x')))%>% 
     names %>% tibble::enframe() %>% 
-      mutate(attribute=stringr::str_extract(.$value,"^.*?(?=\\:)")) %>%
-      mutate(lvl=stringr::str_remove(.$value, .$attribute)) %>%
-      mutate(lvl=stringr::str_remove(.$lvl,"^(:)")) %>%
+      mutate(
+        attribute = ifelse(grepl(":", value), sub(":.*$", "", value), NA_character_),
+        lvl = ifelse(grepl(":", value), sub("^[^:]*:", "", value), NA_character_)
+      ) %>%
       group_by(across("attribute")) %>%
       mutate(reference_lvl=dplyr::first(lvl)) %>%
       mutate(reference=ifelse(lvl==reference_lvl,1,0))%>%
@@ -1795,7 +1787,7 @@ vd_dem_vdm=function(vd,
   vd$.demdraws<-map(out,drop)  
   
   #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% grep('^\\.', ., value = TRUE, invert = TRUE)
   # attributes(vd)$ec_model   <- attributes(est)$ec_model
   attributes(vd)$model <- list(ec_type=est$ec_type,
                                ec_type_short=est$ec_type_short,
@@ -2000,7 +1992,7 @@ vd_dem_vdm_screen=function(vd,
   #add attributes
   attributes(vd)$attr_names <- 
     vd %>% colnames %>% setdiff(c("id","task","alt","x","p")) %>% 
-      str_subset('^\\.', negate = TRUE)
+      grep('^\\.', ., value = TRUE, invert = TRUE)
 
   attributes(vd)$model <- list(ec_type=est$ec_type,
                                ec_type_short=est$ec_type_short,
@@ -2133,7 +2125,7 @@ vd_dem_vdm_ss=function(vd,
   vd$.demdraws<-map(out,drop)  
   
   #add attributes
-  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(vd)$attr_names <- vd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% grep('^\\.', ., value = TRUE, invert = TRUE)
   attributes(vd)$model <- list(ec_type=est$ec_type,
                                ec_type_short=est$ec_type_short,
                                error_specification=est$error_specification)
@@ -2631,7 +2623,7 @@ dd_dem=function(dd,
   dd$.demdraws<-map(out,drop)  
   
   #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% grep('^\\.', ., value = TRUE, invert = TRUE)
   # attributes(dd)$ec_model   <- attributes(est)$ec_model
   attributes(dd)$model <- list(ec_type=est$ec_type,
                                ec_type_short=est$ec_type_short,
@@ -2768,7 +2760,7 @@ dd_dem_sr=function(dd,
   dd$.demdraws<-map(out,drop)  
   
   #add attributes
-  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(dd)$attr_names <- dd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% grep('^\\.', ., value = TRUE, invert = TRUE)
   # attributes(dd)$ec_model   <- attributes(est)$ec_model
   attributes(dd)$model <- list(ec_type=est$ec_type,
                                ec_type_short=est$ec_type_short,
@@ -3033,7 +3025,7 @@ vd_dem_summarize <- vd_dem_summarise
 ec_dem_eval = function(de){
   `%!in%` = Negate(`%in%`)
   
-  is_this_discrete=attributes(de)$model$ec_type %>% stringr::str_detect('discrete')
+  is_this_discrete=grepl('discrete', attributes(de)$model$ec_type)
   
   if(is_this_discrete){
     out <- de %>%
@@ -3445,7 +3437,7 @@ ec_screenprob_sr=function(xd,
   
   #screening model type "olumetric-conjunctive" or "volumetric-conjunctive-pr"
   screening_model_type <- est$ec_type
-  with_price_screening <- stringr::str_detect(screening_model_type, "-pr")
+  with_price_screening <- grepl("-pr", screening_model_type)
   
   #cores  
   if(is.null(cores)){
@@ -3503,7 +3495,7 @@ ec_screenprob_sr=function(xd,
   xd$.screendraws<-map(out,drop)
   
   #add attributes
-  attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% str_subset('^\\.', negate = TRUE)
+  attributes(xd)$attr_names <- xd %>% colnames %>% setdiff(c("id","task","alt","x","p" )) %>% grep('^\\.', ., value = TRUE, invert = TRUE)
   attributes(xd)$ec_model   <- attributes(est)$ec_model
   
   return(xd)
@@ -3671,7 +3663,7 @@ ec_boxplot_MU <- function(draws, burnin=100){
               y = attributes(draws)$ec_data$attributes %>%
                 dplyr::select(all_of(c('attr_level','attribute','lvl','reference_lvl'))), 
               by=c("par"="attr_level")) %>%
-    mutate(par=stringr::str_replace_all(par,paste0(.$attribute,":"),"")) %>%
+    mutate(par=gsub(paste0(attribute, ':'), '', par)) %>%
     select(all_of(c('draw','par','value','attribute'))) %>%
     dplyr::filter(.$draw>burnin) %>%
     ggplot2::ggplot(aes(x=par,y=value)) + geom_boxplot() + coord_flip() +
