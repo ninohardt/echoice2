@@ -1,5 +1,6 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 0 note
+0 errors | 0 warnings | 1 note
 
-* Adapting to change in Roxygen documentation system, no implications for using the package.
+* v0.2.5 removes the stringr dependency
+* Used rhub, check_win_release, check_mac_release, etc. to check package
