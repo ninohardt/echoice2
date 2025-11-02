@@ -28,6 +28,11 @@ though no front-end is built into the package yet.
 - **Looking for co-developers!**
 
 - Version
+  [**0.2.5**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.5):
+
+  - removed stringr dependency
+    
+- Version
   [**0.2.4**](https://github.com/ninohardt/echoice2/releases/tag/v0.2.4):
 
   - A lot of work because of Roxygen’s [breaking
